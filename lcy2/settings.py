@@ -33,7 +33,7 @@ SITE_URL = 'lcy2.herokuapp.com'
 # Application definition
 
 INSTALLED_APPS = [
-    #'splitter.apps.SplitterConfig',
+    'splitter.apps.SplitterConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
