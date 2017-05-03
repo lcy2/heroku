@@ -4,6 +4,11 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 
+class Traveler(models.Model):
+    """ An intermediate between a user object and a traveler registered to each trip"""
+    user = models.ForeignKey(User, blank = True, null = True)
+
+
 # Create your models here.
 class Trip(models.Model):
     # name of the trip
@@ -21,10 +26,6 @@ class Trip(models.Model):
     def __str__(self):
         return repr(self)
 
-
-class Traveler(models.Model):
-    """ An intermediate between a user object and a traveler registered to each trip"""
-    user = models.ForeignKey(User, blank = True, null = True)
 
 
 class Currency(models.Model):
