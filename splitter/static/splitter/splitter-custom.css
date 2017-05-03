@@ -1,0 +1,24 @@
+.navbar-inverse {
+  background-color: #003300;
+}
+
+.navbar-brand,
+.navbar-nav > li > a {
+  color: #bbb !important;
+  line-height: 50px;
+  height: 50px;
+  padding-top: 0;
+}
+
+.navbar-nav > li > a {
+  font-size: 1.1em;
+}
+
+.navbar-brand:hover,
+.navbar-nav > li > *:hover {
+  color: #dfdfdf !important;
+}
+
+.navbar {
+  border-bottom: 10px #009900 solid;
+}

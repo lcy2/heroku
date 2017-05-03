@@ -34,7 +34,9 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('GOOGLE_OAUTH_SECRET')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast = bool)
 
-ALLOWED_HOSTS = ['lcy2.herokuapp.com']
+ALLOWED_HOSTS = [
+    'lcy2.herokuapp.com'
+]
 
 SITE_URL = 'lcy2.herokuapp.com'
 
@@ -44,6 +46,7 @@ SITE_URL = 'lcy2.herokuapp.com'
 INSTALLED_APPS = [
     'splitter.apps.SplitterConfig',
     'social_django',
+    'widget_tweaks',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -172,10 +175,9 @@ LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 LOGIN_REDIRECT_URL = 'home'
 
-
-
 # override potential local settings
 try:
-    from settings_local import *
+    from .settings_local import *
 except ImportError as e:
+    print "Unable to load local settings: " + e
     pass

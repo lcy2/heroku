@@ -19,8 +19,8 @@ from django.views.generic import TemplateView
 from django.contrib.auth.views import login, logout
 
 urlpatterns = [
-    url(r'^login/$', login, name='login'),
-    url(r'^logout/$', logout, name='logout'),
+    url(r'^login/$', login, {'template_name': 'splitter/login.html'}, name='login'),
+    url(r'^logout/$', logout, {'next_page': '/'}, name='logout'),
     url(r'^social-auth/', include('social_django.urls', namespace='social')),
     url(r'^splitter/', include('splitter.urls')),
     url(r'^admin/', admin.site.urls),

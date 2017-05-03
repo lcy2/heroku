@@ -1,0 +1,24 @@
+.login_box {
+  max-width: 500px;
+}
+
+.login_box div[class*="col-"] {
+  border-right: 1px solid #ccc;
+}
+
+.login_box div[class*="col-"]:last-child {
+  border-right: 0;
+}
+
+@media only screen and (max-width: 768px) {
+  .login_box div[class*="col-"] {
+    border-right: 0;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+
+  .login_box div[class*="col-"]:last-child {
+    border-bottom: 0;
+  }
+}
