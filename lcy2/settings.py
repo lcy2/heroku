@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+from decouple import config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '40k_2bumz^08vily(f&)g^%2s9&jx&(^a!83#c_1=7r@k8$mw='
+SECRET_KEY = config('SECRET_KEY')
 
 
 # social login info
@@ -27,11 +28,11 @@ SOCIAL_AUTH_GOOGLE_OAUTH_USE_UNIQUE_USER_ID = True
 SOCIAL_AUTH_GOOGLE_PLUS_AUTH_EXTRA_ARGUMENTS = {
       'access_type': 'offline'
 }
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '488142239374-13jj7hjc8a36pjug2m09kc04uugbrr2f.apps.googleusercontent.com'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '9Wl9URZsGMonPD0HFuvZTWZh'
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('GOOGLE_OAUTH_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('GOOGLE_OAUTH_SECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=False, cast = bool)
 
 ALLOWED_HOSTS = ['lcy2.herokuapp.com']
 
