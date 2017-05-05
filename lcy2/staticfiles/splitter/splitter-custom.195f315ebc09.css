@@ -23,14 +23,6 @@
   border-bottom: 10px #009900 solid;
 }
 
-.navbar-inverse .navbar-toggle,
-.navbar-inverse .navbar-toggle:focus {
-    background-color: transparent;
-}
-.navbar-inverse .navbar-toggle:hover{
-    background-color: rgba(200, 200, 200, 0.3);
-}
-
 body {
-  padding-top: 60px;
+  padding-top: 500px;
 }

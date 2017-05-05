@@ -11,28 +11,36 @@
 
   </head>
   <body>
-    <nav class="navbar navbar-inverse navbar-static-top">
+    <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         {% block navbar %}
         <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu-bar" aria-expanded="false" aria-controls="menu-bar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
           <div class="navbar-brand">Splitter</div>
         </div>
-        <ul class="nav navbar-nav navbar-right">
+        <div id="menu-bar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
 
-          {% if user and not user.is_anonymous %}
-            <li><a><span class="glyphicon glyphicon-user"></span> {{ user.get_short_name|default:user.email|default:user.get_username }}</a></li>
-            <li><a href="{% url "logout" %}"><span class="glyphicon glyphicon-log-out"></span> Logout </a></li>
-          {% else %}
-            <li><a href="{% url "login" %}"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
-          {% endif %}
-        </ul>
+            {% if user and not user.is_anonymous %}
+              <li><a><span class="glyphicon glyphicon-user"></span> {{ user.get_short_name|default:user.email|default:user.get_username }}</a></li>
+              <li><a href="{% url "logout"%}?next={{ request.path }}"><span class="glyphicon glyphicon-log-out"></span> Logout </a></li>
+            {% else %}
+              <li><a href="{% url "login"%}?next={{ request.path }}"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
+            {% endif %}
+          </ul>
+        </div>
       </div>
       {% endblock %}
     </nav>
     {% block main %}{% endblock %}
 
     <!-- Bootstrap -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -41,9 +49,10 @@
       <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="{% static 'splitter/splitter-custom.js' %}"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'splitter/splitter-custom.css' %}" />
     {% block override %}{% endblock %}
   </body>

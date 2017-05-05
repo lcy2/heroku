@@ -1,0 +1,25 @@
+.thumbnail {
+    position:relative;
+    overflow:hidden;
+    width: 200px;
+    height: 200px;
+    display: table-cell;
+}
+
+.thumbnail_img {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  z-index:1;
+}
+
+.caption {
+    position:absolute;
+    margin: auto;
+    background:rgba(90, 90, 90, 0.75);
+    width:80%;
+    height:80%;
+    text-align: left;
+    color:#fff !important;
+    z-index:2;
+}

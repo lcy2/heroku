@@ -7,18 +7,26 @@ from django.contrib.auth.models import User
 class Traveler(models.Model):
     """ An intermediate between a user object and a traveler registered to each trip"""
     user = models.ForeignKey(User, blank = True, null = True)
+    traveler_name = models.CharField(max_length = 50, default = "Unknown")
+
+    def __repr__(self):
+        return self.traveler_name
+
+    def __str__(self):
+        return repr(self)
 
 
 # Create your models here.
 class Trip(models.Model):
     # name of the trip
     trip_name = models.CharField(max_length = 50, default = "Unname Trip")
+    trip_description = models.CharField(max_length = 300, blank = True)
     # comma-separated names of travelers
     travelers = models.ManyToManyField(Traveler)
-    output_url = models.URLField()
-    time_created = models.DateTimeField(auto_now_add = True)
+    time_of_trip = models.DateTimeField(blank = True, null = True)
     time_modified = models.DateTimeField(auto_now = True)
-    trip_id = models.BigIntegerField()
+    profile_pic = models.URLField(default = 'https://unsplash.it/360/200/?random')
+    is_private = models.BooleanField(default = True)
 
     def __repr__(self):
         return self.trip_name
