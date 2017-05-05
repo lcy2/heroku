@@ -34,3 +34,9 @@
 body {
   padding-top: 60px;
 }
+
+.bordered_container {
+  border: 1px solid #ddd;
+  margin: 20px auto;
+  border-radius: 10px;
+}

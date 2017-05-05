@@ -26,6 +26,7 @@ class Trip(models.Model):
     time_of_trip = models.DateTimeField(blank = True, null = True)
     time_modified = models.DateTimeField(auto_now = True)
     profile_pic = models.URLField(default = 'https://unsplash.it/360/200/?random')
+    authorized_viewers = models.ManyToManyField(User, blank = True)
     is_private = models.BooleanField(default = True)
 
     def __repr__(self):

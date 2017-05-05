@@ -1,6 +1,8 @@
 {% if target_trips %}
-  <div class="container" id="index_container">
-    <h1>{{ title }}</h1>
+  <div class="container bordered_container">
+    <div class="page-header">
+      <h1>{{ title }}</h1>
+    </div>
     <!-- hide it in desktop view and tablet view and show it in mobile view -->
     <div id="myCarousel" class="carousel slide hidden-md hidden-lg hidden-sm col-xs-12" data-ride="carousel">
       <!-- indicators -->
@@ -14,22 +16,23 @@
       <div class="carousel-inner" role="listbox">
         <div class="item active">
           <div class="image_cropper">
-              <img class="thumbnail_img" src="{{ target_trips.0.profile_pic }}" />
+            <img class="thumbnail_img" src="{{ target_trips.0.profile_pic }}" />
           </div>
           <div class="carousel-caption">
             <h4>{{ target_trips.0.trip_name }}</h4>
             <p>{{ target_trips.0.trip_description }}</p>
+            <a href="{% url 'splitter:trip' pk=target_trips.0.id %}" role="button" class="btn btn-primary">View  Trip</a>
           </div>
-
         </div>
         {% for trip in target_trips|slice:"1:" %}
           <div class="item">
             <div class="image_cropper">
-                <img class="thumbnail_img" src="{{ trip.profile_pic }}" />
+              <img class="thumbnail_img" src="{{ trip.profile_pic }}" />
             </div>
             <div class="carousel-caption">
               <h4>{{ trip.trip_name }}</h4>
               <p>{{ trip.trip_description }}</p>
+              <a href="{% url 'splitter:trip' pk=trip.id %}" role="button" class="btn btn-primary">View  Trip</a>
             </div>
           </div>
         {% endfor %}
@@ -54,7 +57,7 @@
       <div class="row">
         {% for trip in target_trips %}
           <div class="col-sm-4 col-lg-3 col-xl-2 thumbnail_cols">
-            <a class="thumbnail">
+            <a class="thumbnail" href="{% url 'splitter:trip' pk=trip.id %}">
               <div class="image_cropper">
                 <img class="thumbnail_img" src="{{ trip.profile_pic }}" />
               </div>
