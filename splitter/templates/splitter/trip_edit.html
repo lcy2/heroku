@@ -5,10 +5,12 @@
     {% csrf_token %}
     <div class="container-fluid">
       <div class="row">
-        <div class="form-group col-sm-7">
-          <label class="control-label">profile pic</label>
-          <input type="text" value="{{trip.profile_pic}}" class="form-control"></input>
+        <div class="from-group col-sm-12">
+          <label class="control-label">description</label>
+          <textarea rows="3" value="{{trip.trip_description}}" class="form-control"></textarea>
         </div>
+      </div>
+      <div class="row">
         <div class="col-sm-5 form-group">
           <label class="control-label">Duration</label>
           <div class="input-group input-daterange">
@@ -17,14 +19,11 @@
             <input type="text" class="form-control" value="{{ trip.trip_end|date:"m/d/Y"}}" />
           </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="from-group col-sm-12">
-          <label class="control-label">description</label>
-          <textarea rows="3" value="{{trip.trip_description}}" class="form-control"></textarea>
+        <div class="form-group col-sm-7">
+          <label class="control-label">profile pic</label>
+          <input type="text" value="{{trip.profile_pic}}" class="form-control"></input>
         </div>
       </div>
-
       <!-- inactive elements !-->
       <div class="row spacey_row">
         <div class="col-xs-8">
