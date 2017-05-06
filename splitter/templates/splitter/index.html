@@ -3,11 +3,10 @@
 {% block title %} Welcome to Splitter {% endblock %}
 
 {% block main %}
-  {% include "splitter/index_trips.html" with target_trips=private_trips title="Your Trips" only %}
-  {% include "splitter/index_trips.html" with target_trips=public_trips title="Public Trips" only %}
+  {% include "splitter/index_trips.html" with target_trips=private_trips title="Your Trips" index="0" only %}
+  {% include "splitter/index_trips.html" with target_trips=public_trips title="Public Trips" index="1" only %}
 {% endblock %}
 
 {% block override %}
   <link rel="stylesheet" type="text/css" href="{% static 'splitter/splitter-index-custom.css' %}" />
-  <script src="{% static 'splitter/splitter-index-custom.js' %}"></script>
 {% endblock %}

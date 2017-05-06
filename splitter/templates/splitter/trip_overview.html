@@ -1,20 +1,10 @@
-{% extends 'splitter/base.html' %}
-{% load static %}
-{% block title %}: {{ trip.trip_name }}{% endblock %}
-{% block main%}
-  <div class="container bordered_container">
-    <div class="page-header">
-      <h1>{{ trip.trip_name }}</h1>
-      <p> {{ trip.trip_description }} </p>
-    </div>
-    <p>show trip trek here if available</p>
-    {% if user and not user.is_anonymous %}
-      {{ request.user }}
-    {% endif %}
-
-
-    {% for field, value in data.0.fields.iteritems %}
-      <p>{{field}}:{{value}} </p>
-    {% endfor %}
-  </div>
+{% extends 'splitter/trip_base.html' %}
+{% block trip_base %}
+  <p>TODO: show trip trek here if available</p>
+  <p>TODO: Maybe like a google map containing the whole trajectory </p>
+  <p>load each day as a colored segment. gets highlighted when hover </p>
+  <p>on click, go to that day's summary page</p>
+{% if edit_permission %}
+  {% include 'splitter/editable_palette.html' %}
+{% endif %}
 {% endblock %}

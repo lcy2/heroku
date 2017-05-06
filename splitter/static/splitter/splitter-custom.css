@@ -31,12 +31,39 @@
     background-color: rgba(200, 200, 200, 0.3);
 }
 
+.btn-primary {
+  background-color: #004d00;
+  border-color: #009900;
+}
+.btn-primary:hover {
+  background-color: #006600;
+}
+.btn-primary:focus {
+  background-color: #003300;
+}
+.btn-primary:active,
+.btn-primary.active {
+  background-color: #003300 !important;
+}
+ .btn-primary:active:focus {
+   background-color: #003300;
+}
+
+.glyphicon-menu-hamburger {
+  color: rgba(200, 200, 200, 1);
+}
+
+.spacey_row > * {
+  margin: 5px auto;
+}
+
 body {
   padding-top: 60px;
 }
 
 .bordered_container {
   border: 1px solid #ddd;
-  margin: 20px auto;
+  margin: 10px auto;
+  padding: 5px 10px 30px;
   border-radius: 10px;
 }

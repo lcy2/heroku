@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 
+from datetime import date
+
 class Traveler(models.Model):
     """ An intermediate between a user object and a traveler registered to each trip"""
     user = models.ForeignKey(User, blank = True, null = True)
@@ -23,7 +25,8 @@ class Trip(models.Model):
     trip_description = models.CharField(max_length = 300, blank = True)
     # comma-separated names of travelers
     travelers = models.ManyToManyField(Traveler)
-    time_of_trip = models.DateTimeField(blank = True, null = True)
+    trip_start = models.DateField(default=date.today)
+    trip_end = models.DateField(default=date.today)
     time_modified = models.DateTimeField(auto_now = True)
     profile_pic = models.URLField(default = 'https://unsplash.it/360/200/?random')
     authorized_viewers = models.ManyToManyField(User, blank = True)

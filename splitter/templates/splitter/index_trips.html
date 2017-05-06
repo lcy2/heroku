@@ -4,10 +4,10 @@
       <h1>{{ title }}</h1>
     </div>
     <!-- hide it in desktop view and tablet view and show it in mobile view -->
-    <div id="myCarousel" class="carousel slide hidden-md hidden-lg hidden-sm col-xs-12" data-ride="carousel">
+    <div id="myCarousel{{ index }}" class="carousel slide hidden-md hidden-lg hidden-sm col-xs-12" data-ride="carousel">
       <!-- indicators -->
       <ol class="carousel-indicators">
-          <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+          <li data-target="#myCarousel{{ index }}" data-slide-to="0" class="active"></li>
           {% for trip in target_trips|slice:"1:" %}
             <li data-target="#myCarousel" data-slide-to="{{ forloop.counter }}"></li>
           {% endfor %}
@@ -39,11 +39,11 @@
       </div>
 
       <!-- Left and right controls -->
-      <a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
+      <a class="left carousel-control" href="#myCarousel{{ index }}" role="button" data-slide="prev">
         <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
         <span class="sr-only">Previous</span>
       </a>
-      <a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
+      <a class="right carousel-control" href="#myCarousel{{ index }}" role="button" data-slide="next">
 
         <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
         <span class="sr-only">Next</span>
@@ -54,9 +54,9 @@
 
 
     <div class="container hidden-xs">
-      <div class="row">
+      <div class="row spacey_row">
         {% for trip in target_trips %}
-          <div class="col-sm-4 col-lg-3 col-xl-2 thumbnail_cols">
+          <div class="col-sm-4 col-lg-3 col-xl-2">
             <a class="thumbnail" href="{% url 'splitter:trip' pk=trip.id %}">
               <div class="image_cropper">
                 <img class="thumbnail_img" src="{{ trip.profile_pic }}" />

@@ -1,0 +1,32 @@
+{% extends 'splitter/base.html' %}
+{% load static %}
+{% block title %}: {{ trip.trip_name }}{% endblock %}
+{% block main %}
+  <div class="container bordered_container">
+    <div class="jumbotron">
+      <h1><span>{{ trip.trip_name }}</span></h1>
+      <p><span>{{ trip.trip_description }}</span></p>
+    </div>
+    {% block trip_base %}
+    {% endblock %}
+  </div>
+{% endblock %}
+
+{% block override %}
+  <style>
+    .jumbotron {
+      background-image: url({{ trip.profile_pic }});
+      background-position: right;
+      background-repeat: no-repeat;
+      width: 100%;
+      background-size: cover;
+    }
+    .jumbotron span {
+      background-color: rgba(200, 200, 200, 0.8);
+      padding: 10px auto;
+    }
+  </style>
+
+  {% block trip_override %}
+  {% endblock %}
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'splitter/trip_base.html' %}
+{% load static %}
+{% block trip_base %}
+  <form>
+    {% csrf_token %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="form-group col-sm-7">
+          <label class="control-label">profile pic</label>
+          <input type="text" value="{{trip.profile_pic}}" class="form-control"></input>
+        </div>
+        <div class="col-sm-5 form-group">
+          <label class="control-label">Duration</label>
+          <div class="input-group input-daterange">
+            <input type="text" class="form-control" value="{{ trip.trip_start|date:"m/d/Y"}}" />
+            <div class="input-group-addon">to</div>
+            <input type="text" class="form-control" value="{{ trip.trip_end|date:"m/d/Y"}}" />
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="from-group col-sm-12">
+          <label class="control-label">description</label>
+          <textarea rows="3" value="{{trip.trip_description}}" class="form-control"></textarea>
+        </div>
+      </div>
+
+      <!-- inactive elements !-->
+      <div class="row spacey_row">
+        <div class="col-xs-8">
+          {% for traveler in trip.travelers.all %}
+            <span class="label label-default">{{ traveler.traveler_name }}</span>
+          {% endfor %}
+        </div>
+        <div class="col-xs-4 text-right">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </div>
+  </form>
+  <!--
+{% for key, value in fields.iteritems %}
+  <p><input type="checkbox" />{{ key }} : {{ value }}</p>
+{% endfor %}
+-->
+{% endblock %}
+
+{% block trip_override %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css" integrity="sha256-nFp4rgCvFsMQweFQwabbKfjrBwlaebbLkE29VFR0K40=" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js" integrity="sha256-urCxMaTtyuE8UK5XeVYuQbm/MhnXflqZ/B9AOkyTguo=" crossorigin="anonymous"></script>
+  <script src="{% static 'splitter/splitter-trip-edit.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'splitter/splitter-trip-edit.css' %}" />
+{% endblock %}
