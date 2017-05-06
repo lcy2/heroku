@@ -23,6 +23,10 @@
   border-bottom: 10px #009900 solid;
 }
 
+.navbar-inverse .navbar-toggle {
+  padding: 6px 8px 5px;
+}
+
 .navbar-inverse .navbar-toggle,
 .navbar-inverse .navbar-toggle:focus {
     background-color: transparent;

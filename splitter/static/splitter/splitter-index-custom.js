@@ -4,5 +4,5 @@ $(document).ready(function(){
   });
   $(".caption").on("mouseout", function(){
     $(this).stop().fadeTo(500, 0.75);
-  })
+  });
 });
