@@ -1,0 +1,14 @@
+{% extends 'splitter/trip_base.html' %}
+{% load static %}
+{% block trip_base %}
+  {% for info in album_infos %}
+    <p> {{ info.title }} </p>
+    <img src="{{ info.thumbnail }}" />
+  {% endfor %}
+
+{% endblock %}
+
+{% block trip_override %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css" integrity="sha256-nFp4rgCvFsMQweFQwabbKfjrBwlaebbLkE29VFR0K40=" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js" integrity="sha256-urCxMaTtyuE8UK5XeVYuQbm/MhnXflqZ/B9AOkyTguo=" crossorigin="anonymous"></script>
+{% endblock %}

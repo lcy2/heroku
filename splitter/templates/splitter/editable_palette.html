@@ -2,10 +2,11 @@
   <div class="row spacey_row">
     <div class="col-sm-4">
       <a href="{% url 'splitter:trip_edit' pk=trip.id %}" role="button" class="btn btn-primary btn-block btn-lg">Manage Trip Details</a>
-      <p> TODO: Edit trip_name, trip_description, trip_dates (start / end), authorized viewers </p>
+      <p> TODO: Edit authorized viewers </p>
+      <p> TODO: actually make the form submittable </p>
     </div>
     <div class="col-sm-4">
-      <a role="button" class="btn btn-primary btn-block btn-lg">Manage Your Trek</a>
+      <a href="{% url 'splitter:phototrek_edit' pk=trip.id %}" role="button" class="btn btn-primary btn-block btn-lg">Manage Your PhotoTrek</a>
       <p> TODO: this deals with managing all of the geotags throughout the trek </p>
       <p> and also the gallery import path </p>
     </div>

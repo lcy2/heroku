@@ -7,7 +7,7 @@
       <div class="row">
         <div class="from-group col-sm-12">
           <label class="control-label">description</label>
-          <textarea rows="2" class="form-control" placeholder="Summarize your trip.">{{trip.trip_description}}</textarea>
+          <textarea rows="5" class="form-control" placeholder="Summarize your trip.">{{trip.trip_description}}</textarea>
         </div>
       </div>
       <div class="row">
@@ -24,6 +24,12 @@
           <input type="text" value="{{trip.profile_pic}}" class="form-control" placeholder="Choose the header picture for this trip."></input>
         </div>
       </div>
+      <div class="row">
+        <div class="col-xs-12 form-group">
+          <input type="checkbox" {% if trip.is_private %} checked="checked" {% endif %}></input>
+          <label>Private Trip</label>
+        </div>
+      </div>
       <!-- inactive elements !-->
       <div class="row spacey_row">
         <div class="col-xs-8">
@@ -37,11 +43,7 @@
       </div>
     </div>
   </form>
-  <!--
-{% for key, value in fields.iteritems %}
-  <p><input type="checkbox" />{{ key }} : {{ value }}</p>
-{% endfor %}
--->
+
 {% endblock %}
 
 {% block trip_override %}

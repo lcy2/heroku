@@ -10,6 +10,13 @@ from django.urls import reverse
 
 from .models import Trip
 
+from lxml import objectify
+from urllib import urlencode
+import requests
+import time
+import json
+import re
+
 # Create your views here.
 
 def index(request):
@@ -66,16 +73,16 @@ def check_trip_access(fun):
         return render(request, target, context)
     return wrapper
 
-def show_fields(MyModel):
-    raw_fields = [
-    (f, f.model if f.model != MyModel else None)
-    for f in MyModel._meta.get_fields()
-    if not f.is_relation
-        or f.one_to_one
-        or (f.many_to_one and f.related_model)
-    ]
-
-    return map(lambda x: str(x[0]).split('.')[-1], raw_fields)
+#def show_fields(MyModel):
+#    raw_fields = [
+#    (f, f.model if f.model != MyModel else None)
+#    for f in MyModel._meta.get_fields()
+#    if not f.is_relation
+#        or f.one_to_one
+#        or (f.many_to_one and f.related_model)
+#    ]
+#
+#    return map(lambda x: str(x[0]).split('.')[-1], raw_fields)
 
 @check_trip_access
 def trip(request, trip, *args):
@@ -88,6 +95,68 @@ def trip(request, trip, *args):
 def trip_edit(request, trip, *args):
     context = {
         'trip': trip,
-        'fields': {field: getattr(trip, field) for field in show_fields(trip)}
+        #'fields': {field: getattr(trip, field) for field in show_fields(trip)}
     }
     return ('splitter/trip_edit.html', context)
+
+# from https://github.com/morganwahl/photos-db/blob/master/photosdb/photosdb/views.py
+def _picasa_feed(google, **query):
+    """'google' is a GoogleOAuth2 UserSocialAuth instance."""
+
+    # check whether the token needs refreshing
+    if (google.extra_data['auth_time'] + google.extra_data['expires'] - 10) <= int(time.time()):
+        from social_django.utils import load_strategy
+        strategy = load_strategy()
+        google.refresh_token(strategy = strategy)
+
+    extra_headers = {
+        'GData-Version': '2',
+        'Authorization': 'Bearer {}'.format(google.extra_data['access_token'])
+    }
+    url_base = 'https://picasaweb.google.com/data/feed/api/user/default'
+    url = url_base
+    if query:
+        url += '?' + urlencode(query)
+    response = requests.get(url, headers=extra_headers)
+    #print "Request headers %r", response.request.headers
+    #print "Response headers %r", response.headers
+    return response.content
+
+
+# adapted from https://github.com/morganwahl/photos-db/blob/master/photosdb/photosdb/views.py
+@check_trip_access
+def phototrek_edit(request, trip, *args):
+    """ return all albums """
+    # TODO: add refresh button to refresh the album list in the database
+    # TODO: store the album list in the database
+    try:
+        social = request.user.social_auth.get(provider='google-oauth2')
+    except social_auth.DoesNotExist:
+        # TODO redirect or say that google account is requried
+        raise NotImplementedError
+    xml = _picasa_feed(social, kind='album', prettyprint='true', imgmax='d')
+    feed = objectify.fromstring(xml)
+    print '-' * 50
+    media_ns = feed.nsmap['media']
+    album_infos = [{
+        'title': unicode(el.title),
+        'thumbnail': el["{" + media_ns + "}group"]["{" + media_ns + "}thumbnail"].get('url'),
+    } for el in feed.entry]
+
+    # only show the ones preceded with '201xxxxx - '
+    r = re.compile(r'^[0-9]{8} - ')
+    print trip.trip_start.strftime('%Y%m%d')
+    print trip.trip_end.strftime('%Y%m%d')
+    album_infos = filter(
+        lambda x:
+            r.match(x['title']) and
+            x['title'][:8] >= trip.trip_start.strftime('%Y%m%d') and
+            x['title'][:8] <= trip.trip_end.strftime('%Y%m%d'),
+        album_infos
+    )
+
+    context = {
+        'trip': trip,
+        'album_infos': album_infos,
+    }
+    return ('splitter/phototrek_edit.html', context)

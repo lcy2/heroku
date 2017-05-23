@@ -18,7 +18,7 @@ class Traveler(models.Model):
         return repr(self)
 
 
-# Create your models here.
+
 class Trip(models.Model):
     # name of the trip
     trip_name = models.CharField(max_length = 50, default = "Unname Trip")
