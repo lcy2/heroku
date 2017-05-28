@@ -1,14 +1,30 @@
 {% extends 'splitter/trip_base.html' %}
 {% load static %}
 {% block trip_base %}
-  {% for info in album_infos %}
-    <p> {{ info.title }} </p>
-    <img src="{{ info.thumbnail }}" />
-  {% endfor %}
+  <div class="container-fluid">
+    <div class="row">
+      {% if refresh_buttons.google %}
+        <div class="col pull-right text-right">
+          <a id="rtfg" class="btn btn-primary" role="button">Refresh with Google</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="row spacey_row">
+      <div class="col-sm-8">
+        <div id="map"></div>
+      </div>
+      <div id="thumb_list" class="col-sm-4"></div>
+    </div>
+  </div>
 
 {% endblock %}
 
 {% block trip_override %}
+  <link rel="stylesheet" href="{% static 'splitter/splitter-phototrek-edit.css' %}" />
+  <script src="{% static 'splitter/splitter-phototrek-edit.js' %}"></script>
+  <script src='https://api.mapbox.com/mapbox-gl-js/v0.36.0/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v0.36.0/mapbox-gl.css' rel='stylesheet' />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css" integrity="sha256-nFp4rgCvFsMQweFQwabbKfjrBwlaebbLkE29VFR0K40=" crossorigin="anonymous" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js" integrity="sha256-urCxMaTtyuE8UK5XeVYuQbm/MhnXflqZ/B9AOkyTguo=" crossorigin="anonymous"></script>
 {% endblock %}

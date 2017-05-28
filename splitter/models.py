@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 
 from datetime import date
 
+
 class Traveler(models.Model):
     """ An intermediate between a user object and a traveler registered to each trip"""
     user = models.ForeignKey(User, blank = True, null = True)
@@ -38,7 +39,35 @@ class Trip(models.Model):
     def __str__(self):
         return repr(self)
 
+class Segment(models.Model):
+    trip = models.ForeignKey(Trip, on_delete = models.CASCADE)
+    segment_name = models.CharField(max_length = 50)
+    segment_start = models.DateField(blank = True, null = True)
+    segment_end = models.DateField(blank = True, null = True)
+    segment_lon = models.FloatField(blank = True, null = True)
+    segment_lat = models.FloatField(blank = True, null = True)
+    segment_img = models.URLField(blank = True)
+    segment_album = models.URLField(blank = True)
 
+
+    def __unicode__(self):
+        return self.segment_name
+    def __str__(self):
+        return unicode(self)
+
+class Segment_Detail(models.Model):
+    segment = models.ForeignKey(Segment, on_delete = models.CASCADE)
+    sd_name = models.CharField(max_length = 50)
+    sd_img = models.URLField(blank = True)
+    sd_description = models.TextField(blank = True)
+    sd_lon = models.FloatField(blank = True, null = True)
+    sd_lat = models.FloatField(blank = True, null = True)
+    sd_time = models.DateTimeField(blank = True, null = True)
+
+    def __unicode__(self):
+        return self.sd_name
+    def __str__(self):
+        return repr(self)
 
 class Currency(models.Model):
     trip = models.ForeignKey(Trip, on_delete = models.CASCADE)

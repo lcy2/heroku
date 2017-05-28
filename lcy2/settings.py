@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'splitter.apps.SplitterConfig',
     'social_django',
     'widget_tweaks',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -64,7 +63,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'social_django.middleware.SocialAuthExceptionMiddleware',
-
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

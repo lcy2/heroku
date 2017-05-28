@@ -1,0 +1,13 @@
+#map {
+  height: 200px;
+}
+
+#thumb_list {
+  overflow-y: scroll;
+  height: 200px;
+}
+
+.thumb_title {
+  vertical-align: top;
+  margin-left: 5px;
+}

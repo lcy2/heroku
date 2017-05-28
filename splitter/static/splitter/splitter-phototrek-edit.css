@@ -1,0 +1,19 @@
+#map {
+  height: 500px;
+}
+
+#thumb_list {
+  overflow-y: auto;
+  height: 500px;
+  position: relative;
+  padding-left: 0;
+}
+
+@media only screen and (max-width: 768px) {
+    #thumb_list {
+        margin-right: 15px;
+    }
+    #map, #thumb_list {
+      height: 200px;
+    }
+}

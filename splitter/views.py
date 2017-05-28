@@ -3,19 +3,18 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.core import serializers
 from django.contrib import messages
 from django.urls import reverse
 
 from .models import Trip
+from . import gateway
 
 from lxml import objectify
 from urllib import urlencode
-import requests
-import time
-import json
-import re
+
+import requests, time, json, re
 
 # Create your views here.
 
@@ -37,41 +36,45 @@ def index(request):
 
     return render(request, 'splitter/index.html', context)
 
-def check_trip_access(fun):
+def check_trip_access(enforce_edit):
     """Make sure the user has access to the trip
 
     passing the resultant trip to the view function
     also appending the editable permission to the context upon its return
     """
+    def real_decorator(fun):
+        def wrapper(request, pk, *args):
+            try:
+                trip = Trip.objects.get(pk = pk)
+            except Trip.DoesNotExist:
+                messages.error(request, "This trip does not exist.")
+                return redirect('splitter:index')
+            editable = False
+            # if the user is not logged in
+            if trip.is_private and (not request.user or request.user.is_anonymous()):
+                messages.info(request, "Please log in.")
+                return HttpResponseRedirect(reverse('login') + '?next='+request.path)
 
-    def wrapper(request, pk, *args):
-        try:
-            trip = Trip.objects.get(pk = pk)
-        except Trip.DoesNotExist:
-            messages.error(request, "This trip does not exist.")
-            return redirect('splitter:index')
-        editable = False
-        # if the user is not logged in
-        if trip.is_private and (not request.user or request.user.is_anonymous()):
-            messages.info(request, "Please log in.")
-            return HttpResponseRedirect(reverse('login') + '?next='+request.path)
-
-        editors = filter(lambda x: x, set([trav.user for trav in trip.travelers.all()]))
-        if request.user in editors:
-            editable = True
-        elif (request.user in trip.authorized_viewers.all()) or (not trip.is_private):
-            pass
-        else:
-            # if this user is not authorized
-            # return to splitter:index with a message
-            messages.error(request, "You are not authorized to view " + trip.trip_name + ".")
-            return redirect('splitter:index')
+            editors = filter(lambda x: x, set([trav.user for trav in trip.travelers.all()]))
+            if request.user in editors:
+                editable = True
+            elif ((request.user in trip.authorized_viewers.all()) or (not trip.is_private)) and not enforce_edit:
+                pass
+            else:
+                # if this user is not authorized
+                # return to splitter:index with a message
+                messages.error(request, "You are not authorized to view " + trip.trip_name + ".")
+                return redirect('splitter:index')
 
 
-        target, context = fun(request, trip, *args)
-        context['edit_permission'] = editable
-        return render(request, target, context)
-    return wrapper
+            target, context = fun(request, trip, *args)
+            context['edit_permission'] = editable
+            return render(request, target, context)
+        return wrapper
+    return real_decorator
+
+
+
 
 #def show_fields(MyModel):
 #    raw_fields = [
@@ -84,14 +87,14 @@ def check_trip_access(fun):
 #
 #    return map(lambda x: str(x[0]).split('.')[-1], raw_fields)
 
-@check_trip_access
+@check_trip_access(False)
 def trip(request, trip, *args):
     context = {
         'trip': trip,
     }
     return ('splitter/trip_overview.html', context)
 
-@check_trip_access
+@check_trip_access(True)
 def trip_edit(request, trip, *args):
     context = {
         'trip': trip,
@@ -124,39 +127,39 @@ def _picasa_feed(google, **query):
 
 
 # adapted from https://github.com/morganwahl/photos-db/blob/master/photosdb/photosdb/views.py
-@check_trip_access
+@check_trip_access(True)
 def phototrek_edit(request, trip, *args):
     """ return all albums """
-    # TODO: add refresh button to refresh the album list in the database
-    # TODO: store the album list in the database
+    refresh_buttons = dict()
     try:
         social = request.user.social_auth.get(provider='google-oauth2')
+        refresh_buttons['google'] = True
     except social_auth.DoesNotExist:
-        # TODO redirect or say that google account is requried
-        raise NotImplementedError
-    xml = _picasa_feed(social, kind='album', prettyprint='true', imgmax='d')
-    feed = objectify.fromstring(xml)
-    print '-' * 50
-    media_ns = feed.nsmap['media']
-    album_infos = [{
-        'title': unicode(el.title),
-        'thumbnail': el["{" + media_ns + "}group"]["{" + media_ns + "}thumbnail"].get('url'),
-    } for el in feed.entry]
-
-    # only show the ones preceded with '201xxxxx - '
-    r = re.compile(r'^[0-9]{8} - ')
-    print trip.trip_start.strftime('%Y%m%d')
-    print trip.trip_end.strftime('%Y%m%d')
-    album_infos = filter(
-        lambda x:
-            r.match(x['title']) and
-            x['title'][:8] >= trip.trip_start.strftime('%Y%m%d') and
-            x['title'][:8] <= trip.trip_end.strftime('%Y%m%d'),
-        album_infos
-    )
+        pass
 
     context = {
         'trip': trip,
-        'album_infos': album_infos,
+        'refresh_buttons': refresh_buttons,
     }
     return ('splitter/phototrek_edit.html', context)
+
+
+def gateway_switch(request, action):
+    if action == "rtfg":
+        if 'HTTP_REFERER' in request.META:
+            p = re.compile(r'(?<=\/)[0-9]+(?=\/)')
+            pk = int(p.search(request.META['HTTP_REFERER']).group())
+            return gateway.refresh_trek_from_google(request, pk)
+    elif action == "rafd":
+        if 'HTTP_REFERER' in request.META:
+            p = re.compile(r'(?<=\/)[0-9]+(?=\/)')
+            pk = int(p.search(request.META['HTTP_REFERER']).group())
+
+            return gateway.read_albums_from_db(request, pk)
+
+    elif action == 'picedits':
+        return gateway.pic_edits(request)
+
+
+    messages.error(request, "Went down the wrong rabbit hole.")
+    return redirect("splitter:index")
