@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 
 from datetime import date
 
@@ -48,26 +49,24 @@ class Segment(models.Model):
     segment_lat = models.FloatField(blank = True, null = True)
     segment_img = models.URLField(blank = True)
     segment_album = models.URLField(blank = True)
-
+    segment_detail = JSONField(blank = True, null = True)
 
     def __unicode__(self):
         return self.segment_name
-    def __str__(self):
-        return unicode(self)
 
-class Segment_Detail(models.Model):
-    segment = models.ForeignKey(Segment, on_delete = models.CASCADE)
-    sd_name = models.CharField(max_length = 50)
-    sd_img = models.URLField(blank = True)
-    sd_description = models.TextField(blank = True)
-    sd_lon = models.FloatField(blank = True, null = True)
-    sd_lat = models.FloatField(blank = True, null = True)
-    sd_time = models.DateTimeField(blank = True, null = True)
-
-    def __unicode__(self):
-        return self.sd_name
-    def __str__(self):
-        return repr(self)
+#class Segment_Detail(models.Model):
+#    segment = models.ForeignKey(Segment, on_delete = models.CASCADE)
+#    sd_name = models.CharField(max_length = 50)
+#    sd_img = models.URLField(blank = True)
+#    sd_description = models.TextField(blank = True)
+#    sd_lon = models.FloatField(blank = True, null = True)
+#    sd_lat = models.FloatField(blank = True, null = True)
+#    sd_time = models.DateTimeField(blank = True, null = True)
+#
+#    def __unicode__(self):
+#        return self.sd_name
+#    def __str__(self):
+#        return repr(self)
 
 class Currency(models.Model):
     trip = models.ForeignKey(Trip, on_delete = models.CASCADE)
@@ -87,19 +86,20 @@ class Charge(models.Model):
     category = models.CharField(max_length = 50)
     currency = models.ForeignKey(Currency)
     amount = models.DecimalField(max_digits = 10, decimal_places = 2)
+    charge_detail = JSONField(blank = True, null = True)
 
     def __repr__(self):
         return self.currency.symbol + str(self.amount)
     def __str__(self):
         return repr(self)
 
-class Charge_Detail(models.Model):
-    charge = models.ForeignKey(Charge, on_delete = models.CASCADE)
-    traveler = models.ForeignKey(Traveler, null = True, on_delete = models.SET_NULL)
-    amount = models.DecimalField(max_digits = 10, decimal_places = 2)
-
-    def __repr__(self):
-        return self.user.username + ":" + self.charge.currency.symbol + str(self.amount)
-
-    def __str__(self):
-        return repr(self)
+#class Charge_Detail(models.Model):
+#    charge = models.ForeignKey(Charge, on_delete = models.CASCADE)
+#    traveler = models.ForeignKey(Traveler, null = True, on_delete = models.SET_NULL)
+#    amount = models.DecimalField(max_digits = 10, decimal_places = 2)
+#
+#    def __repr__(self):
+#        return self.user.username + ":" + self.charge.currency.symbol + str(self.amount)
+#
+#    def __str__(self):
+#        return repr(self)

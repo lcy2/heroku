@@ -9,6 +9,7 @@
   padding-left: 0;
 }
 
+
 @media only screen and (max-width: 768px) {
     #thumb_list {
         margin-right: 15px;

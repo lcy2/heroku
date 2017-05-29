@@ -8,9 +8,10 @@ function populate_album(pic_items){
     fill_text += '<div class="media-left media-top"><img class="media-object" src="' + el.thumbnail + '" /></div>';
     fill_text += '<div class="media-body">';
     fill_text += '<h5 class="media-heading"><strong>' + el.title + '</strong></h5>';
-
-    fill_text += '<span class="label label-default time_start">' + (el.time_start ? el.time_start : '&nbsp;') + '</span> - ';
-    fill_text += '<span class="label label-default time_end">' + (el.time_end ? el.time_end : '&nbsp;') + '</span><br />';
+    fill_text += '<div class="time_section">';
+    fill_text += '<span class="label label-default">' + (el.time_start ? format_date(el.time_start) : '&nbsp;') + '</span> - ';
+    fill_text += '<span class="label label-default">' + (el.time_end ? format_date(el.time_end) : '&nbsp;') + '</span><br />';
+    fill_text += '</div>';
 
     fill_text += '<span class="label label-default geo">@ (' + (el.geo ? (el.geo.lat + ', ' + el.geo.lon) : 'Unknown') + ')</span><br />';
 
@@ -30,37 +31,8 @@ function populate_album(pic_items){
   }
 
   // replace info on click to allow for edits
-  $('h5.media-heading').one('click', edit_header);
-}
-
-function edit_header(){
-  var target = $(this);
-  target.html('<input type="text" value="' + target.children().html() + '" />');
-  var child_input = target.find('input');
-  child_input.focus();
-  child_input.on('focusout', function(){
-    //console.log($(this).closest('.media').data('pk'));
-    $.ajax({
-      url: '/splitter/gateway/picedits',
-      data: {
-        'pk': target.closest('.media').data('pk'),
-        'type': 'seg',
-        'target': 'title',
-        'content': child_input.val(),
-      },
-      dataType: 'json',
-      success: function(data){
-        console.log(data.message);
-      },
-      error: function(data){
-        console.log(data.message);
-      },
-      complete: function(data) {
-        target.html('<strong>' + child_input.val() + '</strong>');
-        target.one('click', edit_header);
-      }
-    });
-  });
+  $('div.media .media-heading').one('click', edit_title);
+  $('div.time_section').one('click', hack_time);
 }
 
 function populate_map(collections){
@@ -113,9 +85,116 @@ function populate_map(collections){
   map.addLayer(new_layer);
 }
 
+function newDataProcess(data){
+  pic_data = data.album_infos;
+  pic_nature = data.pic_nature;
+  populate_album(pic_data);
+  populate_map(pic_data);
+}
+
+function message_log(msg){
+  console.log(msg);
+}
+
+function edit_title(){
+  var target = $(this);
+  target.html('<input type="text" value="' + target.children().html() + '" />');
+  var child_input = target.find('input');
+  child_input.focus();
+  child_input.on('focusout', function(){
+    //console.log($(this).closest('.media').data('pk'));
+    $.ajax({
+      url: '/splitter/gateway/picedits',
+      data: {
+        'pk': target.closest('.media').data('pk'),
+        'type': 'seg',
+        'target': 'title',
+        'content': child_input.val(),
+      },
+      dataType: 'json',
+      success: function(data){
+        message_log(data.message);
+      },
+      error: function(data){
+        message_log(data.message);
+      },
+      complete: function(data) {
+        target.html('<strong>' + child_input.val() + '</strong>');
+        target.one('click', edit_title);
+      }
+    });
+  });
+}
+
+function format_date(timestamp){
+  var formattedDate = new Date(timestamp * 1000);
+  var output = [
+    formattedDate.getFullYear(),
+    (formattedDate.getMonth() + 1) >= 10 ? (formattedDate.getMonth() + 1) : '0' + (formattedDate.getMonth() + 1),
+    formattedDate.getDate() >= 10 ? formattedDate.getDate() : '0' + formattedDate.getDate(),
+  ];
+  return output.join('/');
+}
+
+function hack_time(){
+  var target = $(this);
+
+  var date_input = '';
+  date_input += '<div class="input-group input-daterange">';
+  date_input += '<input type="text" class="form-control input-sm" value="' + target.find("span").first().html() + '" />';
+  date_input += '<div class="input-group-addon">-</div>';
+  date_input += '<input type="text" class="form-control input-sm" value="' + target.find("span").last().html() + '" />';
+  date_input += '</div>';
+
+  target.html(date_input);
+
+
+  var child_input = target.find('div.input-daterange');
+  var inputs = child_input.find('input')
+  child_input.datepicker({
+    format: "yyyy/mm/dd"
+  });
+  inputs.first().focus();
+
+  child_input.on('focusout', function(){
+    setTimeout(function(){
+      console.log(document.activeElement);
+      if (child_input.has(document.activeElement).length == 0){
+
+        $.ajax({
+          url: '/splitter/gateway/picedits',
+          data: {
+            'pk': target.closest('.media').data('pk'),
+            'type': 'seg',
+            'target': 'time',
+            'content': inputs.map(function(){
+              return $(this).val();
+            }).get(),
+          },
+          dataType: 'json',
+          success: function(data){
+            message_log(data.message)
+          },
+          error: function(data){
+            message_log(data.message)
+          },
+          complete: function(data) {
+            fill_text = '<span class="label label-default">' + inputs.first().val() + '</span> - ';
+            fill_text += '<span class="label label-default">' + inputs.last().val() + '</span><br />';
+            target.html(fill_text);
+            target.one('click', hack_time);
+          }
+        });
+      }
+    }, 500);
+  });
+}
+
+
 
 function rtfgClick(e){
-  $(this).html("Please Wait");
+  var target = $(this);
+  target.html("Please Wait");
 
   $.ajax({
     url: '/splitter/gateway/rtfg',
@@ -125,17 +204,10 @@ function rtfgClick(e){
       newDataProcess(data);
     },
     complete: function() {
-      $('#rtfg').html("Refresh");
-      $('#rtfg').one('click', rtfgClick);
+      target.html("Refresh");
+      target.one('click', rtfgClick);
     }
   });
-}
-
-function newDataProcess(data){
-  pic_data = data.album_infos;
-  pic_nature = data.pic_nature;
-  populate_album(pic_data);
-  populate_map(pic_data);
 }
 
 
@@ -176,7 +248,8 @@ $(document).ready(function(){
             center: [
               pic_data[i].geo.lon,
               pic_data[i].geo.lat,
-            ]
+            ],
+            zoom: 13,
           })
         }
 

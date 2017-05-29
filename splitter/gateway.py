@@ -3,12 +3,14 @@ from django.utils.dateformat import format
 
 from datetime import date, datetime
 
-from .models import Trip, Segment, Segment_Detail
+from .models import Trip, Segment
 
 import requests, time, re, pytz, sys
 
 from lxml import objectify
 from urllib import urlencode
+
+# TODO: store segment_detail in a json field in segment
 
 
 def check_trip_access_json(enforce_edit):
@@ -130,12 +132,14 @@ def refresh_trek_from_google(request, trip):
         seg_end = 0
 
         # fill in the segment details with each picture
+        # JSON styles
+        seg_JSON = {'data': []}
+
         for el in album_feed.entry:
-            seg_det = Segment_Detail(
-                segment = seg,
-                sd_name = el.title,
-                sd_img = el.content.get('src'),
-            )
+            seg_det = {
+                'name': el.title,
+                'img':  el.content.get('src'),
+            }
 
             # check if geo data exists
             if geo_ns and gml_ns:
@@ -146,9 +150,15 @@ def refresh_trek_from_google(request, trip):
                 ])
                 node = el.find(xmllink)
                 if node:
-                    seg_det.sd_lat, seg_det.sd_lon = map(float, node.text.split())
-                    seg_lats.append(seg_det.sd_lat)
-                    seg_lons.append(seg_det.sd_lon)
+                    sd_lat, sd_lon = map(float, node.text.split())
+                    seg_det.update({
+                        'geo': {
+                            'lat': sd_lat,
+                            'lon': sd_lon,
+                        }
+                    })
+                    seg_lats.append(sd_lat)
+                    seg_lons.append(sd_lon)
                     seg_pos_ct += 1
 
             # check if time data exists
@@ -160,11 +170,12 @@ def refresh_trek_from_google(request, trip):
                 node = el.find(xmllink)
                 if node:
                     epoch_time =int(node) / 1000
-                    seg_det.sd_time = datetime.fromtimestamp(epoch_time).replace(tzinfo=pytz.UTC)
+                    sd_time = datetime.fromtimestamp(epoch_time).replace(tzinfo=pytz.UTC)
+                    seg_det.update({'time': sd_time})
                     seg_start = min(seg_start, epoch_time)
                     seg_end = max(seg_end, epoch_time)
 
-            seg_det.save()
+            seg_JSON['data'].append(seg_det)
 
         # if there's enough geo info in the album
         if seg_pos_ct > 0:
@@ -205,18 +216,33 @@ def output_album_json(request, trip):
     })
 
 def pic_edits(request):
-    print request.GET
     pk = request.GET['pk']
-    db_obj = None
     try:
-        if request.GET['type'] == 'seg':
-            db_obj = Segment.objects.get(pk=pk)
-            if request.GET['target'] == "title":
-                db_obj.segment_name = request.GET['content']
-        elif request.GET['type'] == 'sd':
-            db_obj = Segment_Detail.objects.get(pk = pk)
+        seg = Segment.objects.get(pk = pk)
     except ObjectDoesNotExist:
-        return JsonResponse({'message': 'Object does not exist'}, status = 404)
+        return JsonResponse({'message': 'Object does not exist.'}, status = 404)
 
-    db_obj.save()
+    def title_edits():
+        seg.segment_name = request.GET['content']
+    def time_edits():
+        content_list = request.GET.getlist('content[]')
+        def validate(date_str):
+            try:
+                return datetime.strptime(date_str, '%Y/%m/%d').date()
+            except ValueError:
+                return None
+
+        seg.segment_start, seg.segment_end = map(validate, content_list)
+
+
+    allocation = {
+        'title': title_edits,
+        'time': time_edits,
+    }
+
+    if request.GET['target'] and request.GET['target'] in allocation and ('content' in request.GET or 'content[]' in request.GET):
+        allocation[request.GET['target']]()
+    else:
+        return JsonResponse({'message': 'Invalid request.'}, status = 400)
+    seg.save()
     return JsonResponse({'message': 'Modified.'})
