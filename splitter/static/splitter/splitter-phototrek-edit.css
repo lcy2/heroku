@@ -9,6 +9,21 @@
   padding-left: 0;
 }
 
+.flex_div {
+  display: flex;
+}
+
+.geo_section > span::before {
+  content: "@ (";
+}
+
+.geo_section > span::after {
+  content: ")";
+}
+
+.geo-section span {
+  flex-grow: 100;
+}
 
 @media only screen and (max-width: 768px) {
     #thumb_list {

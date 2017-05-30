@@ -212,7 +212,7 @@ def output_album_json(request, trip):
         album_infos.append(album)
     return JsonResponse({
         'album_infos': album_infos,
-        'pic_nature': 'segment',
+        'is_album': True,
     })
 
 def pic_edits(request):
@@ -224,6 +224,7 @@ def pic_edits(request):
 
     def title_edits():
         seg.segment_name = request.GET['content']
+        return True
     def time_edits():
         content_list = request.GET.getlist('content[]')
         def validate(date_str):
@@ -231,17 +232,24 @@ def pic_edits(request):
                 return datetime.strptime(date_str, '%Y/%m/%d').date()
             except ValueError:
                 return None
-
         seg.segment_start, seg.segment_end = map(validate, content_list)
-
+        return True
+    def geo_edits():
+        try:
+            seg.segment_lat, seg.segment_lon = map(float, request.GET['content'].split(','))
+        except ValueError:
+            return False
+        return True
 
     allocation = {
         'title': title_edits,
         'time': time_edits,
+        'geo': geo_edits,
     }
 
     if request.GET['target'] and request.GET['target'] in allocation and ('content' in request.GET or 'content[]' in request.GET):
-        allocation[request.GET['target']]()
+        if not allocation[request.GET['target']]():
+            return JsonResponse({'message': 'Invalid content. No changes were made.'}, status = 400)
     else:
         return JsonResponse({'message': 'Invalid request.'}, status = 400)
     seg.save()
