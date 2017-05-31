@@ -1,5 +1,7 @@
-var map, itemHeights, pic_data, is_album;
+var map, itemHeights, pic_data, is_album, seg_pk, edit_actions;
 var timeoutLimit = 500;
+var imgHeight = 135;
+var mediaMargin = 15;
 
 
 function populate_album(pic_items){
@@ -23,26 +25,94 @@ function populate_album(pic_items){
     fill_text += '<div class="geo_section">';
     fill_text += '<span class="label label-default">' + (el.geo ? (el.geo.lat.toFixed(5) + ', ' + el.geo.lon.toFixed(5)) : 'Unknown') + '</span><br />';
     fill_text += '</div>';
+
+    fill_text += '<div class="delete_media"><small><span class="glyphicon glyphicon-trash"></span></small></div>';
+
     fill_text += '</div></div>';
   });
   $('#thumb_list').html(fill_text);
 
+  // map flies to the relevant item when scrolled to
+  $('#thumb_list').scroll(function(){
+    var itemID = Math.floor(Math.round($(this).scrollTop() / ($(this).prop("scrollHeight") - $(this).height()) * $(this).prop("scrollHeight")) / (imgHeight + mediaMargin));
+    if (pic_data[itemID].geo){
+      map.flyTo({
+        center: [
+          pic_data[itemID].geo.lon,
+          pic_data[itemID].geo.lat,
+        ]
+
+      });
+    }
+  });
+
   $('.media').each(function(index, el){
     $(this).data('item_index', index);
     $(this).data('pk', pic_data[index].pk);
+    if (is_album){
+      $(this).find('img.media-object').on('click', lp_wrapper(pic_data[index].pk));
+    }
   });
 
-  // find the position cutoffs
-  var pos = new Array(pic_items.length - 1);
-  for (var i = 0; i < pos.length; i++){
-    pos[i] = (160 + 15) * (i + 1);
-  }
 
+  $('.media').hover(function(){
+    $(this).find('div.delete_media').show();
+  }, function(){
+    $(this).find('div.delete_media').hide();
+  });
+
+  // functions allowing for click-to-edit
   // replace info on click to allow for edits
-  $('div.media .media-heading').one('click', edit_title);
-  $('div.time_section').one('click', hack_time);
-  $('div.geo_section').one('click', edit_geo);
+  if (is_album){
+    $('div.media .media-heading').one('click', edit_title);
+    $('div.time_section').one('click', hack_time);
+    $('div.geo_section').one('click', edit_geo);
+    $('div.delete_media').on('click', del_med);
+    $('img.media-object').hover(function(){
+      $(this).css('cursor', 'pointer');
+    }, function(){
+      $(this).css('cursor', 'auto');
+    });
+  } else {
+    $('div.media .media-heading').one('click', edit_pic_title);
+    $('div.time_section').one('click', hack_pic_time);
+    //$('div.geo_section').one('click', edit_geo);
+    //$('div.delete_media').on('click', del_med);
+    $('img.media-object').off('hover');
 
+    $('#btn_col').append('<span id="back_to_album" class="pull-right text-right"><button class="btn btn-primary" type="button">Back to Albums</button></span>');
+    $('#back_to_album button').on('click', function(){
+      // save current results
+      console.log({'data': edit_actions});
+      $.ajax({
+        url: '/splitter/gateway/picedits',
+        type: 'POST',
+        data: {
+          'pk': seg_pk,
+          'target': 'json',
+          'content': JSON.stringify(edit_actions),
+        },
+        dataType: 'json',
+        success: function(data){
+          message_log(data.message);
+          // clear actions
+          edit_actions = [];
+
+          // going back to album list
+          load_albums();
+
+          // remove button
+          $('#back_to_album').remove();
+        },
+        error: function(xhr, err){
+          var response = $.parseJSON(xhr.responseText);
+          message_log(response.message);
+        },
+      });
+
+
+    });
+  }
 }
 
 function populate_map(collections){
@@ -133,11 +203,37 @@ function populate_map(collections){
   map.addLayer(point_layer);
 }
 
+//centers the map to 1st item (upon initialization)
+function center_map(collections){
+  var i = 0;
+  while (i < collections.length && !collections[i].geo){
+    i ++;
+  }
+  if (i == collections.length){
+    map.flyTo({
+      center: [ // fly to Paris if no coordinates are found
+        2.3522,
+        48.8566,
+      ],
+      zoom: 13,
+    });
+  } else {
+    map.flyTo({
+      center: [
+        collections[i].geo.lon,
+        collections[i].geo.lat,
+      ],
+      zoom: 13,
+    })
+  }
+}
+
 function newDataProcess(data){
-  pic_data = data.album_infos;
+  pic_data = data.item_data;
   is_album = data.is_album;
   populate_album(pic_data);
   populate_map(pic_data);
+  center_map(pic_data);
 }
 
 function message_log(msg){
@@ -154,9 +250,9 @@ function edit_title(){
     //console.log($(this).closest('.media').data('pk'));
     $.ajax({
       url: '/splitter/gateway/picedits',
+      type: 'POST',
       data: {
         'pk': target.closest('.media').data('pk'),
-        'type': 'seg',
         'target': 'title',
         'content': child_input.val(),
       },
@@ -165,8 +261,9 @@ function edit_title(){
         message_log(data.message);
         target.html('<strong>' + child_input.val() + '</strong>');
       },
-      error: function(data){
-        message_log(data.message);
+      error: function(xhr, err){
+        var response = $.parseJSON(xhr.responseText);
+        message_log(response.message);
         target.html(old_content);
       },
       complete: function(data) {
@@ -174,6 +271,49 @@ function edit_title(){
       }
     });
   });
+}
+
+function edit_pic_title(){
+  var target = $(this);
+  target.html('<input type="text" value="' + target.children().html() + '" />');
+  var child_input = target.find('input');
+  child_input.focus();
+  child_input.on('focusout', function(){
+    target.one('click', edit_pic_title);
+    edit_actions.push({
+      'type': 'edit',
+      'item_id': target.closest('.media').data('pk'),
+      'target': 'title',
+      'content': child_input.val(),
+    });
+    target.html('<strong>' + child_input.val() + '</strong>');
+  });
+}
+
+function del_med(){
+  var target = $(this).closest('.media');
+  if (confirm("Delete this item?")){
+    $.ajax({
+      url: '/splitter/gateway/picdel',
+      type: 'POST',
+      data: {
+        'pk': target.data('pk'),
+      },
+      dataType: 'json',
+      success: function(data){
+        message_log(data.message);
+        pic_data.splice(target.data('item_index'), 1);
+        populate_album(pic_data);
+        populate_map(pic_data);
+        target.remove();
+      },
+      error: function(xhr, err){
+        var response = $.parseJSON(xhr.responseText);
+        message_log(response.message);
+      },
+    });
+  }
+
 }
 
 function format_date(timestamp){
@@ -185,7 +325,6 @@ function format_date(timestamp){
   ];
   return output.join('/');
 }
-
 function hack_time(){
   var target = $(this);
   var total_old_content = target.html();
@@ -216,9 +355,9 @@ function hack_time(){
 
         $.ajax({
           url: '/splitter/gateway/picedits',
+          type: "POST",
           data: {
             'pk': target.closest('.media').data('pk'),
-            'type': 'seg',
             'target': 'time',
             'content': inputs.map(function(){
               return $(this).val();
@@ -231,14 +370,44 @@ function hack_time(){
             fill_text += '<span class="label label-default">' + inputs.last().val() + '</span><br />';
             target.html(fill_text);
           },
-          error: function(data){
+          error: function(xhr, err){
+            var response = $.parseJSON(xhr.responseText);
+            message_log(response.message);
             target.html(total_old_content);
-            message_log(data.message);
           },
           complete: function(data) {
 
             target.one('click', hack_time);
           }
+        });
+      }
+    }, timeoutLimit);
+  });
+}
+
+function hack_pic_time(){
+  var target = $(this);
+  var old_content = target.find("span").html();
+
+  target.html('<input type="text" class="form-control input-sm" value="' + old_content + '" />');
+
+  var child_input = target.find('input');
+  child_input.datepicker({
+    format: "yyyy/mm/dd"
+  });
+  child_input.focus();
+
+  child_input.on('focusout', function(){
+    setTimeout(function(){
+      if (!child_input.is(":focus")){
+        console.log(document.activeElement);
+        target.one('click', hack_pic_time);
+        target.html('<span class="label label-default">' + child_input.val() + '</span>');
+        edit_actions.push({
+          'type': 'edit',
+          'item_id': target.closest('.media').data('pk'),
+          'target': 'timestamp',
+          'content': new Date(child_input.val().replace('/', '-')).getTime() / 1000,
         });
       }
     }, timeoutLimit);
@@ -325,7 +494,6 @@ function edit_geo(){
           url: '/splitter/gateway/picedits',
           data: {
             'pk': target.closest('.media').data('pk'),
-            'type': 'seg',
             'target': 'geo',
             'content': child_input.val(),
           },
@@ -344,8 +512,9 @@ function edit_geo(){
             };
             populate_map(pic_data);
           },
-          error: function(data){
-            message_log(data.message);
+          error: function(xhr, err){
+            var response = $.parseJSON(xhr.responseText);
+            message_log(response.message);
             target.html(old_content);
           },
           complete: function(data) {
@@ -359,95 +528,40 @@ function edit_geo(){
     }, timeoutLimit);
   });
 
-
-
-
-
-
-
-
-
-
-
-
   child_input.focus();
-  /*
-  child_input.on('focusout', function(){
-    //console.log($(this).closest('.media').data('pk'));
-    $.ajax({
-      url: '/splitter/gateway/picedits',
-      data: {
-        'pk': target.closest('.media').data('pk'),
-        'type': 'seg',
-        'target': 'geo',
-        'content': child_input.val(),
-      },
-      dataType: 'json',
-      success: function(data){
-        message_log(data.message);
-        target.html('<span class="label label-default">@ ()</span><br />');
-      },
-      error: function(data){
-        message_log(data.message);
-        target.html(old_content);
-      },
-      complete: function(data) {
-        target.one('click', edit_geo);
-        target.removeClass("flex_div");
-      }
-    });
-  });
-  */
 }
 
+// initially, load in the albums interface
 function load_albums(){
   $.ajax({
     url: '/splitter/gateway/rafd',
+    type: 'POST',
     data: {},
     dataType: 'json',
     success: function (data) {
       newDataProcess(data);
-
-      // center the map
-      var i = 0;
-      while (!pic_data[i].geo && i < pic_data.length){
-        i ++;
-      }
-      if (i == pic_data.length){
-        map.flyTo({
-          center: [ // fly to Paris if no coordinates are found
-            2.3522,
-            48.8566,
-          ],
-          zoom: 13,
-        });
-      } else {
-        map.flyTo({
-          center: [
-            pic_data[i].geo.lon,
-            pic_data[i].geo.lat,
-          ],
-          zoom: 13,
-        })
-      }
-
-
-      $('#thumb_list').scroll(function(){
-        var itemID = Math.floor(Math.round($(this).scrollTop() / ($(this).prop("scrollHeight") - $(this).height()) * $(this).prop("scrollHeight")) / 175);
-        if (pic_data[itemID].geo){
-          map.flyTo({
-            center: [
-              pic_data[itemID].geo.lon,
-              pic_data[itemID].geo.lat,
-            ]
-
-          });
-        }
-
-      });
-
     }
   });
+}
+
+function lp_wrapper(pk){
+  function load_pics(){
+    $.ajax({
+      url: '/splitter/gateway/rpfd',
+      type: 'POST',
+      data: {
+        'thumbsize': imgHeight,
+        'seg_pk': pk,
+      },
+      dataType: 'json',
+      success: function (data) {
+        seg_pk = data.seg_pk;
+        edit_actions = [];
+        newDataProcess(data);
+      }
+    });
+  }
+  return load_pics;
 }
 
 function rtfgClick(e){
@@ -456,13 +570,14 @@ function rtfgClick(e){
 
   $.ajax({
     url: '/splitter/gateway/rtfg',
+    type: 'POST',
     data: {},
     dataType: 'json',
     success: function (data) {
       newDataProcess(data);
     },
     complete: function() {
-      target.html("Refresh");
+      target.html("Refresh with Google");
       target.one('click', rtfgClick);
     }
   });
@@ -470,6 +585,19 @@ function rtfgClick(e){
 
 
 $(document).ready(function(){
+  // setting the csrf token
+  var csrftoken = $('[name=csrfmiddlewaretoken]').val();
+  function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+  }
+  $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+          if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader("X-CSRFToken", csrftoken);
+          }
+      }
+  });
 
   mapboxgl.accessToken = 'pk.eyJ1IjoibGljaGFuZ3lpODg4IiwiYSI6ImNqMzJiMW14cDAwMDAzM3MzZ3djcmt4N3QifQ.XknNEOZ93pNGqvU_2oOv5Q';
   map = new mapboxgl.Map({

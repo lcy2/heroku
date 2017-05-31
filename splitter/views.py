@@ -154,11 +154,17 @@ def gateway_switch(request, action):
         if 'HTTP_REFERER' in request.META:
             p = re.compile(r'(?<=\/)[0-9]+(?=\/)')
             pk = int(p.search(request.META['HTTP_REFERER']).group())
-
             return gateway.read_albums_from_db(request, pk)
+    elif action == "rpfd":
+        if 'HTTP_REFERER' in request.META:
+            p = re.compile(r'(?<=\/)[0-9]+(?=\/)')
+            pk = int(p.search(request.META['HTTP_REFERER']).group())
+            return gateway.read_pics_from_db(request, pk)
 
     elif action == 'picedits':
         return gateway.pic_edits(request)
+    elif action == 'picdel':
+        return gateway.pic_delete(request)
 
 
     messages.error(request, "Went down the wrong rabbit hole.")

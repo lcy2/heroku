@@ -6,11 +6,37 @@
   overflow-y: auto;
   height: 500px;
   position: relative;
+}
+
+#content_panel > div {
   padding-left: 0;
+}
+#btn_col {
+  padding: 0;
 }
 
 .flex_div {
   display: flex;
+}
+
+img.media-object {
+  object-fit: cover;
+  width: 135px;
+  height: 135px;
+}
+
+div.media-body {
+  position: relative;
+}
+
+div.delete_media {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  display: none;
+}
+div.delete_media:hover {
+  cursor: pointer;
 }
 
 .geo_section > span::before {
@@ -26,10 +52,11 @@
 }
 
 @media only screen and (max-width: 768px) {
-    #thumb_list {
-        margin-right: 15px;
-    }
-    #map, #thumb_list {
-      height: 200px;
-    }
+  #content_panel > div {
+    padding-right: 0;
+  }
+
+  #map, #thumb_list {
+    height: 200px;
+  }
 }

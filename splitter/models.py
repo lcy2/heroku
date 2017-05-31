@@ -49,7 +49,7 @@ class Segment(models.Model):
     segment_lat = models.FloatField(blank = True, null = True)
     segment_img = models.URLField(blank = True)
     segment_album = models.URLField(blank = True)
-    segment_detail = JSONField(blank = True, null = True)
+    segment_detail = JSONField(blank = True, null = True, default = dict)
 
     def __unicode__(self):
         return self.segment_name
