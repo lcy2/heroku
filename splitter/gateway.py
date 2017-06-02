@@ -97,9 +97,9 @@ def refresh_trek_from_google(request, trip, start):
     # TODO: only modify the entries as needed
     # TODO: pull old info, compare with new, make edits
     # for now just deleting all old info and replace with new
-
-    old_info = trip.segment_set.all()
-    old_info.delete()
+    if not start:
+        old_info = trip.segment_set.all()
+        old_info.delete()
 
     url_base = 'https://picasaweb.google.com/data/feed/api/user/default/albumid/'
 
