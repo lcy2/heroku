@@ -187,12 +187,12 @@ def refresh_trek_from_google(request, trip, start):
         'finished': len(album_infos) < start + 10
     })
 
-@check_trip_access_json(True)
+@check_trip_access_json(False)
 def read_albums_from_db(request, trip, **kwargs):
     """return albums available from db"""
     return output_album_json(request, trip)
 
-@check_trip_access_json(True)
+@check_trip_access_json(False)
 def read_pics_from_db(request, trip, **kwargs):
     """return picture details from db"""
     return output_pics_json(request, trip)
