@@ -4,9 +4,13 @@
 {% block title %}: Login{% endblock %}
 
 {% block navbar %}
-  <div class="navbar-header">
-    <div class="navbar-brand">Splitter</div>
-  </div>
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <div class="navbar-brand">Splitter</div>
+      </div>
+    </div>
+  </nav>
 {% endblock %}
 
 {% block main %}
@@ -34,7 +38,8 @@
           <img alt="Google Login" src="{% static 'shared_asset/btn_google_signin_dark_normal_web.png' %}" />
         </a>
       </div>
-  </div>
+    </div>
+</div>
 
 {% endblock %}
 {% block override %}
