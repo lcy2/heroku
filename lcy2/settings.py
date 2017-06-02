@@ -192,5 +192,4 @@ LOGIN_REDIRECT_URL = 'home'
 try:
     from .settings_local import *
 except ImportError as e:
-    print "Unable to load local settings: " + e
-    pass
+    print "Unable to load local settings: " + unicode(e)
