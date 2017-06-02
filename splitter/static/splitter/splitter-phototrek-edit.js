@@ -643,8 +643,9 @@ function lp_wrapper(pk){
         seg_pk = data.seg_pk;
         edit_actions = [];
         newDataProcess(data);
-        $('#btn_col').append('<span id="back_to_album" class="pull-right text-right"><button class="btn btn-primary" type="button">Back to Albums</button></span>');
-        $('#back_to_album button').on('click', function(){
+        var ba_button = $('<span id="back_to_album" class="pull-right text-right"><button class="btn btn-primary" type="button">Back to Albums</button></span>');
+        $('#btn_col').append(ba_button);
+        ba_button.on('click', function(){
           // save current results
           $.ajax({
             url: '/splitter/gateway/picedits',
@@ -682,21 +683,42 @@ function lp_wrapper(pk){
 
 function rtfgClick(e){
   var target = $(this);
+  var finished = false;
+  var error_out = false;
+  var next_start = 0;
   target.html("Please Wait");
 
-  $.ajax({
-    url: '/splitter/gateway/rtfg',
-    type: 'POST',
-    data: {},
-    dataType: 'json',
-    success: function (data) {
-      newDataProcess(data);
-    },
-    complete: function() {
-      target.html("Refresh with Google");
-      target.one('click', rtfgClick);
-    }
-  });
+  function ajax_call(next_start){
+    $.ajax({
+      url: '/splitter/gateway/rtfg',
+      type: 'POST',
+      data: {
+        'start': next_start,
+      },
+      dataType: 'json',
+      error: function(xhr, err){
+        var response = $.parseJSON(xhr.responseText);
+        message_log(response.message);
+        return;
+      },
+      success: function (data) {
+        finished = data.finished;
+        next_start = data.next_start;
+        console.log(data);
+
+        if (!finished){
+          return ajax_call(next_start);
+        } else {
+          load_albums();
+          target.html("Refresh with Google");
+          target.one('click', rtfgClick);
+        }
+      },
+
+    });
+  }
+  ajax_call(0);
+
 }
 
 

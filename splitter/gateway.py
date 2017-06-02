@@ -19,7 +19,7 @@ def check_trip_access_json(enforce_edit):
     passing the resultant trip to the view function
     """
     def real_decorator(fun):
-        def wrapper(request, pk, *args):
+        def wrapper(request, pk, **kwargs):
             try:
                 trip = Trip.objects.get(pk = pk)
             except Trip.DoesNotExist:
@@ -30,9 +30,9 @@ def check_trip_access_json(enforce_edit):
 
             editors = filter(lambda x: x, set([trav.user for trav in trip.travelers.all()]))
             if request.user in editors:
-                return fun(request, trip, *args)
+                return fun(request, trip, **kwargs)
             elif ((request.user in trip.authorized_viewers.all()) or (not trip.is_private)) and not enforce_edit:
-                return fun(request, trip, *args)
+                return fun(request, trip, **kwargs)
             # if this user is not authorized
             # return to splitter:index with a message
             return JsonResponse({'message': "You're not authorized"}, status = 403)
@@ -64,7 +64,7 @@ def _picasa_feed(google, add_url = '', **query):
     return re.sub(r'\sxmlns=["\'][^"\']+["\']', '', response.content, count=1)
 
 @check_trip_access_json(True)
-def refresh_trek_from_google(request, trip):
+def refresh_trek_from_google(request, trip, start):
     """ return all albums """
     # TODO: add refresh button to refresh the album list in the database
     # TODO: store the album list in the database
@@ -80,7 +80,6 @@ def refresh_trek_from_google(request, trip):
         'title': unicode(el.title),
         'albumid': el.id.text.split('/')[-1],
         'thumbnail': el.find('media:group/media:thumbnail', feed.nsmap).get('url'),
-        'order': None,
     } for el in feed.entry]
 
     # TODO: change it to user-selecting which albums to use
@@ -104,7 +103,7 @@ def refresh_trek_from_google(request, trip):
 
     url_base = 'https://picasaweb.google.com/data/feed/api/user/default/albumid/'
 
-    for album in album_infos:
+    for album in album_infos[start:start + 10]:
         print album['title']
         albumid = album.pop('albumid', '')
         seg = Segment(
@@ -183,15 +182,18 @@ def refresh_trek_from_google(request, trip):
             seg.segment_start = date.fromtimestamp(seg_start)
             seg.segment_end = date.fromtimestamp(seg_end)
         seg.save()
-    return output_album_json(request, trip)
+    return JsonResponse({
+        'next_start': start + 10,
+        'finished': len(album_infos) < start + 10
+    })
 
 @check_trip_access_json(True)
-def read_albums_from_db(request, trip, *args):
+def read_albums_from_db(request, trip, **kwargs):
     """return albums available from db"""
     return output_album_json(request, trip)
 
 @check_trip_access_json(True)
-def read_pics_from_db(request, trip, *args):
+def read_pics_from_db(request, trip, **kwargs):
     """return picture details from db"""
     return output_pics_json(request, trip)
 
@@ -221,6 +223,7 @@ def output_album_json(request, trip):
     #        album['pk'] = seg.pk
     #
     #        album_infos.append(album)
+
     return JsonResponse({
         'item_data': album_infos,
         'is_album': True,

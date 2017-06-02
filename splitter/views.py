@@ -90,14 +90,14 @@ def check_trip_access(enforce_edit):
 #    return map(lambda x: str(x[0]).split('.')[-1], raw_fields)
 
 @check_trip_access(False)
-def trip(request, trip, *args):
+def trip(request, trip):
     context = {
         'trip': trip,
     }
     return ('splitter/trip_overview.html', context)
 
 @check_trip_access(True)
-def trip_edit(request, trip, *args):
+def trip_edit(request, trip):
     context = {
         'trip': trip,
         #'fields': {field: getattr(trip, field) for field in show_fields(trip)}
@@ -130,7 +130,7 @@ def _picasa_feed(google, **query):
 
 # adapted from https://github.com/morganwahl/photos-db/blob/master/photosdb/photosdb/views.py
 @check_trip_access(True)
-def phototrek_edit(request, trip, *args):
+def phototrek_edit(request, trip):
     """ return all albums """
     refresh_buttons = dict()
     try:
@@ -150,7 +150,7 @@ def gateway_switch(request, action):
         if 'HTTP_REFERER' in request.META:
             p = re.compile(r'(?<=\/)[0-9]+(?=\/)')
             pk = int(p.search(request.META['HTTP_REFERER']).group())
-            return gateway.refresh_trek_from_google(request, pk)
+            return gateway.refresh_trek_from_google(request, pk, start = int(request.POST.get('start', 0)))
     elif action == "rafd":
         if 'HTTP_REFERER' in request.META:
             p = re.compile(r'(?<=\/)[0-9]+(?=\/)')
@@ -172,7 +172,7 @@ def gateway_switch(request, action):
     return redirect("splitter:index")
 
 @check_trip_access(False)
-def phototrek(request, trip, *args):
+def phototrek(request, trip):
     context = {
         'trip': trip,
     }
