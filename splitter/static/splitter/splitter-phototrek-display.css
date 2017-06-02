@@ -1,6 +1,10 @@
 html, body { height: 100% }
 
 
+.media-heading {
+  color: #eee;
+}
+
 .img_wrapper > img {
   object-fit: cover;
   width: 135px;
