@@ -38,29 +38,29 @@ function populate_album(pic_items){
 
   // map flies to the relevant item when scrolled to
   $('#thumb_list').scroll(function(){
-    var itemID = Math.floor($(this).scrollTop() / (($(this).prop("scrollHeight") - $(this).height()) / (pic_items.length - 0.0001)));
-    if (pic_items[itemID].geo){
+    var itemID = Math.floor(Math.round($(this).scrollTop() / ($(this).prop("scrollHeight") - $(this).height()) * $(this).prop("scrollHeight")) / (imgHeight + mediaMargin));
+    if (pic_data[itemID].geo){
       map.flyTo({
         center: [
-          pic_items[itemID].geo.lon,
-          pic_items[itemID].geo.lat,
+          pic_data[itemID].geo.lon,
+          pic_data[itemID].geo.lat,
         ]
       });
     }
   });
 
   $('.media').each(function(index, el){
-    $(this).data('item_index', index);
-    $(this).data('pk', pic_items[index].pk);
+    el.data('item_index', index);
+    el.data('pk', pic_data[index].pk);
     if (is_album){
-      $(this).find('img.media-object').on('click', lp_wrapper(pic_items[index].pk));
+      el.find('img.media-object').on('click', lp_wrapper(pic_data[index].pk));
     } else {
-      $(this).find('img.media-object').on('click', function(){
-        if (pic_items[index].geo){
+      el.find('img.media-object').on('click', function(){
+        if (pic_data[index].geo){
           map.flyTo({
             center: [
-              pic_items[index].geo.lon,
-              pic_items[index].geo.lat,
+              pic_data[index].geo.lon,
+              pic_data[index].geo.lat,
             ]
           });
         }

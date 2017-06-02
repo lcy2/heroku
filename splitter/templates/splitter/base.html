@@ -11,30 +11,31 @@
 
   </head>
   <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container-fluid">
-        {% block navbar %}
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu-bar" aria-expanded="false" aria-controls="menu-bar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="glyphicon glyphicon-menu-hamburger"></span>
-          </button>
-          <a class="navbar-brand" href="{% url "splitter:index" %}">Splitter</a>
-        </div>
-        <div id="menu-bar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
+    {% block navbar %}
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
 
-            {% if user and not user.is_anonymous %}
-              <li><a><span class="glyphicon glyphicon-user"></span> {{ user.get_short_name|default:user.email|default:user.get_username }}</a></li>
-              <li><a href="{% url "logout"%}?next={{ request.path }}"><span class="glyphicon glyphicon-log-out"></span> Logout </a></li>
-            {% else %}
-              <li><a href="{% url "login"%}?next={{ request.path }}"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
-            {% endif %}
-          </ul>
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu-bar" aria-expanded="false" aria-controls="menu-bar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="glyphicon glyphicon-menu-hamburger"></span>
+            </button>
+            <a class="navbar-brand" href="{% url "splitter:index" %}">Splitter</a>
+          </div>
+          <div id="menu-bar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+
+              {% if user and not user.is_anonymous %}
+                <li><a><span class="glyphicon glyphicon-user"></span> {{ user.get_short_name|default:user.email|default:user.get_username }}</a></li>
+                <li><a href="{% url "logout"%}?next={{ request.path }}"><span class="glyphicon glyphicon-log-out"></span> Logout </a></li>
+              {% else %}
+                <li><a href="{% url "login"%}?next={{ request.path }}"><span class="glyphicon glyphicon-log-in"></span> Login </a></li>
+              {% endif %}
+            </ul>
+          </div>
         </div>
-      </div>
-      {% endblock %}
-    </nav>
+      </nav>
+    {% endblock %}
     {% include 'splitter/message_panels.html' %}
     {% block main %}{% endblock %}
 

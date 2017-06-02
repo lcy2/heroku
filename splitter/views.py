@@ -143,7 +143,6 @@ def phototrek_edit(request, trip, *args):
     }
     return ('splitter/phototrek_edit.html', context)
 
-
 def gateway_switch(request, action):
     if action == "rtfg":
         if 'HTTP_REFERER' in request.META:
@@ -169,3 +168,10 @@ def gateway_switch(request, action):
 
     messages.error(request, "Went down the wrong rabbit hole.")
     return redirect("splitter:index")
+
+@check_trip_access(False)
+def phototrek(request, trip, *args):
+    context = {
+        'trip': trip,
+    }
+    return ('splitter/phototrek_display.html', context)

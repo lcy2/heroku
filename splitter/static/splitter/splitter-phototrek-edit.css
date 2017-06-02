@@ -25,6 +25,10 @@ img.media-object {
   height: 135px;
 }
 
+img.media-object:hover {
+  cursor: pointer;
+}
+
 div.media-body {
   position: relative;
 }

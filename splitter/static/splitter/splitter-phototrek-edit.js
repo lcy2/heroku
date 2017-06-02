@@ -3,6 +3,10 @@ var timeoutLimit = 500;
 var imgHeight = 135;
 var mediaMargin = 15;
 
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 
 function populate_album(pic_items){
   var fill_text = '';
@@ -34,23 +38,33 @@ function populate_album(pic_items){
 
   // map flies to the relevant item when scrolled to
   $('#thumb_list').scroll(function(){
-    var itemID = Math.floor(Math.round($(this).scrollTop() / ($(this).prop("scrollHeight") - $(this).height()) * $(this).prop("scrollHeight")) / (imgHeight + mediaMargin));
-    if (pic_data[itemID].geo){
+    var itemID = Math.floor($(this).scrollTop() / (($(this).prop("scrollHeight") - $(this).height()) / (pic_items.length - 0.0001)));
+    if (pic_items[itemID].geo){
       map.flyTo({
         center: [
-          pic_data[itemID].geo.lon,
-          pic_data[itemID].geo.lat,
+          pic_items[itemID].geo.lon,
+          pic_items[itemID].geo.lat,
         ]
-
       });
     }
   });
 
   $('.media').each(function(index, el){
     $(this).data('item_index', index);
-    $(this).data('pk', pic_data[index].pk);
+    $(this).data('pk', pic_items[index].pk);
     if (is_album){
-      $(this).find('img.media-object').on('click', lp_wrapper(pic_data[index].pk));
+      $(this).find('img.media-object').on('click', lp_wrapper(pic_items[index].pk));
+    } else {
+      $(this).find('img.media-object').on('click', function(){
+        if (pic_items[index].geo){
+          map.flyTo({
+            center: [
+              pic_items[index].geo.lon,
+              pic_items[index].geo.lat,
+            ]
+          });
+        }
+      });
     }
   });
 
@@ -68,50 +82,12 @@ function populate_album(pic_items){
     $('div.time_section').one('click', hack_time);
     $('div.geo_section').one('click', edit_geo);
     $('div.delete_media').on('click', del_med);
-    $('img.media-object').hover(function(){
-      $(this).css('cursor', 'pointer');
-    }, function(){
-      $(this).css('cursor', 'auto');
-    });
+
   } else {
     $('div.media .media-heading').one('click', edit_pic_title);
     $('div.time_section').one('click', hack_pic_time);
-    //$('div.geo_section').one('click', edit_geo);
-    //$('div.delete_media').on('click', del_med);
-    $('img.media-object').off('hover');
-
-    $('#btn_col').append('<span id="back_to_album" class="pull-right text-right"><button class="btn btn-primary" type="button">Back to Albums</button></span>');
-    $('#back_to_album button').on('click', function(){
-      // save current results
-      console.log({'data': edit_actions});
-      $.ajax({
-        url: '/splitter/gateway/picedits',
-        type: 'POST',
-        data: {
-          'pk': seg_pk,
-          'target': 'json',
-          'content': JSON.stringify(edit_actions),
-        },
-        dataType: 'json',
-        success: function(data){
-          message_log(data.message);
-          // clear actions
-          edit_actions = [];
-
-          // going back to album list
-          load_albums();
-
-          // remove button
-          $('#back_to_album').remove();
-        },
-        error: function(xhr, err){
-          var response = $.parseJSON(xhr.responseText);
-          message_log(response.message);
-        },
-      });
-
-
-    });
+    $('div.geo_section').one('click', edit_pic_geo);
+    $('div.delete_media').on('click', del_pic_med);
   }
 }
 
@@ -305,7 +281,6 @@ function del_med(){
         pic_data.splice(target.data('item_index'), 1);
         populate_album(pic_data);
         populate_map(pic_data);
-        target.remove();
       },
       error: function(xhr, err){
         var response = $.parseJSON(xhr.responseText);
@@ -313,6 +288,20 @@ function del_med(){
       },
     });
   }
+
+}
+function del_pic_med(){
+  var target = $(this).closest('.media');
+  if (confirm("Delete this item?")){
+    edit_actions.push({
+      'type': 'delete',
+      'item_id': target.data('pk'),
+    });
+    pic_data.splice(target.data('item_index'), 1);
+    populate_album(pic_data);
+    populate_map(pic_data);
+  }
+
 
 }
 
@@ -400,7 +389,6 @@ function hack_pic_time(){
   child_input.on('focusout', function(){
     setTimeout(function(){
       if (!child_input.is(":focus")){
-        console.log(document.activeElement);
         target.one('click', hack_pic_time);
         target.html('<span class="label label-default">' + child_input.val() + '</span>');
         edit_actions.push({
@@ -414,20 +402,13 @@ function hack_pic_time(){
   });
 }
 
-function edit_geo(){
-  var target = $(this);
-  var old_content = target.html();
-  var default_content = target.find('span').html();
 
-  target.html('<input class="input-sm form-control" type="text" value="" />');
-  var child_input = target.find('input');
+function update_geo_field(ci, lngLat){
+  ci.val(lngLat.lat + ", " + lngLat.lng);
+  ci.focus();
+}
 
-  function update_geo_field(lngLat){
-    child_input.val(lngLat.lat + ", " + lngLat.lng);
-    child_input.focus();
-
-  }
-
+function i_wrapper(ci){
   // initialize the map marker etc.
   function initialize(e){
     // add a marker to where I clicked
@@ -444,29 +425,50 @@ function edit_geo(){
           "icon-image": "circle-stroked-15",
       }
     });
-    update_geo_field(e.lngLat);
+    update_geo_field(ci, e.lngLat);
     // replace the click listener after the first click
-    map.on('click', move_marker);
+    map.on('click', mm_wrapper(ci));
   }
+  return initialize;
+}
 
+function mm_wrapper(ci){
   function move_marker(e){
     var bullseye = {
       "type": "Point",
       "coordinates": [e.lngLat.lng, e.lngLat.lat],
     }
     map.getSource('bullseye').setData(bullseye);
-    update_geo_field(e.lngLat);
+    update_geo_field(ci, e.lngLat);
   }
+  return move_marker;
+}
+function removeMapListeners(){
+  $.each(map._listeners.click, function(i, el){
+    map.off('click', el);
+  });
+  if (map._oneTimeListeners){
+    $.each(map._oneTimeListeners.click, function(i, el){
+      map.off('click', el);
+    });
+  }
+}
+function edit_geo(){
+  var target = $(this);
+  var old_content = target.html();
+  var default_content = target.find('span').html();
 
+  target.html('<input class="input-sm form-control" type="text" value="" />');
+  var child_input = target.find('input');
 
   if (default_content == "Unknown"){
     child_input.val("");
-    map.once('click', initialize);
+    map.once('click', i_wrapper(child_input));
   } else {
     child_input.val(default_content);
     // there's already a latlon, fly to it
     var latlon = $.map(default_content.split(', '), function(el, index){
-      return $.trim(el);
+      return parseFloat(el);
     });
     var e = {
       'lngLat': {
@@ -474,24 +476,22 @@ function edit_geo(){
         'lat': latlon[0],
       }
     }
-    initialize(e);
+    i_wrapper(child_input)(e);
 
     map.flyTo({
       center: latlon.reverse(),
       zoom: 13,
     });
   }
+  child_input.focus();
 
   $('body').on('focusout', function(){
     setTimeout(function(){
       if (!child_input.is(":focus") && !$('.mapboxgl-canvas').is(":focus")){
-        // get rid of the tiny marker
-        map.removeLayer("bullseye");
-        map.removeSource("bullseye");
-
         // submit location to the database
         $.ajax({
           url: '/splitter/gateway/picedits',
+          type: 'POST',
           data: {
             'pk': target.closest('.media').data('pk'),
             'target': 'geo',
@@ -501,9 +501,9 @@ function edit_geo(){
           success: function(data){
             message_log(data.message);
             var latlon = $.map(child_input.val().split(', '), function(el, index){
-              return $.trim(el);
+              return parseFloat(el).toFixed(5);
             });
-            target.html('<span class="label label-default">' + child_input.val().toFixed(5) + '</span><br />');
+            target.html('<span class="label label-default">' + latlon.join(', ') + '</span><br />');
 
             // refresh the map
             pic_data[target.closest('.media').data('item_index')].geo = {
@@ -518,17 +518,102 @@ function edit_geo(){
             target.html(old_content);
           },
           complete: function(data) {
+
+            if (map.getLayer('bullseye')){
+              // get rid of the tiny marker
+              map.removeLayer("bullseye");
+              map.removeSource("bullseye");
+            }
+
             target.one('click', edit_geo);
             target.removeClass("flex_div");
             $('body').off('focusout');
-            map.off('click', move_marker);
+            removeMapListeners();
+
           }
         });
       }
     }, timeoutLimit);
   });
+}
 
+function edit_pic_geo(){
+  var target = $(this);
+  var old_content = target.html();
+  var default_content = target.find('span').html();
+
+  target.html('<input class="input-sm form-control" type="text" value="" />');
+  var child_input = target.find('input');
+
+  if (default_content == "Unknown"){
+    child_input.val("");
+    map.once('click', i_wrapper(child_input));
+  } else {
+    child_input.val(default_content);
+    // there's already a latlon, fly to it
+    var latlon = $.map(default_content.split(', '), function(el, index){
+      return parseFloat(el);
+    });
+    var e = {
+      'lngLat': {
+        'lng': latlon[1],
+        'lat': latlon[0],
+      }
+    }
+    i_wrapper(child_input)(e);
+
+    map.flyTo({
+      center: latlon.reverse(),
+      zoom: 13,
+    });
+  }
   child_input.focus();
+
+  $('body').on('focusout', function(){
+    setTimeout(function(){
+      if (!child_input.is(":focus") && !$('.mapboxgl-canvas').is(":focus")){
+        var latlon = child_input.val().split(', ');
+
+        // validate it's actually a pair of floats
+        if (latlon.length == 2 && latlon.every(isNumeric)){
+
+          var geo = {
+            'lat': parseFloat(latlon[0]),
+            'lon': parseFloat(latlon[1]),
+          }
+
+          edit_actions.push({
+            'type': 'edit',
+            'item_id': target.closest('.media').data('pk'),
+            'target': 'loc',
+            'content': geo,
+          });
+
+
+          target.html('<span class="label label-default">' + geo.lat.toFixed(5) + ', ' + geo.lon.toFixed(5) + '</span><br />');
+
+          // refresh the map
+          pic_data[target.closest('.media').data('item_index')].geo = geo;
+          populate_map(pic_data);
+        } else {
+          target.html(old_content);
+          message_log('Invalid content');
+        }
+
+        if (map.getLayer('bullseye')){
+          // get rid of the tiny marker
+          map.removeLayer("bullseye");
+          map.removeSource("bullseye");
+        }
+
+        target.one('click', edit_pic_geo);
+        target.removeClass("flex_div");
+        $('body').off('focusout');
+        // unbind all the click event listeners
+        removeMapListeners();
+      }
+    }, timeoutLimit);
+  });
 }
 
 // initially, load in the albums interface
@@ -558,6 +643,37 @@ function lp_wrapper(pk){
         seg_pk = data.seg_pk;
         edit_actions = [];
         newDataProcess(data);
+        $('#btn_col').append('<span id="back_to_album" class="pull-right text-right"><button class="btn btn-primary" type="button">Back to Albums</button></span>');
+        $('#back_to_album button').on('click', function(){
+          // save current results
+          $.ajax({
+            url: '/splitter/gateway/picedits',
+            type: 'POST',
+            data: {
+              'pk': seg_pk,
+              'target': 'json',
+              'content': JSON.stringify(edit_actions),
+            },
+            dataType: 'json',
+            success: function(data){
+              message_log(data.message);
+              // clear actions
+              edit_actions = [];
+
+              // going back to album list
+              load_albums();
+
+              // remove button
+              $('#back_to_album').remove();
+            },
+            error: function(xhr, err){
+              var response = $.parseJSON(xhr.responseText);
+              message_log(response.message);
+            },
+          });
+
+
+        });
       }
     });
   }

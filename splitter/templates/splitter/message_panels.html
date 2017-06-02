@@ -1,9 +1,11 @@
 {% if messages %}
-<!-- adapted from https://simpleisbetterthancomplex.com/tips/2016/09/06/django-tip-14-messages-framework.html -->
-  {% for message in messages %}
-    <div class="alert {{ message.tags }} alert-dismissible" role="alert">
-      <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-      {{ message }}
-    </div>
-  {% endfor %}
+  <!-- adapted from https://simpleisbetterthancomplex.com/tips/2016/09/06/django-tip-14-messages-framework.html -->
+  <div id='message_panel'>
+    {% for message in messages %}
+      <div class="alert {{ message.tags }} alert-dismissible" role="alert">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
 {% endif %}

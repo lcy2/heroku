@@ -73,7 +73,7 @@ def refresh_trek_from_google(request, trip):
     except social_auth.DoesNotExist:
         # TODO redirect or say that google account is requried
         raise NotImplementedError
-    xml = _picasa_feed(social, kind='album', prettyprint='true', imgmax='d')
+    xml = _picasa_feed(social, kind='album', prettyprint='true')
     feed = objectify.fromstring(xml)
 
     album_infos = [{
@@ -115,7 +115,7 @@ def refresh_trek_from_google(request, trip):
         )
         seg.save()
 
-        album_xml = _picasa_feed(social, add_url="/albumid/" + albumid)
+        album_xml = _picasa_feed(social, add_url="/albumid/" + albumid, imgmax=1600)
         album_feed = objectify.fromstring(album_xml)
 
         seg_pos_ct = 0
@@ -253,6 +253,7 @@ def output_pics_json(request, trip):
             'time': format(datetime.fromtimestamp(pic['time'], tz = pytz.UTC), 'U') if 'time' in pic else None,
             'geo': {'lat': pic['geo']['lat'], 'lon': pic['geo']['lon']} if 'geo' in pic else None,
             'pk': pic['id'],
+            'src': pic['img'],
         },
         seg_det['data']
     )
@@ -298,14 +299,13 @@ def pic_edits(request):
             'timestamp': 'time',
         }
 
-        print actions
         delete_queue = set()
         try:
             for entry in actions:
                 if entry['type'] == 'edit':
                     json_data[int(entry['item_id'])][field_codes[entry['target']]] = entry['content']
                 elif entry['type'] == 'delete':
-                    delete_queue.add(entry['id'])
+                    delete_queue.add(entry['item_id'])
         except KeyError:
             return False
 
