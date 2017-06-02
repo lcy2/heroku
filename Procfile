@@ -1,1 +1,1 @@
-web: gunicorn herokusite.wsgi --log-file -
+web: gunicorn lcy2.wsgi --log-file -
