@@ -8,6 +8,8 @@ from django.core import serializers
 from django.contrib import messages
 from django.urls import reverse
 
+from social_auth.models import UserSocialAuth
+
 from .models import Trip
 from . import gateway
 
@@ -134,8 +136,8 @@ def phototrek_edit(request, trip, *args):
     try:
         social = request.user.social_auth.get(provider='google-oauth2')
         refresh_buttons['google'] = True
-    except social_auth.DoesNotExist:
-        pass
+    except UserSocialAuth.DoesNotExist:
+        print "No social auth for this user available."
 
     context = {
         'trip': trip,
