@@ -8,7 +8,7 @@ from django.core import serializers
 from django.contrib import messages
 from django.urls import reverse
 
-from social_auth.models import UserSocialAuth
+from social_django.models import UserSocialAuth
 
 from .models import Trip
 from . import gateway
