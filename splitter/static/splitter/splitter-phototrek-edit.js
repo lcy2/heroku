@@ -699,21 +699,20 @@ function rtfgClick(e){
       error: function(xhr, err){
         var response = $.parseJSON(xhr.responseText);
         message_log(response.message);
-        return;
       },
       success: function (data) {
         finished = data.finished;
         next_start = data.next_start;
-        console.log(data);
 
         if (!finished){
           return ajax_call(next_start);
         } else {
-          load_albums();
-          target.html("Refresh with Google");
-          target.one('click', rtfgClick);
-        }
+          load_albums();        }
       },
+      complete: function(){
+        target.html("Refresh with Google");
+        target.one('click', rtfgClick);
+      }
 
     });
   }
