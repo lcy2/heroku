@@ -113,6 +113,7 @@ function populate_map(collections){
         "properties": {
             "title": el.title,
             "icon": "marker",
+            'pk': el.pk,
         }
       }
       return geo_pt;
@@ -141,50 +142,27 @@ function populate_map(collections){
         "text-color" : "#ffffff",
       }
   };
-  /*
 
-  var geo_line = $.map(collections, function(el, index){
-    if (el.geo){
-      return [[el.geo.lon, el.geo.lat]];
-    }
-    return null;
-  });
-  var line_layer = {
-        "id": "route",
-        "type": "line",
-        "source": {
-            "type": "geojson",
-            "data": {
-                "type": "Feature",
-                "properties": {},
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": geo_line,
-                }
-            }
-        },
-        "layout": {
-            "line-join": "round",
-            "line-cap": "round"
-        },
-        "paint": {
-            "line-color": "#888",
-            "line-width": 3,
-            "line-dasharray": [5, 3],
-        }
-    };
-  */
   if (map.getLayer('points')){
     map.removeLayer("points");
     map.removeSource("points");
   }
-  /*
-  if (map.getLayer('route')){
-    map.removeLayer('route');
-    map.removeSource('route');
-  }
-  */
   map.addLayer(point_layer);
+
+  if (is_album){
+    map.on('click', 'points', function (e) {
+      lp_wrapper(e.features[0].properties.pk)();
+    });
+      // Change the cursor to a pointer when the mouse is over the places layer.
+    map.on('mouseenter', 'points', function () {
+        map.getCanvas().style.cursor = 'pointer';
+    });
+
+    // Change it back to a pointer when it leaves.
+    map.on('mouseleave', 'points', function () {
+        map.getCanvas().style.cursor = '';
+    });
+  }
 }
 
 //centers the map to 1st item (upon initialization)
@@ -194,13 +172,15 @@ function center_map(collections){
     i ++;
   }
   if (i == collections.length){
-    map.flyTo({
-      center: [ // fly to Paris if no coordinates are found
-        2.3522,
-        48.8566,
-      ],
-      zoom: 13,
-    });
+    if (is_album){
+      map.flyTo({
+        center: [ // fly to Paris if no coordinates are found
+          2.3522,
+          48.8566,
+        ],
+        zoom: 13,
+      });
+    }
   } else {
     map.flyTo({
       center: [
