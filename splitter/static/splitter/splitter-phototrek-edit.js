@@ -742,6 +742,8 @@ $(document).ready(function(){
     style: 'mapbox://styles/mapbox/dark-v9',
     zoom: 13,
   });
+  // Add zoom and rotation controls to the map.
+  map.addControl(new mapboxgl.NavigationControl());
 
   $("#rtfg").one("click", rtfgClick);
 
