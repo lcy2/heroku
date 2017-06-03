@@ -3,42 +3,16 @@ from django.utils.dateformat import format
 
 from datetime import date, datetime
 
-from .models import Trip, Segment
+from .models import Segment
+from .decorators import check_trip_access_json, check_trip_access
 
 import requests, time, re, pytz, sys, json
 
 from lxml import objectify
 from urllib import urlencode
 
-# TODO: store segment_detail in a json field in segment
 
 
-def check_trip_access_json(enforce_edit):
-    """Make sure the user has access to the trip
-
-    passing the resultant trip to the view function
-    """
-    def real_decorator(fun):
-        def wrapper(request, pk, **kwargs):
-            try:
-                trip = Trip.objects.get(pk = pk)
-            except Trip.DoesNotExist:
-                return JsonResponse({'message': 'Trip does not exist'}, status = 404)
-            # if the user is not logged in for a private trip
-            if trip.is_private and (not request.user or request.user.is_anonymous()):
-                return JsonResponse({'message': 'User not logged in.'}, status = 403)
-
-            editors = filter(lambda x: x, set([trav.user for trav in trip.travelers.all()]))
-            if request.user in editors:
-                return fun(request, trip, **kwargs)
-            elif ((request.user in trip.authorized_viewers.all()) or (not trip.is_private)) and not enforce_edit:
-                return fun(request, trip, **kwargs)
-            # if this user is not authorized
-            # return to splitter:index with a message
-            return JsonResponse({'message': "You're not authorized"}, status = 403)
-
-        return wrapper
-    return real_decorator
 
 # from https://github.com/morganwahl/photos-db/blob/master/photosdb/photosdb/views.py
 def _picasa_feed(google, add_url = '', **query):
@@ -188,12 +162,12 @@ def refresh_trek_from_google(request, trip, start):
     })
 
 @check_trip_access_json(False)
-def read_albums_from_db(request, trip, **kwargs):
+def read_albums_from_db(request, trip):
     """return albums available from db"""
     return output_album_json(request, trip)
 
 @check_trip_access_json(False)
-def read_pics_from_db(request, trip, **kwargs):
+def read_pics_from_db(request, trip):
     """return picture details from db"""
     return output_pics_json(request, trip)
 
@@ -211,18 +185,6 @@ def output_album_json(request, trip):
         },
         segments
     )
-
-    #    for seg in segments:
-    #        album = dict()
-    #        album['title'] = seg.segment_name
-    #        album['albumid'] = seg.segment_album.split('/')[-1]
-    #        album['thumbnail'] = seg.segment_img
-    #        album['time_start'] = format(seg.segment_start, 'U') if seg.segment_start else None
-    #        album['time_end'] = format(seg.segment_end, 'U') if seg.segment_end else None
-    #        album['geo'] = {'lat': seg.segment_lat, 'lon': seg.segment_lon} if seg.segment_lat and seg.segment_lon else None
-    #        album['pk'] = seg.pk
-    #
-    #        album_infos.append(album)
 
     return JsonResponse({
         'item_data': album_infos,
@@ -267,13 +229,8 @@ def output_pics_json(request, trip):
         'seg_pk' : request.POST['seg_pk'],
     })
 
-def pic_edits(request):
-    pk = request.POST['pk']
-    try:
-        seg = Segment.objects.get(pk = pk)
-    except Segment.DoesNotExist:
-        return JsonResponse({'message': 'Album does not exist.'}, status = 404)
-
+@check_trip_access_json(True)
+def pic_edits(request, trip, seg):
     def title_edits(post_data):
         seg.segment_name = post_data['content']
         return True
@@ -342,12 +299,11 @@ def pic_edits(request):
     seg.save()
     return JsonResponse({'message': 'Modified.'})
 
-def pic_delete(request):
-    pk = request.POST['pk']
-    try:
-        seg = Segment.objects.get(pk = pk)
-    except ObjectDoesNotExist:
-        return JsonResponse({'message': 'Object does not exist.'}, status = 404)
-
+@check_trip_access_json(True)
+def pic_delete(request, trip, seg):
     seg.delete()
     return JsonResponse({'message': 'Deleted.'})
+
+@check_trip_access(True)
+def edit_trip_info(request, trip):
+    pass

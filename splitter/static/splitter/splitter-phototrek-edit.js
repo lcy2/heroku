@@ -423,11 +423,15 @@ function mm_wrapper(ci){
   return move_marker;
 }
 function removeMapListeners(){
-  $.each(map._listeners.click, function(i, el){
+  $.each(map._listeners.click.filter(function(entry){
+    return entry.name === "move_marker";
+  }), function(i, el){
     map.off('click', el);
   });
   if (map._oneTimeListeners){
-    $.each(map._oneTimeListeners.click, function(i, el){
+    $.each(map._oneTimeListeners.click.filter(function(entry){
+      return entry.name === "move_marker";
+    }), function(i, el){
       map.off('click', el);
     });
   }
@@ -497,7 +501,6 @@ function edit_geo(){
             target.html(old_content);
           },
           complete: function(data) {
-
             if (map.getLayer('bullseye')){
               // get rid of the tiny marker
               map.removeLayer("bullseye");
