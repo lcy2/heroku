@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from social_django.models import UserSocialAuth
 
-from .models import Trip, Segment
+from .models import Trip, Segment, Traveler
 from . import gateway
 from .decorators import check_trip_access
 
@@ -25,10 +25,7 @@ def index(request):
     user = request.user
     private_trips = []
     if user and not user.is_anonymous():
-        traveler_roles = user.traveler_set.all()
-        all_trips = [role.trip_set.all() for role in traveler_roles]
-        if all_trips:
-            private_trips = reduce(lambda x, y: x.union(y), all_trips)
+        private_trips = user.traveler.trip_set.all()
 
     public_trips = Trip.objects.filter(is_private = False)
 
@@ -39,38 +36,6 @@ def index(request):
 
     return render(request, 'splitter/index.html', context)
 
-
-@check_trip_access(False)
-def trip_overview(request, trip):
-    context = {
-        'trip': trip,
-    }
-    return ('splitter/trip_overview.html', context)
-
-@check_trip_access(True)
-def trip_edit(request, trip):
-    context = {
-        'trip': trip,
-        #'fields': {field: getattr(trip, field) for field in show_fields(trip)}
-    }
-    return ('splitter/trip_edit.html', context)
-
-# adapted from https://github.com/morganwahl/photos-db/blob/master/photosdb/photosdb/views.py
-@check_trip_access(True)
-def phototrek_edit(request, trip):
-    """ return all albums """
-    refresh_buttons = dict()
-    try:
-        social = request.user.social_auth.get(provider='google-oauth2')
-        refresh_buttons['google'] = True
-    except UserSocialAuth.DoesNotExist:
-        print "No social auth for this user available."
-
-    context = {
-        'trip': trip,
-        'refresh_buttons': refresh_buttons,
-    }
-    return ('splitter/phototrek_edit.html', context)
 
 def gateway_switch(request, action):
     action_dir_trip = {
@@ -91,6 +56,7 @@ def gateway_switch(request, action):
             func, params = action_dir_trip[action]
             return func(request, pk, **params)
     elif action in action_dir_seg:
+
         if 'pk' in request.POST:
             seg_pk = int(request.POST['pk'])
             try:
@@ -107,8 +73,49 @@ def gateway_switch(request, action):
     return redirect("splitter:index")
 
 @check_trip_access(False)
-def phototrek(request, trip):
+def trip_overview(request, trip, editable):
     context = {
         'trip': trip,
+        'edit_permission': editable,
     }
-    return ('splitter/phototrek_display.html', context)
+    return render(request, 'splitter/trip_overview.html', context)
+
+@check_trip_access(True)
+def trip_edit(request, trip, editable):
+    context = {
+        'trip': trip,
+        'edit_permission': editable,
+    }
+    return render(request, 'splitter/trip_edit.html', context)
+
+# adapted from https://github.com/morganwahl/photos-db/blob/master/photosdb/photosdb/views.py
+@check_trip_access(True)
+def phototrek_edit(request, trip, editable):
+    """ return all albums """
+    refresh_buttons = dict()
+    try:
+        social = request.user.social_auth.get(provider='google-oauth2')
+        refresh_buttons['google'] = True
+    except UserSocialAuth.DoesNotExist:
+        print "No social auth for this user available."
+
+    context = {
+        'trip': trip,
+        'refresh_buttons': refresh_buttons,
+        'edit_permission': editable,
+    }
+    return render(request, 'splitter/phototrek_edit.html', context)
+
+@check_trip_access(False)
+def phototrek(request, trip, editable):
+    context = {
+        'trip': trip,
+        'edit_permission': editable,
+    }
+    return render(request, 'splitter/phototrek_display.html', context)
+
+def new_trip(request):
+    context = {
+        'travelers': Traveler.objects.all()
+    }
+    return render(request, 'splitter/new_trip.html', context)

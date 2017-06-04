@@ -7,32 +7,21 @@
     <div id="myCarousel{{ index }}" class="carousel slide hidden-md hidden-lg hidden-sm col-xs-12" data-ride="carousel">
       <!-- indicators -->
       <ol class="carousel-indicators">
-          <li data-target="#myCarousel{{ index }}" data-slide-to="0" class="active"></li>
-          {% for trip in target_trips|slice:"1:" %}
-            <li data-target="#myCarousel" data-slide-to="{{ forloop.counter }}"></li>
+          {% for trip in target_trips %}
+            <li data-target="#myCarousel{{ index }}" data-slide-to="{{ forloop.counter0 }}" {% if forloop.first %} class="active" {% endif %}></li>
           {% endfor %}
       </ol>
       <!-- Wrapper for slides -->
       <div class="carousel-inner" role="listbox">
-        <div class="item active">
-          <div class="image_cropper">
-            <img class="thumbnail_img" src="{{ target_trips.0.profile_pic }}" />
-          </div>
-          <div class="carousel-caption">
-            <h4>{{ target_trips.0.trip_name }}</h4>
-            <p>{{ target_trips.0.trip_description }}</p>
-            <a href="{% url 'splitter:trip_overview' pk=target_trips.0.id %}" role="button" class="btn btn-primary">View  Trip</a>
-          </div>
-        </div>
-        {% for trip in target_trips|slice:"1:" %}
-          <div class="item">
+        {% for trip in target_trips %}
+          <div class="item {% if forloop.first %}active{% endif %}">
             <div class="image_cropper">
               <img class="thumbnail_img" src="{{ trip.profile_pic }}" />
             </div>
             <div class="carousel-caption">
               <h4>{{ trip.trip_name }}</h4>
               <p>{{ trip.trip_description }}</p>
-              <a href="{% url 'splitter:trip_overview' pk=trip.id %}" role="button" class="btn btn-primary">View  Trip</a>
+              <a href="{ trip.get_absolute_url }" role="button" class="btn btn-primary">View  Trip</a>
             </div>
           </div>
         {% endfor %}
@@ -57,7 +46,7 @@
       <div class="row spacey_row">
         {% for trip in target_trips %}
           <div class="col-sm-4 col-lg-3 col-xl-2">
-            <a class="thumbnail" href="{% url 'splitter:trip_overview' pk=trip.id %}">
+            <a class="thumbnail" href="{{ trip.get_absolute_url }}">
               <div class="image_cropper">
                 <img class="thumbnail_img" src="{{ trip.profile_pic }}" />
               </div>

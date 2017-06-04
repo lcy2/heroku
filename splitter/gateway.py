@@ -1,9 +1,13 @@
 from django.http import JsonResponse
+from django.shortcuts import render, redirect
 from django.utils.dateformat import format
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+from django.contrib import messages
 
 from datetime import date, datetime
 
-from .models import Segment
+from .models import Segment, Trip, Traveler
 from .decorators import check_trip_access_json, check_trip_access
 
 import requests, time, re, pytz, sys, json
@@ -305,5 +309,38 @@ def pic_delete(request, trip, seg):
     return JsonResponse({'message': 'Deleted.'})
 
 @check_trip_access(True)
-def edit_trip_info(request, trip):
-    pass
+def edit_trip_info(request, trip, *args):
+    try:
+        URLValidator()(request.POST['pp_url'])
+    except ValidationError as e:
+        messages.error(request, "Malformed URL for the banner picture.")
+        return redirect('splitter:trip_edit', pk=trip.pk)
+
+    trip.trip_description = request.POST['description']
+    trip.trip_start = datetime.strptime(request.POST['start_date'], '%Y/%m/%d').date()
+    trip.trip_end = datetime.strptime(request.POST['end_date'], '%Y/%m/%d').date()
+    trip.profile_pic = request.POST['pp_url']
+    trip.is_private = 'private' in request.POST
+    trip.save()
+    return redirect(trip)
+
+def new_trip(request):
+    if 'travelers' not in request.POST:
+        messages.error(request, "Add at least one traveler to the trip.")
+        return redirect('splitter:new_trip')
+    if not request.POST['title']:
+        messages.error(request, "Please enter a name for the trip.")
+        return redirect('splitter:new_trip')
+    trip = Trip(trip_name = request.POST['title'])
+    trav_pks = request.POST.getlist('travelers')
+    try:
+        travs = Traveler.objects.filter(pk__in=trav_pks)
+    except Traveler.DoesNotExist:
+        messages.error(request, "Invalid travelers submitted.")
+        return redirect('splitter:new_trip')
+
+    trip.save()
+    trip.travelers.add(*trav_pks)
+    messages.success(request, "Trip created :)")
+    messages.info(request, "Fill out the rest of the details.")
+    return redirect('splitter:trip_edit', pk=trip.pk)

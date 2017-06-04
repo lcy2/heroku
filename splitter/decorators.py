@@ -24,7 +24,7 @@ def check_trip_access(enforce_edit):
                 messages.info(request, "Please log in.")
                 return HttpResponseRedirect(reverse('login') + '?next='+request.path)
 
-            editors = filter(lambda x: x, set([trav.user for trav in trip.travelers.all()]))
+            editors = set([trav.user for trav in trip.travelers.all() if trav.user])
             if request.user in editors:
                 editable = True
             elif ((request.user in trip.authorized_viewers.all()) or (not trip.is_private)) and not enforce_edit:
@@ -35,10 +35,7 @@ def check_trip_access(enforce_edit):
                 messages.error(request, "You are not authorized to view " + trip.trip_name + ".")
                 return redirect('splitter:index')
 
-
-            target, context = fun(request, trip, **kwargs)
-            context['edit_permission'] = editable
-            return render(request, target, context)
+            return fun(request, trip, editable, **kwargs)
         return wrapper
     return real_decorator
 
@@ -58,7 +55,7 @@ def check_trip_access_json(enforce_edit):
             if trip.is_private and (not request.user or request.user.is_anonymous()):
                 return JsonResponse({'message': 'User not logged in.'}, status = 403)
 
-            editors = filter(lambda x: x, set([trav.user for trav in trip.travelers.all()]))
+            editors = set([trav.user for trav in trip.travelers.all() if trav.user])
             if request.user in editors:
                 return fun(request, trip, **kwargs)
             elif ((request.user in trip.authorized_viewers.all()) or (not trip.is_private)) and not enforce_edit:

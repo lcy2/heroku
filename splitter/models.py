@@ -4,13 +4,14 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
+from django.urls import reverse
 
 from datetime import date
 
 
 class Traveler(models.Model):
     """ An intermediate between a user object and a traveler registered to each trip"""
-    user = models.ForeignKey(User, blank = True, null = True)
+    user = models.OneToOneField(User, blank = True, null = True, on_delete = models.CASCADE)
     traveler_name = models.CharField(max_length = 50, default = "Unknown")
 
     def __repr__(self):
@@ -35,10 +36,15 @@ class Trip(models.Model):
     is_private = models.BooleanField(default = True)
 
     def __repr__(self):
-        return self.trip_name
+        return unicode(self.trip_name)
 
-    def __str__(self):
+    def __unicode__(self):
         return repr(self)
+
+    def get_absolute_url(self):
+        return reverse('splitter:trip_overview', kwargs={'pk': self.pk})
+
+
 
 class Segment(models.Model):
     trip = models.ForeignKey(Trip, on_delete = models.CASCADE)

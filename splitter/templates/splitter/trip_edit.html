@@ -1,32 +1,32 @@
 {% extends 'splitter/trip_base.html' %}
 {% load static %}
 {% block trip_base %}
-  <form>
+  <form action="{% url 'splitter:gateway' action='etd' %}" method="post">
     {% csrf_token %}
     <div class="container-fluid">
       <div class="row">
         <div class="from-group col-sm-12">
-          <label class="control-label">description</label>
-          <textarea rows="5" class="form-control" placeholder="Summarize your trip.">{{trip.trip_description}}</textarea>
+          <label class="control-label">Description</label>
+          <textarea rows="5" class="form-control" name="description" placeholder="Summarize your trip.">{{trip.trip_description}}</textarea>
         </div>
       </div>
       <div class="row">
         <div class="col-sm-5 form-group">
           <label class="control-label">Duration</label>
           <div class="input-group input-daterange">
-            <input type="text" class="form-control" value="{{ trip.trip_start|date:"m/d/Y"}}" />
+            <input type="text" class="form-control" name="start_date" value="{{ trip.trip_start|date:"Y/m/d"}}" />
             <div class="input-group-addon">to</div>
-            <input type="text" class="form-control" value="{{ trip.trip_end|date:"m/d/Y"}}" />
+            <input type="text" class="form-control" name="end_date" value="{{ trip.trip_end|date:"Y/m/d"}}" />
           </div>
         </div>
         <div class="form-group col-sm-7">
-          <label class="control-label">profile pic</label>
-          <input type="text" value="{{trip.profile_pic}}" class="form-control" placeholder="Choose the header picture for this trip."></input>
+          <label class="control-label">Banner Picture</label>
+          <input type="text" value="{{trip.profile_pic}}" name="pp_url" class="form-control" placeholder="Choose the header picture for this trip."></input>
         </div>
       </div>
       <div class="row">
         <div class="col-xs-12 form-group">
-          <input type="checkbox" {% if trip.is_private %} checked="checked" {% endif %}></input>
+          <input type="checkbox" {% if trip.is_private %} checked="checked"{% endif %} name="private" ></input>
           <label>Private Trip</label>
         </div>
       </div>

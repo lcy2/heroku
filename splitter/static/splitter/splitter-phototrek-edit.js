@@ -668,38 +668,40 @@ function rtfgClick(e){
   var finished = false;
   var error_out = false;
   var next_start = 0;
-  target.html("Please Wait");
 
-  function ajax_call(next_start){
-    $.ajax({
-      url: '/splitter/gateway/rtfg',
-      type: 'POST',
-      data: {
-        'start': next_start,
-      },
-      dataType: 'json',
-      error: function(xhr, err){
-        var response = $.parseJSON(xhr.responseText);
-        message_log(response.message);
-      },
-      success: function (data) {
-        finished = data.finished;
-        next_start = data.next_start;
+  if (confirm("This action will delete all current records in this trip. Continue?")){
+    target.html("Please Wait");
 
-        if (!finished){
-          return ajax_call(next_start);
-        } else {
-          load_albums();        }
-      },
-      complete: function(){
-        target.html("Refresh with Google");
-        target.one('click', rtfgClick);
-      }
+    function ajax_call(next_start){
+      $.ajax({
+        url: '/splitter/gateway/rtfg',
+        type: 'POST',
+        data: {
+          'start': next_start,
+        },
+        dataType: 'json',
+        error: function(xhr, err){
+          var response = $.parseJSON(xhr.responseText);
+          message_log(response.message);
+        },
+        success: function (data) {
+          finished = data.finished;
+          next_start = data.next_start;
 
-    });
+          if (!finished){
+            return ajax_call(next_start);
+          } else {
+            load_albums();        }
+        },
+        complete: function(){
+          target.html("Refresh with Google");
+          target.one('click', rtfgClick);
+        }
+
+      });
+    }
+    ajax_call(0);
   }
-  ajax_call(0);
-
 }
 
 
