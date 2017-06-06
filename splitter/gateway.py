@@ -329,6 +329,18 @@ def pic_delete(request, trip, seg):
     seg.delete()
     return JsonResponse({'message': 'Deleted.'})
 
+@check_trip_access_json(True)
+def set_album_cover(request, trip, seg):
+    if 'item_id' not in request.POST:
+        return JsonResponse({'message': "Invalid request."}, status = 400)
+    seg = seg[0]
+    json_data = seg.segment_detail['data']
+    seg.segment_img = json_data[int(request.POST['item_id'])]['thumbnails'][-1]['url']
+    print seg.segment_img
+    seg.save()
+    return JsonResponse({'message': 'New album cover set.'})
+
+
 @check_trip_access(True)
 def edit_trip_info(request, trip, *args):
     try:

@@ -31,6 +31,9 @@ function populate_album(pic_items){
     fill_text += '</div>';
 
     fill_text += '<div class="delete_media"><small><span class="glyphicon glyphicon-trash"></span></small></div>';
+    if (!is_album){
+      fill_text += '<div class="set_cover"><small><span class="glyphicon glyphicon-picture"></span></small></div>';
+    }
 
     fill_text += '</div></div>';
   });
@@ -72,7 +75,9 @@ function populate_album(pic_items){
 
   $('.media').hover(function(){
     $(this).find('div.delete_media').show();
+    $(this).find('div.set_cover').show();
   }, function(){
+    $(this).find('div.set_cover').hide();
     $(this).find('div.delete_media').hide();
   });
 
@@ -89,6 +94,8 @@ function populate_album(pic_items){
     $('div.time_section').one('click', hack_pic_time);
     $('div.geo_section').one('click', edit_pic_geo);
     $('div.delete_media').on('click', del_pic_med);
+    $('div.set_cover').on('click', set_cover);
+
   }
 }
 
@@ -194,6 +201,26 @@ function newDataProcess(data){
 
 function message_log(msg){
   console.log(msg);
+}
+
+function set_cover(){
+  var target = $(this);
+  $.ajax({
+    url: '/splitter/gateway/setcover',
+    type: 'POST',
+    data: {
+      'item_id': target.closest('.media').data('pk'),
+      'pk': seg_pk,
+    },
+    dataType: 'json',
+    success: function(data){
+      message_log(data.message);
+    },
+    error: function(xhr, err){
+      var response = $.parseJSON(xhr.responseText);
+      message_log(response.message);
+    }
+  });
 }
 
 function edit_title(){

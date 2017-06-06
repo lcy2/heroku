@@ -52,6 +52,7 @@ def gateway_switch(request, action):
     action_dir_seg = {
         'picedits': gateway.pic_edits,
         'picdel': gateway.pic_delete,
+        'setcover': gateway.set_album_cover,
     }
     if action in action_dir_trip:
         if 'HTTP_REFERER' in request.META:
@@ -65,7 +66,7 @@ def gateway_switch(request, action):
         elif 'pk' in request.POST:
             seg_pk = [request.POST['pk']]
         else:
-            return JsonResponse({'message': 'Invalid request. No trip identifier supplied.'}, status = 400)
+            return JsonResponse({'message': 'Invalid request. No album identifier supplied.'}, status = 400)
 
         if not seg_pk:
             return JsonResponse({'message': 'Album does not exist.'}, status = 404)

@@ -35,11 +35,20 @@ div.media-body {
 
 div.delete_media {
   position: absolute;
-  right: 5px;
+  right: 25px;
   bottom: 5px;
   display: none;
 }
-div.delete_media:hover {
+
+div.set_cover {
+  position: absolute;
+  right: 50px;
+  bottom: 5px;
+  display: none;
+}
+
+div.delete_media:hover,
+div.set_cover:hover {
   cursor: pointer;
 }
 
