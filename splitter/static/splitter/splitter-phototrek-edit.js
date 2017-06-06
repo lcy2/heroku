@@ -37,7 +37,8 @@ function populate_album(pic_items){
   $('#thumb_list').html(fill_text);
 
   // map flies to the relevant item when scrolled to
-  $('#thumb_list').scroll(function(){
+  $('#thumb_list').off('scroll');
+  $('#thumb_list').on('scroll', function(){
     var itemID = Math.floor($(this).scrollTop() / (($(this).prop("scrollHeight") - $(this).height()) / (pic_items.length - 0.0001)));
     if (itemID && pic_items[itemID].geo){
       map.flyTo({

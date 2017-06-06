@@ -49,9 +49,9 @@ function populate_album(pic_items){
 
   });
 
+  $('#thumb_list').off('scroll');
   $('#thumb_list').on('scroll', function(){
     var itemID = Math.floor($(this).scrollLeft() / (($(this).prop("scrollWidth") - $(this).width()) / (pic_items.length - 0.0001)));
-    //var itemID = Math.floor(Math.round($(this).scrollLeft() / ($(this).prop("scrollWidth") - $(this).width()) * $(this).prop("scrollWidth")) / (imgHeight + mediaMargin));
 
     if (itemID && pic_items[itemID].geo){
       map.flyTo({
