@@ -413,30 +413,26 @@ function update_geo_field(ci, lngLat){
   ci.focus();
 }
 
-function i_wrapper(ci){
-  // initialize the map marker etc.
-  function initialize(e){
-    geo_lock = true;
-    // add a marker to where I clicked
-    var bullseye = {
-      "type": "Point",
-      "coordinates": [e.lngLat.lng, e.lngLat.lat],
-    }
-    map.addSource('bullseye', {type: 'geojson', data: bullseye});
-    map.addLayer({
-      "id": "bullseye",
-      "type": "symbol",
-      "source": "bullseye",
-      "layout": {
-          "icon-image": "circle-stroked-15",
-      }
-    });
-    update_geo_field(ci, e.lngLat);
-    // replace the click listener after the first click
-    map.on('click', mm_wrapper(ci));
+function initialize_marker(ci, center){
+  // add a marker to where I clicked
+  var bullseye = {
+    "type": "Point",
+    "coordinates": [center.lng, center.lat],
   }
-  return initialize;
+  map.addSource('bullseye', {type: 'geojson', data: bullseye});
+  map.addLayer({
+    "id": "bullseye",
+    "type": "symbol",
+    "source": "bullseye",
+    "layout": {
+        "icon-image": "circle-stroked-15",
+    }
+  });
+  update_geo_field(ci, center);
+  // replace the click listener after the first click
+  map.on('click', mm_wrapper(ci));
 }
+
 
 function mm_wrapper(ci){
   function move_marker(e){
@@ -475,20 +471,18 @@ function edit_geo(){
 
     if (default_content == "Unknown"){
       child_input.val("");
-      map.once('click', i_wrapper(child_input));
+      initialize_marker(child_input, map.getCenter());
     } else {
       child_input.val(default_content);
       // there's already a latlon, fly to it
       var latlon = $.map(default_content.split(', '), function(el, index){
         return parseFloat(el);
       });
-      var e = {
-        'lngLat': {
-          'lng': latlon[1],
-          'lat': latlon[0],
-        }
+      var center = {
+        'lng': latlon[1],
+        'lat': latlon[0],
       }
-      i_wrapper(child_input)(e);
+      initialize_marker(child_input, center);
 
       map.flyTo({
         center: latlon.reverse(),
@@ -564,20 +558,20 @@ function edit_pic_geo(){
 
     if (default_content == "Unknown"){
       child_input.val("");
-      map.once('click', i_wrapper(child_input));
+      initialize_marker(child_input, map.getCenter());
     } else {
       child_input.val(default_content);
       // there's already a latlon, fly to it
       var latlon = $.map(default_content.split(', '), function(el, index){
         return parseFloat(el);
       });
-      var e = {
+      var center = {
         'lngLat': {
           'lng': latlon[1],
           'lat': latlon[0],
         }
       }
-      i_wrapper(child_input)(e);
+      initialize_marker(child_input, center);
 
       map.flyTo({
         center: latlon.reverse(),
