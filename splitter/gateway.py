@@ -169,6 +169,11 @@ def refresh_trek_from_google(request, trip):
         if seg_end > 0:
             seg.segment_start = date.fromtimestamp(seg_start)
             seg.segment_end = date.fromtimestamp(seg_end)
+
+            # update the trip's travel time
+            trip.trip_start = min(trip.trip_start, seg.segment_start)
+            trip.trip_end = max(trip.trip_end, seg.segment_end)
+            trip.save()
         seg.save()
     return JsonResponse({'message': 'Segments saved.'})
 
@@ -256,6 +261,10 @@ def pic_edits(request, trip, seg):
             except ValueError:
                 return None
         seg.segment_start, seg.segment_end = map(validate, content_list)
+
+        # update the trip's travel time
+        trip.trip_start = min(trip.trip_start, seg.segment_start)
+        trip.trip_end = max(trip.trip_end, seg.segment_end)
         return True
     def geo_edits(post_data):
         try:
@@ -310,7 +319,9 @@ def pic_edits(request, trip, seg):
             return JsonResponse({'message': 'Invalid content. No changes were made.'}, status = 400)
     else:
         return JsonResponse({'message': 'Invalid request.'}, status = 400)
+
     seg.save()
+    trip.save()
     return JsonResponse({'message': 'Modified.'})
 
 @check_trip_access_json(True)

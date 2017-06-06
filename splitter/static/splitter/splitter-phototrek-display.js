@@ -65,7 +65,7 @@ function populate_album(pic_items){
     var itemID = Math.floor($(this).scrollLeft() / (($(this).prop("scrollWidth") - $(this).width()) / (pic_items.length - 0.0001)));
     //var itemID = Math.floor(Math.round($(this).scrollLeft() / ($(this).prop("scrollWidth") - $(this).width()) * $(this).prop("scrollWidth")) / (imgHeight + mediaMargin));
 
-    if (pic_items[itemID].geo){
+    if (itemID && pic_items[itemID].geo){
       map.flyTo({
         center: [
           pic_items[itemID].geo.lon,

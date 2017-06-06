@@ -39,7 +39,7 @@ function populate_album(pic_items){
   // map flies to the relevant item when scrolled to
   $('#thumb_list').scroll(function(){
     var itemID = Math.floor($(this).scrollTop() / (($(this).prop("scrollHeight") - $(this).height()) / (pic_items.length - 0.0001)));
-    if (pic_items[itemID].geo){
+    if (itemID && pic_items[itemID].geo){
       map.flyTo({
         center: [
           pic_items[itemID].geo.lon,
