@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.urls import reverse
 
@@ -25,7 +26,10 @@ def index(request):
     user = request.user
     private_trips = []
     if user and not user.is_anonymous():
-        private_trips = user.traveler.trip_set.all()
+        try:
+            private_trips = user.traveler.trip_set.all()
+        except ObjectDoesNotExist:
+            pass
 
     public_trips = Trip.objects.filter(is_private = False)
 
@@ -119,7 +123,14 @@ def phototrek(request, trip, editable):
     }
     return render(request, 'splitter/phototrek_display.html', context)
 
+@login_required
 def new_trip(request):
+    try:
+        request.user.traveler
+    except ObjectDoesNotExist:
+        trav = Traveler(user=request.user, traveler_name = request.user.first_name if request.user.first_name else request.user.username)
+        trav.save()
+
     context = {
         'travelers': Traveler.objects.all()
     }

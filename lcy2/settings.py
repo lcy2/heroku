@@ -36,6 +36,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     'https://picasaweb.google.com/data/',
     'https://photos.googleapis.com/data/',
 ]
+SOCIAL_AUTH_LOGIN_ERROR_URL = '/'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast = bool)
@@ -83,7 +84,6 @@ TEMPLATES = [
             'context_processors': [
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
-
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -95,7 +95,6 @@ TEMPLATES = [
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',
-
     'django.contrib.auth.backends.ModelBackend'
 )
 
