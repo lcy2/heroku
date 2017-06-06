@@ -4,6 +4,7 @@ from django.utils.dateformat import format
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from django.contrib import messages
+from django.urls import reverse
 
 from datetime import date, datetime
 
@@ -26,7 +27,10 @@ def _picasa_feed(google, add_url = '', **query):
     if (google.extra_data['auth_time'] + google.extra_data['expires'] - 10) <= int(time.time()):
         from social_django.utils import load_strategy
         strategy = load_strategy()
-        google.refresh_token(strategy = strategy)
+        try:
+            google.refresh_token(strategy = strategy)
+        except requests.HTTPError as e:
+            return '<error><code>' + str(e.response.status_code) + '</code><reason>' + unicode(e.response.reason) + '</reason></error>'
 
     extra_headers = {
         'GData-Version': '2',
@@ -37,63 +41,69 @@ def _picasa_feed(google, add_url = '', **query):
     if query:
         url += '?' + urlencode(query)
     response = requests.get(url, headers=extra_headers)
-    #print "Request headers %r", response.request.headers
-    #print "Response headers %r", response.headers
     return re.sub(r'\sxmlns=["\'][^"\']+["\']', '', response.content, count=1)
 
 @check_trip_access_json(True)
-def refresh_trek_from_google(request, trip, start):
-    """ return all albums """
-    # TODO: add refresh button to refresh the album list in the database
-    # TODO: store the album list in the database
+def get_preview_info_only(request, trip):
+    """ return all albums from Google"""
     try:
         social = request.user.social_auth.get(provider='google-oauth2')
     except social_auth.DoesNotExist:
-        # TODO redirect or say that google account is requried
-        raise NotImplementedError
+        return JsonResponse({'message':  'You do not have linked social accounts.'}, status = 401)
     xml = _picasa_feed(social, kind='album', prettyprint='true')
     feed = objectify.fromstring(xml)
 
+    if feed.tag == "error":
+        if feed.code.text == "400":
+            return JsonResponse({
+                'message': 'Please log in again.',
+                'action': reverse('login'),
+            }, status = 400);
+
+    # get all the segments currently in the database
+    albums_in_db = {x.segment_album : x.pk for x in trip.segment_set.all()}
     album_infos = [{
         'title': unicode(el.title),
         'albumid': el.id.text.split('/')[-1],
         'thumbnail': el.find('media:group/media:thumbnail', feed.nsmap).get('url'),
+        'db_pk': albums_in_db.get(el.id.text.split('/')[-1], None)
     } for el in feed.entry]
 
-    # TODO: change it to user-selecting which albums to use
-    # only show the ones preceded with '201xxxxx - '
-    r = re.compile(r'^[0-9]{8} - ')
-    album_infos = filter(
-        lambda x:
-            r.match(x['title']) and
-            x['title'][:8] >= trip.trip_start.strftime('%Y%m%d') and
-            x['title'][:8] <= trip.trip_end.strftime('%Y%m%d'),
-        album_infos
-    )
+    #print '\n'.join([x['albumid'] for x in album_infos])
 
-    # get the queryset from db
-    # TODO: only modify the entries as needed
-    # TODO: pull old info, compare with new, make edits
-    # for now just deleting all old info and replace with new
-    if not start:
-        old_info = trip.segment_set.all()
-        old_info.delete()
+    # filter out the hangouts
+    album_infos = filter(lambda x: not x['title'].startswith('Hangout'), album_infos)
+    # filter out Auto Backup
+    excludes = set(['Auto Backup', 'Profile Photos'])
+    album_infos = filter(lambda x: not x['title'] in excludes, album_infos)
 
-    url_base = 'https://picasaweb.google.com/data/feed/api/user/default/albumid/'
+    return JsonResponse({
+        'data': album_infos,
+    })
 
-    for album in album_infos[start:start + 10]:
-        print album['title']
-        albumid = album.pop('albumid', '')
+@check_trip_access_json(True)
+def refresh_trek_from_google(request, trip):
+    try:
+        social = request.user.social_auth.get(provider='google-oauth2')
+    except social_auth.DoesNotExist:
+        return JsonResponse({'message':  'You do not have linked social accounts.'}, status = 401)
+
+    print request.POST
+    if 'album_ids[]' not in request.POST:
+        return JsonResponse({'message':  'Invalid request.'}, status = 400)
+
+    for album_id in request.POST.getlist('album_ids[]'):
+        album_xml = _picasa_feed(social, add_url="/albumid/" + album_id, imgmax=1600)
+        album_feed = objectify.fromstring(album_xml)
+    #for album in album_infos[start:start + 10]:
         seg = Segment(
             trip=trip,
-            segment_name = album['title'],
-            segment_img = album['thumbnail'],
-            segment_album = url_base + albumid,
+            segment_name = album_feed.title.text,
+            segment_img = album_feed.icon.text,
+            segment_album = album_id,
         )
+        print seg
         seg.save()
-
-        album_xml = _picasa_feed(social, add_url="/albumid/" + albumid, imgmax=1600)
-        album_feed = objectify.fromstring(album_xml)
 
         seg_pos_ct = 0
         seg_lats = []
@@ -160,10 +170,9 @@ def refresh_trek_from_google(request, trip, start):
             seg.segment_start = date.fromtimestamp(seg_start)
             seg.segment_end = date.fromtimestamp(seg_end)
         seg.save()
-    return JsonResponse({
-        'next_start': start + 10,
-        'finished': len(album_infos) < start + 10
-    })
+    return JsonResponse({'message': 'Segments saved.'})
+
+
 
 @check_trip_access_json(False)
 def read_albums_from_db(request, trip):
@@ -235,6 +244,7 @@ def output_pics_json(request, trip):
 
 @check_trip_access_json(True)
 def pic_edits(request, trip, seg):
+    seg = seg[0]
     def title_edits(post_data):
         seg.segment_name = post_data['content']
         return True

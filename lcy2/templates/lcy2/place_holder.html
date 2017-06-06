@@ -1,17 +1,98 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-      <title> lcy2's corner </title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> lcy2's corner </title>
   </head>
   <body>
-    <h1>Hi</h1>
-    <p> I may not be much right now. <br />
-    I'm just a place holder. </p>
-    <p> Maybe some day I'll grow up to be a beautiful butterfly </p>
-    <br /><br />
-    <h3> there's only one app on here</h3>
-    <ul>
-      <li> <a href="splitter/"> Splitter </a> </li>
-    </ul>
+    <div class="container">
+      <div class="page-header">
+        <h1>Welcome!</h1>
+      </div>
+      <div class="row">
+        <div class="col-sm-7">
+          <p><h3> Hi internet strangers.</h3></p>
+          You have stumbled upon my webdev playground. <br /><br />
+          <p> Professionally, I am a chemical engineer. <br /><small>(BS '10 Caltech, PhD '15 Berkeley).</small><br /><br />
+             I make tiny nanostructures... <br />
+             <ul class="list-group">
+               <li class="list-group-item"> to make batteries run better </li>
+               <li class="list-group-item"> to better capture carbon dioxide </li>
+               <li class="list-group-item"> to study how molecules interact in confined spaces </li>
+             </ul>
+           I am also interested in learning more about computation, data, automation, AI ...  <br /><br />
+           I wrote the following webapps for myself. Hopefully it would be useful for you too. <br />
+         </p>
+        </div>
+        <div class="col-sm-5">
+          <div class="LI-profile-badge pull-right"  data-version="v1" data-size="medium" data-locale="en_US" data-type="vertical" data-theme="light" data-vanity="changyi-li-407b3332"><a class="LI-simple-link" href='https://www.linkedin.com/in/changyi-li-407b3332?trk=profile-badge'>Changyi Li</a></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="panel panel-default">
+            <div class="panel-heading">Available Webapps</div>
+
+            <ul class="list-group">
+              <li class="list-group-item"><a href="splitter/" role="button" class="btn btn-primary app-btn">Splitter</a>
+                <span>for organizing my travel photos and managing trips.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://platform.linkedin.com/badges/js/profile.js" async defer></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-100462331-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+    <style>
+      body {
+        margin: 10px;
+      }
+      .container {
+        border: 1px solid #eee;
+        border-collapse: collapse;
+      }
+      .row > * {
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
+
+
+      @media only screen and (max-width: 768px) {
+        .LI-profile-badge {
+          float: none !important;
+          text-align: center;
+        }
+        .row > * {
+          border-top: 1px solid #eee;
+          border-bottom: 1px solid #eee;
+        }
+      }
+    </style>
   </body>
 </html>

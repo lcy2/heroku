@@ -11,9 +11,20 @@
     </div>
     <div class="row"><div class="col-xs-12" id="btn_col">
       {% if refresh_buttons.google %}
-        <span><button id="rtfg" class="btn btn-primary" type="button">Refresh with Google</button></span>
+        <span><a href="#lity-panel" data-lity id="rtfg" class="btn btn-primary" role="button">Refresh with Google</a></span>
       {% endif %}
     </div></div>
+  </div>
+
+  <div id="lity-panel" class="lity-hide">
+    <div class="container-fluid">
+      <div class="row spacey_row" id="preview_list">
+      </div>
+      <div class="row spacey_row" id="lity_btn_row">
+        <span class="pull-right text-right"><button id="refresh" class="btn btn-primary" type="button">Please wait</button></span>
+        <span class="pull-right text-right"><button id="cancel_lity" class="btn btn-primary" type="button">Cancel</button></span>
+      </div>
+    </div>
   </div>
 
 {% endblock %}
@@ -21,6 +32,8 @@
 {% block trip_override %}
   <link rel="stylesheet" href="{% static 'splitter/splitter-phototrek-edit.css' %}" />
   <script src="{% static 'splitter/splitter-phototrek-edit.js' %}"></script>
+  <script src="{% static 'exlibs/lity.min.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'exlibs/lity.min.css' %}" />
   <script src='https://api.mapbox.com/mapbox-gl-js/v0.36.0/mapbox-gl.js'></script>
   <link href='https://api.mapbox.com/mapbox-gl-js/v0.36.0/mapbox-gl.css' rel='stylesheet' />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css" integrity="sha256-nFp4rgCvFsMQweFQwabbKfjrBwlaebbLkE29VFR0K40=" crossorigin="anonymous" />

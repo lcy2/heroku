@@ -19,7 +19,7 @@
   display: flex;
 }
 
-img.media-object {
+img.thumbnail_img {
   object-fit: cover;
   width: 135px;
   height: 135px;
@@ -55,6 +55,89 @@ div.delete_media:hover {
   flex-grow: 100;
 }
 
+.caption {
+  word-wrap: break-word;
+}
+
+#preview_list {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+#preview_list div.thumbnail:hover {
+  border: 1px solid #999;
+}
+#preview_list div.thumbnail {
+  position: relative;
+  z-index: 10;
+  -moz-user-select: none; /* These user-select properties are inheritable, used to prevent text selection */
+  -webkit-user-select: none;
+  -ms-user-select: none; /* From IE10 only */
+  user-select: none; /* Not valid CSS yet, as of July 2012 */
+
+  -webkit-user-drag: none; /* Prevents dragging of images/divs etc */
+  user-drag: none;
+}
+.thumb_indb {
+  background: #13842c;
+}
+.thumb_indb_refresh {
+  background: #b38c1b;
+}
+.thumb_indb_del {
+  background: #9c1a1a;
+}
+.thumb_to_add {
+  background: #1259c5;
+}
+.thumb_active_font {
+  color: #fff !important;
+}
+
+
+.img_grad {
+  margin: 0;
+  padding: 0;
+  background: -moz-linear-gradient(top, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left bottom, left top, color-stop(0%,rgba(0,0,0,0.65)), color-stop(100%,rgba(0,0,0,0))); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.65) 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.65) 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,0.65) 100%); /* IE10+ */
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0.65) 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a6000000', endColorstr='#00000000',GradientType=0 ); /* IE6-9 */
+}
+
+.img_grad > img {
+  position: relative;
+  z-index: -1;
+  width: 100%;
+}
+
+
+.tick_mark {
+  position: absolute;
+  top: 115px;
+  right: 10px;
+  color: #fff;
+  z-index: 2;
+}
+
+#lity-panel {
+  background-color: #ddd;
+}
+
+#lity_btn_row button {
+  margin-right: 20px;
+}
+.lity-inline .lity-container {
+  max-width: 800px;
+}
+
+@media only screen and (min-width: 768px) {
+  #preview_list > .col-sm-3:nth-child(4n+1) {
+    clear: left;
+  }
+}
+
 @media only screen and (max-width: 768px) {
   #content_panel > div {
     padding-right: 0;
@@ -63,4 +146,5 @@ div.delete_media:hover {
   #map, #thumb_list {
     height: 200px;
   }
+
 }

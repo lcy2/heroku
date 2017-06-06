@@ -39,35 +39,36 @@ def index(request):
 
 def gateway_switch(request, action):
     action_dir_trip = {
-        'rtfg': (gateway.refresh_trek_from_google, {'start': int(request.POST.get('start', 0))}),
-        'rafd': (gateway.read_albums_from_db, {}),
-        'rpfd': (gateway.read_pics_from_db, {}),
-        'etd': (gateway.edit_trip_info, {}),
+        'rtfg': gateway.refresh_trek_from_google,
+        'rafd': gateway.read_albums_from_db,
+        'rpfd': gateway.read_pics_from_db,
+        'etd': gateway.edit_trip_info,
+        'gpio': gateway.get_preview_info_only,
     }
     action_dir_seg = {
-        'picedits': (gateway.pic_edits, {}),
-        'picdel': (gateway.pic_delete, {}),
+        'picedits': gateway.pic_edits,
+        'picdel': gateway.pic_delete,
     }
-
     if action in action_dir_trip:
         if 'HTTP_REFERER' in request.META:
             p = re.compile(r'(?<=\/)[0-9]+(?=\/)')
             pk = int(p.search(request.META['HTTP_REFERER']).group())
-            func, params = action_dir_trip[action]
-            return func(request, pk, **params)
+            return action_dir_trip[action](request, pk)
     elif action in action_dir_seg:
+        seg_pk = None
+        if 'pk[]' in request.POST:
+            seg_pk = map(int, request.POST.getlist('pk[]'))
+        elif 'pk' in request.POST:
+            seg_pk = [request.POST['pk']]
+        else:
+            return JsonResponse({'message': 'Invalid request. No trip identifier supplied.'}, status = 400)
 
-        if 'pk' in request.POST:
-            seg_pk = int(request.POST['pk'])
-            try:
-                seg = Segment.objects.get(pk = seg_pk)
-            except Segment.DoesNotExist:
-                return JsonResponse({'message': 'Album does not exist.'}, status = 404)
-            pk = seg.trip.pk;
-            func, params = action_dir_seg[action]
-            return func(request, pk, seg = seg, **params)
+        if not seg_pk:
+            return JsonResponse({'message': 'Album does not exist.'}, status = 404)
 
-        return action_dir[action](request)
+        seg = Segment.objects.filter(pk__in = seg_pk)
+        pk = seg[0].trip.pk;
+        return action_dir_seg[action](request, pk, seg = seg)
 
     messages.error(request, "Went down the wrong rabbit hole.")
     return redirect("splitter:index")
@@ -97,7 +98,8 @@ def phototrek_edit(request, trip, editable):
         social = request.user.social_auth.get(provider='google-oauth2')
         refresh_buttons['google'] = True
     except UserSocialAuth.DoesNotExist:
-        print "No social auth for this user available."
+        messages.error(request, "You do not have linked social accounts.")
+        return redirect("splitter:index")
 
     context = {
         'trip': trip,

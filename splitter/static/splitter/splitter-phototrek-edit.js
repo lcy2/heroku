@@ -13,7 +13,7 @@ function populate_album(pic_items){
 
   $.each(pic_items, function(index, el){
     fill_text += '<div class="media">';
-    fill_text += '<div class="media-left media-top"><img class="media-object" src="' + el.thumbnail + '" /></div>';
+    fill_text += '<div class="media-left media-top"><img class="media-object thumbnail_img" src="' + el.thumbnail + '" /></div>';
     fill_text += '<div class="media-body">';
     fill_text += '<h5 class="media-heading"><strong>' + el.title + '</strong></h5>';
     fill_text += '<div class="time_section">';
@@ -202,7 +202,6 @@ function edit_title(){
   var child_input = target.find('input');
   child_input.focus();
   child_input.on('focusout', function(){
-    //console.log($(this).closest('.media').data('pk'));
     $.ajax({
       url: '/splitter/gateway/picedits',
       type: 'POST',
@@ -654,54 +653,97 @@ function lp_wrapper(pk){
               message_log(response.message);
             },
           });
-
-
         });
-      }
+      },
+      error: function(xhr, err){
+        var response = $.parseJSON(xhr.responseText);
+        message_log(response.message);
+        load_albums();
+      },
     });
   }
   return load_pics;
 }
 
 function rtfgClick(e){
-  var target = $(this);
-  var finished = false;
-  var error_out = false;
-  var next_start = 0;
+  // populate the database
+  function ajax_call(start){
+    $.ajax({
+      url: '/splitter/gateway/rtfg',
+      type: 'POST',
+      data: {
+        'album_ids': refresh_list.slice(start, start + 10),
+      },
+      dataType: 'json',
+      success: function(data){
+        message_log(data.message);
+        if (refresh_list.length > start + 10){
+          return ajax_call(start + 10);
+        } else {
+          load_albums();
+        }
+      },
+      error: function(xhr, err){
+        var response = $.parseJSON(xhr.responseText);
+        message_log(response.message);
+        $('[data-lity-close]').trigger('click');
+      },
+    });
+  }
 
-  if (confirm("This action will delete all current records in this trip. Continue?")){
-    target.html("Please Wait");
+  // sends a list of albums with albumid and save_state
+  var refresh_list = [];
+  var del_list = [];
+  $('#preview_list > *').each(function(index, el){
+    var target = el;
+    switch ($(this).data('album_save_state')){
+      case 0:
+        if ($(this).data('pk')){
+          del_list.push($(this).data('pk'));
+        }
+        refresh_list.push($(this).data('albumid'));
+        break;
+      case 1:
+        del_list.push($(this).data('pk'));
+        break;
+    }
+  });
 
-    function ajax_call(next_start){
+  if (confirm("This action might modify / delete current records in this trip. Continue?")){
+    // first delete everything in the del queue
+    if (del_list.length){
+      console.log(del_list);
       $.ajax({
-        url: '/splitter/gateway/rtfg',
+        url: '/splitter/gateway/picdel',
         type: 'POST',
         data: {
-          'start': next_start,
+          'pk': del_list,
         },
         dataType: 'json',
+        success: function(data){
+          message_log(data.message);
+          if (refresh_list.length){
+            ajax_call(0);
+          }
+        },
         error: function(xhr, err){
           var response = $.parseJSON(xhr.responseText);
           message_log(response.message);
+          $('[data-lity-close]').trigger('click');
         },
-        success: function (data) {
-          finished = data.finished;
-          next_start = data.next_start;
-
-          if (!finished){
-            return ajax_call(next_start);
-          } else {
-            load_albums();        }
-        },
-        complete: function(){
-          target.html("Refresh with Google");
-          target.one('click', rtfgClick);
-        }
-
       });
+    } else if (refresh_list.length) {
+      ajax_call(0);
+
+    } else {
+      message_log("No item is slated to change.");
     }
-    ajax_call(0);
+    $('#cancel_lity').trigger('click');
+  } else {
+    $('#refresh').one('click', rtfgClick);
   }
+
+
 }
 
 
@@ -729,7 +771,81 @@ $(document).ready(function(){
   // Add zoom and rotation controls to the map.
   map.addControl(new mapboxgl.NavigationControl());
 
-  $("#rtfg").one("click", rtfgClick);
+
+
+  $('#cancel_lity').on('click', function(){
+    $('[data-lity-close]').trigger('click');
+    $('#rtfg').blur();
+  })
+  $('#rtfg').on('click', function(){
+    $.ajax({
+      url: '/splitter/gateway/gpio',
+      type: 'POST',
+      dataType: 'json',
+      error: function(xhr, err){
+        var response = $.parseJSON(xhr.responseText);
+        message_log(response.message);
+        if (response.action){
+          window.location.replace(response.action);
+        }
+      },
+      success: function (data) {
+        $('#preview_list').empty();
+        $.each(data.data, function(index, el){
+
+          // populate the preview list
+          var $album = $('<div class="col-sm-3"><div class="thumbnail"><div class="img_grad"><img class="thumbnail_img" src="'
+            + el.thumbnail + '" /></div><div class="tick_mark"></div><div class="caption"><strong>' + el.title + '</strong></div></div></div>');
+          $album.data('albumid', el.albumid);
+          var album_thumb = $album.find('.thumbnail');
+          var $tick = $('<span class="glyphicon"></span>');
+          $album.find('.tick_mark').append($tick);
+          $('#preview_list').append($album);
+          if (el.db_pk){
+            $album.data('pk', el.db_pk);
+            $tick.addClass('glyphicon-ok-sign');
+            $album.data('album_save_state', 2);
+            album_thumb.addClass('thumb_indb');
+            album_thumb.find('.caption').addClass('thumb_active_font');
+            $album.on('click', function(){
+              var save_state = ($album.data('album_save_state') + 1) % 3;
+              $album.data('album_save_state', save_state);
+              switch (save_state){
+                case 0:
+                  album_thumb.addClass("thumb_indb_refresh").removeClass("thumb_indb");
+                  $tick.addClass('glyphicon-refresh').removeClass('glyphicon-ok-sign');
+                  break;
+                case 1:
+                  album_thumb.addClass("thumb_indb_del").removeClass("thumb_indb_refresh");
+                  $tick.removeClass('glyphicon-refresh').addClass('glyphicon-remove-sign');
+                  break;
+                case 2:
+                  album_thumb.addClass("thumb_indb").removeClass("thumb_indb_del");
+                  $tick.removeClass('glyphicon-remove-sign').addClass('glyphicon-ok-sign');
+                  break;
+              }
+            });
+          } else {
+            $album.data('album_save_state', -1);
+            $album.on('click', function(){
+              var save_state = ($album.data('album_save_state') -1) % 2;
+              $album.data('album_save_state', save_state);
+              album_thumb.toggleClass("thumb_to_add");
+              album_thumb.find('.caption').toggleClass('thumb_active_font');
+              $tick.toggleClass('glyphicon-plus-sign');
+            });
+          }
+
+
+        });
+        $('#refresh').html('Refresh Selections');
+        $('#refresh').off('click').one('click', rtfgClick);
+      }
+
+    });
+
+
+  });
 
   map.on('load', function(){
     load_albums();
