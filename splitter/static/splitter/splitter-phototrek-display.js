@@ -3,6 +3,10 @@ var prevID = -1;
 var imgHeight = 135;
 var mediaMargin = 10;
 
+function message_log(msg){
+  console.log(msg);
+}
+
 function format_date(timestamp){
   var formattedDate = new Date(timestamp * 1000);
   var output = [
@@ -181,13 +185,19 @@ function center_map(collections){
 }
 
 function newDataProcess(data){
-  pic_data = data.item_data;
-  is_album = data.is_album;
-  refresh_info_text(pic_data[0]);
-  prevID = -1;
-  populate_album(pic_data);
-  populate_map(pic_data);
-  center_map(pic_data);
+  if (data.length){
+    pic_data = data.item_data;
+    is_album = data.is_album;
+
+    refresh_info_text(pic_data[0]);
+
+    prevID = -1;
+    populate_album(pic_data);
+    populate_map(pic_data);
+    center_map(pic_data);
+  } else {
+    message_log("Populate with some photos first.");
+  }
 }
 // initially, load in the albums interface
 function load_albums(){

@@ -307,8 +307,6 @@ function del_pic_med(){
     populate_album(pic_data);
     populate_map(pic_data);
   }
-
-
 }
 
 function format_date(timestamp){
@@ -421,6 +419,10 @@ function i_wrapper(ci){
     var bullseye = {
       "type": "Point",
       "coordinates": [e.lngLat.lng, e.lngLat.lat],
+    }
+    if (map.getLayer('bullseye')){
+      map.removeLayer("bullseye");
+      map.removeSource("bullseye");
     }
     map.addSource('bullseye', {type: 'geojson', data: bullseye});
     map.addLayer({

@@ -59,9 +59,17 @@ def get_preview_info_only(request, trip):
                 'message': 'Please log in again.',
                 'action': reverse('login'),
             }, status = 400);
+    if not feed.find('entry'):
+        return JsonResponse({
+            'message': 'No albums found in your Google Photos.',
+            'action': reverse('splitter:phototrek_edit', kwargs={'pk' : trip.pk}),
+        }, status = 404);
+
 
     # get all the segments currently in the database
     albums_in_db = {x.segment_album : x.pk for x in trip.segment_set.all()}
+
+
     album_infos = [{
         'title': unicode(el.title),
         'albumid': el.id.text.split('/')[-1],
