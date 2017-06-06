@@ -1,3 +1,15 @@
 div.mapboxgl-popup-content {
   padding: 15px 15px 0;
 }
+#map {
+  height: 500px;
+}
+#content_panel {
+  position: relative;
+}
+#display_btn {
+  position: absolute;
+  top: 15px;
+  left: 40px;
+  z-index: 1;
+}

@@ -4,8 +4,11 @@
   {% csrf_token %}
   <div class="container-fluid">
     <div class="row spacey_row">
-      <div class="col-xs-12">
-        <div id="map" style="height: 500px;"></div>
+      <div id="content_panel" class="col-xs-12">
+        <div id="map"></div>
+        <div id="display_btn">
+          <a role="button" class="btn btn-primary" href="{% url 'splitter:phototrek' pk=trip.pk %}">Display Mode</a>
+        </div>
       </div>
     </div>
   </div>
