@@ -51,7 +51,7 @@ def gateway_switch(request, action):
     }
     if action in action_dir_trip:
         if 'HTTP_REFERER' in request.META:
-            p = re.compile(r'(?<=\/)[0-9]+(?=\/)')
+            p = re.compile(r'(?<=\/)[0-9]+(?=[\/#]|$)')
             pk = int(p.search(request.META['HTTP_REFERER']).group())
             return action_dir_trip[action](request, pk)
     elif action in action_dir_seg:
@@ -75,6 +75,9 @@ def gateway_switch(request, action):
 
 @check_trip_access(False)
 def trip_overview(request, trip, editable):
+    if not editable:
+        return redirect('splitter:phototrek', pk = trip.pk)
+
     context = {
         'trip': trip,
         'edit_permission': editable,

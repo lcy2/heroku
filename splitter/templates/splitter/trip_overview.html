@@ -1,10 +1,21 @@
 {% extends 'splitter/trip_base.html' %}
+{% load static %}
 {% block trip_base %}
-  <p>TODO: show trip trek here if available</p>
-  <p>TODO: Maybe like a google map containing the whole trajectory </p>
-  <p>load each day as a colored segment. gets highlighted when hover </p>
-  <p>on click, go to that day's summary page</p>
+  {% csrf_token %}
+  <div class="container-fluid">
+    <div class="row spacey_row">
+      <div class="col-xs-12">
+        <div id="map" style="height: 500px;"></div>
+      </div>
+    </div>
+  </div>
 {% if edit_permission %}
   {% include 'splitter/editable_palette.html' %}
 {% endif %}
+{% endblock %}
+{% block trip_override %}
+  <link rel="stylesheet" href="{% static 'splitter/splitter-trip-overview.css' %}" />
+  <script src="{% static 'splitter/splitter-trip-overview.js' %}"></script>
+  <script src='https://api.mapbox.com/mapbox-gl-js/v0.36.0/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v0.36.0/mapbox-gl.css' rel='stylesheet' />
 {% endblock %}

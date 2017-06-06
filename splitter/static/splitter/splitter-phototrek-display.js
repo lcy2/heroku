@@ -38,19 +38,7 @@ function populate_album(pic_items){
 
       });
     }
-    /*
-    fill_text += '<div class="media-body">';
-    fill_text += '<h5 class="media-heading"><strong>' + el.title + '</strong></h5>';
 
-    if (is_album){
-      fill_text += '<span class="label label-default">' + (el.time_start ? format_date(el.time_start) : '&nbsp;') + '</span> - ';
-      fill_text += '<span class="label label-default">' + (el.time_end ? format_date(el.time_end) : '&nbsp;') + '</span><br />';
-    } else {
-      fill_text +='<span class="label label-default">' + (el.time ? format_date(el.time) : '&nbsp;') + '</span>';
-    }
-    fill_text += '</div>';
-    fill_text += '</div></div>';
-    */
   });
   // map flies to the relevant item when scrolled to
 
