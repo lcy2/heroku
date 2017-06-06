@@ -2,6 +2,7 @@ var map, itemHeights, pic_data, is_album, seg_pk, edit_actions;
 var timeoutLimit = 500;
 var imgHeight = 135;
 var mediaMargin = 15;
+var geo_lock = false;
 
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
@@ -415,14 +416,11 @@ function update_geo_field(ci, lngLat){
 function i_wrapper(ci){
   // initialize the map marker etc.
   function initialize(e){
+    geo_lock = true;
     // add a marker to where I clicked
     var bullseye = {
       "type": "Point",
       "coordinates": [e.lngLat.lng, e.lngLat.lat],
-    }
-    if (map.getLayer('bullseye')){
-      map.removeLayer("bullseye");
-      map.removeSource("bullseye");
     }
     map.addSource('bullseye', {type: 'geojson', data: bullseye});
     map.addLayer({
@@ -465,166 +463,178 @@ function removeMapListeners(){
     });
   }
 }
+
 function edit_geo(){
-  var target = $(this);
-  var old_content = target.html();
-  var default_content = target.find('span').html();
+  if (!geo_lock){
+    var target = $(this);
+    var old_content = target.html();
+    var default_content = target.find('span').html();
 
-  target.html('<input class="input-sm form-control" type="text" value="" />');
-  var child_input = target.find('input');
+    target.html('<input class="input-sm form-control" type="text" value="" />');
+    var child_input = target.find('input');
 
-  if (default_content == "Unknown"){
-    child_input.val("");
-    map.once('click', i_wrapper(child_input));
-  } else {
-    child_input.val(default_content);
-    // there's already a latlon, fly to it
-    var latlon = $.map(default_content.split(', '), function(el, index){
-      return parseFloat(el);
-    });
-    var e = {
-      'lngLat': {
-        'lng': latlon[1],
-        'lat': latlon[0],
+    if (default_content == "Unknown"){
+      child_input.val("");
+      map.once('click', i_wrapper(child_input));
+    } else {
+      child_input.val(default_content);
+      // there's already a latlon, fly to it
+      var latlon = $.map(default_content.split(', '), function(el, index){
+        return parseFloat(el);
+      });
+      var e = {
+        'lngLat': {
+          'lng': latlon[1],
+          'lat': latlon[0],
+        }
       }
+      i_wrapper(child_input)(e);
+
+      map.flyTo({
+        center: latlon.reverse(),
+        zoom: 13,
+      });
     }
-    i_wrapper(child_input)(e);
+    child_input.focus();
 
-    map.flyTo({
-      center: latlon.reverse(),
-      zoom: 13,
-    });
-  }
-  child_input.focus();
+    $('body').on('focusout', function(){
+      setTimeout(function(){
+        if (!child_input.is(":focus") && !$('.mapboxgl-canvas').is(":focus")){
+          // submit location to the database
+          $.ajax({
+            url: '/splitter/gateway/picedits',
+            type: 'POST',
+            data: {
+              'pk': target.closest('.media').data('pk'),
+              'target': 'geo',
+              'content': child_input.val(),
+            },
+            dataType: 'json',
+            success: function(data){
+              message_log(data.message);
+              var latlon = $.map(child_input.val().split(', '), function(el, index){
+                return parseFloat(el).toFixed(5);
+              });
+              target.html('<span class="label label-default">' + latlon.join(', ') + '</span><br />');
 
-  $('body').on('focusout', function(){
-    setTimeout(function(){
-      if (!child_input.is(":focus") && !$('.mapboxgl-canvas').is(":focus")){
-        // submit location to the database
-        $.ajax({
-          url: '/splitter/gateway/picedits',
-          type: 'POST',
-          data: {
-            'pk': target.closest('.media').data('pk'),
-            'target': 'geo',
-            'content': child_input.val(),
-          },
-          dataType: 'json',
-          success: function(data){
-            message_log(data.message);
-            var latlon = $.map(child_input.val().split(', '), function(el, index){
-              return parseFloat(el).toFixed(5);
-            });
-            target.html('<span class="label label-default">' + latlon.join(', ') + '</span><br />');
+              // refresh the map
+              pic_data[target.closest('.media').data('item_index')].geo = {
+                'lat': latlon[0],
+                'lon': latlon[1],
+              };
+              populate_map(pic_data);
+            },
+            error: function(xhr, err){
+              var response = $.parseJSON(xhr.responseText);
+              message_log(response.message);
+              target.html(old_content);
+            },
+            complete: function(data) {
+              if (map.getLayer('bullseye')){
+                // get rid of the tiny marker
+                map.removeLayer("bullseye");
+                map.removeSource("bullseye");
+              }
 
-            // refresh the map
-            pic_data[target.closest('.media').data('item_index')].geo = {
-              'lat': latlon[0],
-              'lon': latlon[1],
-            };
-            populate_map(pic_data);
-          },
-          error: function(xhr, err){
-            var response = $.parseJSON(xhr.responseText);
-            message_log(response.message);
-            target.html(old_content);
-          },
-          complete: function(data) {
-            if (map.getLayer('bullseye')){
-              // get rid of the tiny marker
-              map.removeLayer("bullseye");
-              map.removeSource("bullseye");
+              target.one('click', edit_geo);
+              target.removeClass("flex_div");
+              $('body').off('focusout');
+              removeMapListeners();
+              geo_lock = false;
+
             }
+          });
+        }
+      }, timeoutLimit);
+    });
+  } else {
+    $('div.geo_section').one('click', edit_geo);
+  }
 
-            target.one('click', edit_geo);
-            target.removeClass("flex_div");
-            $('body').off('focusout');
-            removeMapListeners();
-
-          }
-        });
-      }
-    }, timeoutLimit);
-  });
 }
 
 function edit_pic_geo(){
-  var target = $(this);
-  var old_content = target.html();
-  var default_content = target.find('span').html();
+  if (!geo_lock){
+    var target = $(this);
+    var old_content = target.html();
+    var default_content = target.find('span').html();
 
-  target.html('<input class="input-sm form-control" type="text" value="" />');
-  var child_input = target.find('input');
+    target.html('<input class="input-sm form-control" type="text" value="" />');
+    var child_input = target.find('input');
 
-  if (default_content == "Unknown"){
-    child_input.val("");
-    map.once('click', i_wrapper(child_input));
-  } else {
-    child_input.val(default_content);
-    // there's already a latlon, fly to it
-    var latlon = $.map(default_content.split(', '), function(el, index){
-      return parseFloat(el);
-    });
-    var e = {
-      'lngLat': {
-        'lng': latlon[1],
-        'lat': latlon[0],
+    if (default_content == "Unknown"){
+      child_input.val("");
+      map.once('click', i_wrapper(child_input));
+    } else {
+      child_input.val(default_content);
+      // there's already a latlon, fly to it
+      var latlon = $.map(default_content.split(', '), function(el, index){
+        return parseFloat(el);
+      });
+      var e = {
+        'lngLat': {
+          'lng': latlon[1],
+          'lat': latlon[0],
+        }
       }
+      i_wrapper(child_input)(e);
+
+      map.flyTo({
+        center: latlon.reverse(),
+        zoom: 13,
+      });
     }
-    i_wrapper(child_input)(e);
+    child_input.focus();
 
-    map.flyTo({
-      center: latlon.reverse(),
-      zoom: 13,
-    });
-  }
-  child_input.focus();
+    $('body').on('focusout', function(){
+      setTimeout(function(){
+        if (!child_input.is(":focus") && !$('.mapboxgl-canvas').is(":focus")){
+          var latlon = child_input.val().split(', ');
 
-  $('body').on('focusout', function(){
-    setTimeout(function(){
-      if (!child_input.is(":focus") && !$('.mapboxgl-canvas').is(":focus")){
-        var latlon = child_input.val().split(', ');
+          // validate it's actually a pair of floats
+          if (latlon.length == 2 && latlon.every(isNumeric)){
 
-        // validate it's actually a pair of floats
-        if (latlon.length == 2 && latlon.every(isNumeric)){
+            var geo = {
+              'lat': parseFloat(latlon[0]),
+              'lon': parseFloat(latlon[1]),
+            }
 
-          var geo = {
-            'lat': parseFloat(latlon[0]),
-            'lon': parseFloat(latlon[1]),
+            edit_actions.push({
+              'type': 'edit',
+              'item_id': target.closest('.media').data('pk'),
+              'target': 'loc',
+              'content': geo,
+            });
+
+
+            target.html('<span class="label label-default">' + geo.lat.toFixed(5) + ', ' + geo.lon.toFixed(5) + '</span><br />');
+
+            // refresh the map
+            pic_data[target.closest('.media').data('item_index')].geo = geo;
+            populate_map(pic_data);
+          } else {
+            target.html(old_content);
+            message_log('Invalid content');
           }
 
-          edit_actions.push({
-            'type': 'edit',
-            'item_id': target.closest('.media').data('pk'),
-            'target': 'loc',
-            'content': geo,
-          });
+          if (map.getLayer('bullseye')){
+            // get rid of the tiny marker
+            map.removeLayer("bullseye");
+            map.removeSource("bullseye");
+          }
 
-
-          target.html('<span class="label label-default">' + geo.lat.toFixed(5) + ', ' + geo.lon.toFixed(5) + '</span><br />');
-
-          // refresh the map
-          pic_data[target.closest('.media').data('item_index')].geo = geo;
-          populate_map(pic_data);
-        } else {
-          target.html(old_content);
-          message_log('Invalid content');
+          target.one('click', edit_pic_geo);
+          target.removeClass("flex_div");
+          $('body').off('focusout');
+          // unbind all the click event listeners
+          removeMapListeners();
+          geo_lock = false;
         }
-
-        if (map.getLayer('bullseye')){
-          // get rid of the tiny marker
-          map.removeLayer("bullseye");
-          map.removeSource("bullseye");
-        }
-
-        target.one('click', edit_pic_geo);
-        target.removeClass("flex_div");
-        $('body').off('focusout');
-        // unbind all the click event listeners
-        removeMapListeners();
-      }
-    }, timeoutLimit);
-  });
+      }, timeoutLimit);
+    });
+  } else {
+    $('div.geo_section').one('click', edit_pic_geo);
+  }
 }
 
 // initially, load in the albums interface
