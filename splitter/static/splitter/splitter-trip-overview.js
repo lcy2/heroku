@@ -87,6 +87,7 @@ function center_map(collections){
           2.3522,
           48.8566,
         ],
+        speed: 5,
         zoom: 13,
       });
     }
@@ -96,6 +97,7 @@ function center_map(collections){
         collections[i].geo.lon,
         collections[i].geo.lat,
       ],
+      speed: 5,
       zoom: 13,
     })
   }
@@ -150,6 +152,9 @@ $(document).ready(function(){
   map.on('load', function(){
     load_albums();
   });
+  map.once('moveend', function(){
+    slide_up();
+  })
 
 
 });

@@ -1,5 +1,6 @@
 {% extends 'splitter/trip_base.html' %}
 {% load static %}
+{% block loading %}{% include "splitter/loading_screen.html" with target_trips=private_trips title="Your Trips" index="0" only %}{% endblock %}
 {% block trip_base %}
   {% csrf_token %}
   <div class="container-fluid">

@@ -171,6 +171,7 @@ function center_map(collections){
           48.8566,
         ],
         zoom: 13,
+        speed: 5,
       });
     }
   } else {
@@ -179,13 +180,14 @@ function center_map(collections){
         collections[i].geo.lon,
         collections[i].geo.lat,
       ],
+      speed: 5,
       zoom: 13,
     })
   }
 }
 
 function newDataProcess(data){
-  if (data.length){
+  if (data.item_data.length){
     pic_data = data.item_data;
     is_album = data.is_album;
 
@@ -277,6 +279,9 @@ $(document).ready(function(){
   map.on('load', function(){
     load_albums();
   });
-
+  map.once('moveend', function(){
+    slide_up();
+  })
+slide_up();
 
 });

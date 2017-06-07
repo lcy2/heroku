@@ -1,7 +1,7 @@
 {% extends 'splitter/base.html' %}
 {% load static %}
 {% block title %} Welcome to Splitter {% endblock %}
-
+{% block loading %}{% include "splitter/loading_screen.html" %}{% endblock %}
 {% block main %}
   {% if user and not user.is_anonymous %}
     {% include "splitter/index_trips.html" with target_trips=private_trips title="Your Trips" index="0" only %}

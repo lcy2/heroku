@@ -1,0 +1,90 @@
+/* spinnkit by @tobiasahlin: http://tobiasahlin.com/spinkit/*/
+html,
+body {
+  overflow: hidden;
+}
+
+#loading {
+  width: 100%;
+  min-height: 100%;
+  position: absolute;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  background: #009900;
+
+  transition: all 1.5s cubic-bezier(.06,.5,.41,1);
+  -webkit-transition: all 1.5s cubic-bezier(.06,.5,.41,1); /** Chrome & Safari **/
+  -moz-transition: all 1.5s cubic-bezier(.06,.5,.41,1); /** Firefox **/
+  -o-transition: all 1.5s cubic-bezier(.06,.5,.41,1); /** Opera **/
+
+  -webkit-transition-delay: 0.75s; /* Safari */
+  transition-delay: 0.75s;
+}
+
+.moved {
+  transform: translate(0, -100%);
+  -webkit-transform: translate(0, -100%); /** Chrome & Safari **/
+  -o-transform: translate(0, -100%); /** Opera **/
+  -moz-transform: translate(0, -100%); /** Firefox **/
+}
+
+.dots_disappear {
+  opacity: 0;
+}
+
+
+
+.spinner {
+  margin: 200px auto;
+  width: 40px;
+  height: 40px;
+  position: relative;
+  text-align: center;
+
+  -webkit-animation: sk-rotate 2.0s infinite linear;
+  animation: sk-rotate 2.0s infinite linear;
+}
+
+.dot1, .dot2 {
+  width: 60%;
+  height: 60%;
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  background-color: #eee;
+  border-radius: 100%;
+
+  -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
+  animation: sk-bounce 2.0s infinite ease-in-out;
+
+  transition: opacity 1s ease-out;
+  -webkit-transition: opacity 1s ease-out; /** Chrome & Safari **/
+  -moz-transition: opacity 1s ease-out; /** Firefox **/
+  -o-transition: opacity 1s ease-out; /** Opera **/
+}
+
+.dot2 {
+  top: auto;
+  bottom: 0;
+  -webkit-animation-delay: -1.0s;
+  animation-delay: -1.0s;
+}
+
+@-webkit-keyframes sk-rotate { 100% { -webkit-transform: rotate(360deg) }}
+@keyframes sk-rotate { 100% { transform: rotate(360deg); -webkit-transform: rotate(360deg) }}
+
+@-webkit-keyframes sk-bounce {
+  0%, 100% { -webkit-transform: scale(0.0) }
+  50% { -webkit-transform: scale(1.0) }
+}
+
+@keyframes sk-bounce {
+  0%, 100% {
+    transform: scale(0.0);
+    -webkit-transform: scale(0.0);
+  } 50% {
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+  }
+}

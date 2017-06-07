@@ -6,3 +6,8 @@ $(document).ready(function(){
     $(this).stop().fadeTo(500, 0.75);
   });
 });
+
+
+$(window).on('load', function(){
+  slide_up();
+});
