@@ -13,3 +13,10 @@ div.mapboxgl-popup-content {
   left: 40px;
   z-index: 1;
 }
+
+@media only screen and (max-width: 768px) {
+  #map {
+    height: 200px;
+  }
+
+}

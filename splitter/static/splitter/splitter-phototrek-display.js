@@ -35,7 +35,8 @@ function populate_album(pic_items){
             center: [
               pic_items[index].geo.lon,
               pic_items[index].geo.lat,
-            ]
+            ],
+            offset: [0, -150],
           });
         }
         lity(pic_items[index].src);
@@ -62,7 +63,8 @@ function populate_album(pic_items){
         center: [
           pic_items[itemID].geo.lon,
           pic_items[itemID].geo.lat,
-        ]
+        ],
+        offset: [0, -150],
       });
 
       if (itemID != prevID){
@@ -170,6 +172,7 @@ function center_map(collections){
           2.3522,
           48.8566,
         ],
+        offset: [0, -150],
         zoom: 13,
         speed: 5,
       });
@@ -180,6 +183,7 @@ function center_map(collections){
         collections[i].geo.lon,
         collections[i].geo.lat,
       ],
+      offset: [0, -150],
       speed: 5,
       zoom: 13,
     })
