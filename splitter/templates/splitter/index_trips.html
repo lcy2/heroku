@@ -21,7 +21,7 @@
             <div class="carousel-caption">
               <h4>{{ trip.trip_name }}</h4>
               <p>{{ trip.trip_description }}</p>
-              <a href="{ trip.get_absolute_url }" role="button" class="btn btn-primary">View  Trip</a>
+              <a href="{{ trip.get_absolute_url }}" role="button" class="btn btn-primary">View  Trip</a>
             </div>
           </div>
         {% endfor %}
