@@ -20,8 +20,6 @@ class Traveler(models.Model):
     def __str__(self):
         return repr(self)
 
-
-
 class Trip(models.Model):
     # name of the trip
     trip_name = models.CharField(max_length = 50, default = "Unname Trip")
@@ -31,6 +29,7 @@ class Trip(models.Model):
     trip_start = models.DateField(default=date.today)
     trip_end = models.DateField(default=date.today)
     time_modified = models.DateTimeField(auto_now = True)
+    time_created = models.DateTimeField(auto_now_add = True)
     profile_pic = models.URLField(default = 'https://unsplash.it/360/200/?random')
     authorized_viewers = models.ManyToManyField(User, blank = True)
     is_private = models.BooleanField(default = True)

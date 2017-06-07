@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.contrib import messages
 from django.urls import reverse
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from .models import Segment, Trip, Traveler
 from .decorators import check_trip_access_json, check_trip_access
@@ -372,6 +372,14 @@ def new_trip(request):
     if not request.POST['title']:
         messages.error(request, "Please enter a name for the trip.")
         return redirect('splitter:new_trip')
+
+    throttle_time = datetime.now() - timedelta(hours = 1)
+    recent_trip_counts = request.user.traveler.trip_set.filter(time_created__gte = throttle_time).count()
+    if recent_trip_counts > 5:
+        messages.warning(request, "Please limit to creating only 5 trips an hour.")
+        return redirect('splitter:index')
+
+
     trip = Trip(trip_name = request.POST['title'])
     trav_pks = request.POST.getlist('travelers')
     try:
