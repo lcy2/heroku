@@ -173,6 +173,8 @@ function center_map(collections){
   }
   if (i == collections.length){
     if (is_album){
+      map.setCenter([2.3522, 38.8566]);
+      /*
       map.flyTo({
         center: [ // fly to Paris if no coordinates are found
           2.3522,
@@ -181,8 +183,11 @@ function center_map(collections){
         speed: 5,
         zoom: 13,
       });
+      */
     }
   } else {
+    map.setCenter([collections[i].geo.lon, collections[i].geo.lat]);
+    /*
     map.flyTo({
       center: [
         collections[i].geo.lon,
@@ -191,6 +196,7 @@ function center_map(collections){
       zoom: 13,
       speed: 5,
     })
+    */
   }
 }
 
@@ -202,9 +208,7 @@ function newDataProcess(data){
   center_map(pic_data);
 }
 
-function message_log(msg){
-  console.log(msg);
-}
+
 
 function set_cover(){
   var target = $(this);
@@ -221,7 +225,7 @@ function set_cover(){
     },
     error: function(xhr, err){
       var response = $.parseJSON(xhr.responseText);
-      message_log(response.message);
+      message_log(response.message, response.warning_level);
     }
   });
 }
@@ -248,7 +252,7 @@ function edit_title(){
       },
       error: function(xhr, err){
         var response = $.parseJSON(xhr.responseText);
-        message_log(response.message);
+        message_log(response.message, response.warning_level);
         target.html(old_content);
       },
       complete: function(data) {
@@ -293,7 +297,7 @@ function del_med(){
       },
       error: function(xhr, err){
         var response = $.parseJSON(xhr.responseText);
-        message_log(response.message);
+        message_log(response.message, response.warning_level);
       },
     });
   }
@@ -368,7 +372,7 @@ function hack_time(){
           },
           error: function(xhr, err){
             var response = $.parseJSON(xhr.responseText);
-            message_log(response.message);
+            message_log(response.message, response.warning_level);
             target.html(total_old_content);
           },
           complete: function(data) {
@@ -453,7 +457,7 @@ function removeMapListeners(){
   }), function(i, el){
     map.off('click', el);
   });
-  if (map._oneTimeListeners){
+  if (map._oneTimeListeners && map._oneTimeListeners.click){
     $.each(map._oneTimeListeners.click.filter(function(entry){
       return entry.name === "move_marker";
     }), function(i, el){
@@ -522,7 +526,7 @@ function edit_geo(){
             },
             error: function(xhr, err){
               var response = $.parseJSON(xhr.responseText);
-              message_log(response.message);
+              message_log(response.message, response.warning_level);
               target.html(old_content);
             },
             complete: function(data) {
@@ -642,6 +646,14 @@ function load_albums(){
     dataType: 'json',
     success: function (data) {
       newDataProcess(data);
+    },
+    error: function(xhr, err){
+      var response = $.parseJSON(xhr.responseText);
+      message_log(response.message, response.warning_level);
+    },
+    error: function(xhr, err){
+      var response = $.parseJSON(xhr.responseText);
+      message_log(response.message, response.warning_level);
     }
   });
 }
@@ -686,14 +698,14 @@ function lp_wrapper(pk){
             },
             error: function(xhr, err){
               var response = $.parseJSON(xhr.responseText);
-              message_log(response.message);
+              message_log(response.message, response.warning_level);
             },
           });
         });
       },
       error: function(xhr, err){
         var response = $.parseJSON(xhr.responseText);
-        message_log(response.message);
+        message_log(response.message, response.warning_level);
         load_albums();
       },
     });
@@ -721,7 +733,7 @@ function rtfgClick(e){
       },
       error: function(xhr, err){
         var response = $.parseJSON(xhr.responseText);
-        message_log(response.message);
+        message_log(response.message, response.warning_level);
         $('[data-lity-close]').trigger('click');
       },
     });
@@ -764,7 +776,7 @@ function rtfgClick(e){
         },
         error: function(xhr, err){
           var response = $.parseJSON(xhr.responseText);
-          message_log(response.message);
+          message_log(response.message, response.warning_level);
           $('[data-lity-close]').trigger('click');
         },
       });
@@ -820,7 +832,7 @@ $(document).ready(function(){
       dataType: 'json',
       error: function(xhr, err){
         var response = $.parseJSON(xhr.responseText);
-        message_log(response.message);
+        message_log(response.message, response.warning_level);
         if (response.action){
           window.location.replace(response.action);
         }
@@ -886,8 +898,9 @@ $(document).ready(function(){
   map.on('load', function(){
     load_albums();
   });
-  map.once('moveend', function(){
-    slide_up();
+  map.once('render', function(){
+
   })
+  slide_up();
 
 });

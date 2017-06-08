@@ -3,9 +3,7 @@ var prevID = -1;
 var imgHeight = 135;
 var mediaMargin = 10;
 
-function message_log(msg){
-  console.log(msg);
-}
+
 
 function format_date(timestamp){
   var formattedDate = new Date(timestamp * 1000);
@@ -214,6 +212,10 @@ function load_albums(){
     dataType: 'json',
     success: function (data) {
       newDataProcess(data);
+    },
+    error: function(xhr, err){
+      var response = $.parseJSON(xhr.responseText);
+      message_log(response.message, response.warning_level);
     }
   });
 }

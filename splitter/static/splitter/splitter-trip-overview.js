@@ -109,6 +109,9 @@ function newDataProcess(data){
   populate_map(pic_data);
   center_map(pic_data);
 }
+
+
+
 // initially, load in the albums interface
 function load_albums(){
   $.ajax({
@@ -118,6 +121,10 @@ function load_albums(){
     dataType: 'json',
     success: function (data) {
       newDataProcess(data);
+    },
+    error: function(xhr, err){
+      var response = $.parseJSON(xhr.responseText);
+      message_log(response.message, response.warning_level);
     }
   });
 }
