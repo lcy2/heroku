@@ -148,6 +148,7 @@ $(document).ready(function(){
   });
   map.on('sourcedata', function(){
     if (map.areTilesLoaded()){
+      console.log('loaded');
       if (document.readyState === "complete"){
         slide_up();
         map.off('sourcedata');

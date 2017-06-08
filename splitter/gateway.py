@@ -49,7 +49,7 @@ def get_preview_info_only(request, trip):
     try:
         social = request.user.social_auth.get(provider='google-oauth2')
     except social_auth.DoesNotExist:
-        return JsonResponse({'message':  'You do not have linked social accounts.'}, status = 401)
+        return JsonResponse({'message':  'You do not have linked social accounts.', 'warning_level': 'warning'}, status = 401)
     xml = _picasa_feed(social, kind='album', prettyprint='true')
     feed = objectify.fromstring(xml)
 
@@ -57,11 +57,13 @@ def get_preview_info_only(request, trip):
         if feed.code.text == "400":
             return JsonResponse({
                 'message': 'Please log in again.',
+                'warning_level': 'info',
                 'action': reverse('login'),
             }, status = 400);
     if not feed.find('entry'):
         return JsonResponse({
             'message': 'No albums found in your Google Photos.',
+            'warning_level': 'info',
             'action': reverse('splitter:phototrek_edit', kwargs={'pk' : trip.pk}),
         }, status = 404);
 
@@ -94,11 +96,11 @@ def refresh_trek_from_google(request, trip):
     try:
         social = request.user.social_auth.get(provider='google-oauth2')
     except social_auth.DoesNotExist:
-        return JsonResponse({'message':  'You do not have linked social accounts.'}, status = 401)
+        return JsonResponse({'message':  'You do not have linked social accounts.', 'warning_level': 'warning'}, status = 401)
 
     print request.POST
     if 'album_ids[]' not in request.POST:
-        return JsonResponse({'message':  'Invalid request.'}, status = 400)
+        return JsonResponse({'message':  'Invalid request.', 'warning_level': 'danger'}, status = 400)
 
     for album_id in request.POST.getlist('album_ids[]'):
         album_xml = _picasa_feed(social, add_url="/albumid/" + album_id, imgmax=1600)
@@ -183,7 +185,7 @@ def refresh_trek_from_google(request, trip):
             trip.trip_end = max(trip.trip_end, seg.segment_end)
             trip.save()
         seg.save()
-    return JsonResponse({'message': 'Segments saved.'})
+    return JsonResponse({'message': 'Segments saved.', 'warning_level': 'success'})
 
 
 
@@ -220,11 +222,11 @@ def output_album_json(request, trip):
 
 def output_pics_json(request, trip):
     if 'seg_pk' not in request.POST:
-        return JsonResponse({'message':  'Invalid request.'}, status = 400)
+        return JsonResponse({'message':  'Invalid request.', 'warning_level': 'danger'}, status = 400)
     try:
         seg = trip.segment_set.get(pk = request.POST['seg_pk'])
     except Segment.DoesNotExist:
-        return JsonResponse({'message': 'Album does not exist.'}, status = 404)
+        return JsonResponse({'message': 'Album does not exist.', 'warning_level': 'warning'}, status = 404)
 
     def get_fit_thumb(thumbs, frame_size):
         min_diff = sys.maxint
@@ -324,29 +326,28 @@ def pic_edits(request, trip, seg):
 
     if request.POST['target'] and request.POST['target'] in allocation and ('content' in request.POST or 'content[]' in request.POST):
         if not allocation[request.POST['target']](request.POST):
-            return JsonResponse({'message': 'Invalid content. No changes were made.'}, status = 400)
+            return JsonResponse({'message': 'Invalid content. No changes were made.', 'warning_level': 'danger'}, status = 400)
     else:
-        return JsonResponse({'message': 'Invalid request.'}, status = 400)
+        return JsonResponse({'message': 'Invalid request.', 'warning_level': 'danger'}, status = 400)
 
     seg.save()
     trip.save()
-    return JsonResponse({'message': 'Modified.'})
+    return JsonResponse({'message': 'Modified.', 'warning_level': 'success'})
 
 @check_trip_access_json(True)
 def pic_delete(request, trip, seg):
     seg.delete()
-    return JsonResponse({'message': 'Deleted.'})
+    return JsonResponse({'message': 'Deleted.', 'warning_level': 'success'})
 
 @check_trip_access_json(True)
 def set_album_cover(request, trip, seg):
     if 'item_id' not in request.POST:
-        return JsonResponse({'message': "Invalid request."}, status = 400)
+        return JsonResponse({'message': "Invalid request.", 'warning_level': 'danger'}, status = 400)
     seg = seg[0]
     json_data = seg.segment_detail['data']
     seg.segment_img = json_data[int(request.POST['item_id'])]['thumbnails'][-1]['url']
-    print seg.segment_img
     seg.save()
-    return JsonResponse({'message': 'New album cover set.'})
+    return JsonResponse({'message': 'New album cover set.', 'warning_level': 'success'})
 
 
 @check_trip_access(True)
@@ -363,6 +364,7 @@ def edit_trip_info(request, trip, *args):
     trip.profile_pic = request.POST['pp_url']
     trip.is_private = 'private' in request.POST
     trip.save()
+    messages.success(request, "Trip edited.")
     return redirect(trip)
 
 def new_trip(request):
