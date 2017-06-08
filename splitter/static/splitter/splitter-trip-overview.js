@@ -82,24 +82,11 @@ function center_map(collections){
   }
   if (i == collections.length){
     if (is_album){
-      map.flyTo({
-        center: [ // fly to Paris if no coordinates are found
-          2.3522,
-          48.8566,
-        ],
-        speed: 5,
-        zoom: 13,
-      });
+      map.setCenter([2.3522, 38.8566]); // center at Paris if no geotag
+
     }
   } else {
-    map.flyTo({
-      center: [
-        collections[i].geo.lon,
-        collections[i].geo.lat,
-      ],
-      speed: 5,
-      zoom: 13,
-    })
+    map.setCenter([collections[i].geo.lon, collections[i].geo.lat]);
   }
 }
 
@@ -159,9 +146,20 @@ $(document).ready(function(){
   map.on('load', function(){
     load_albums();
   });
-  map.once('moveend', function(){
-    slide_up();
-  })
+  map.on('sourcedata', function(){
+    if (map.areTilesLoaded()){
+      console.log('loaded');
+      if (document.readyState === "complete"){
+        slide_up();
+        map.off('sourcedata');
+      } else {
+        $(window).one('load', function(){
+          slide_up();
+          map.off('sourcedata');
+        });
+      }
+    }
+  });
 
 
 });

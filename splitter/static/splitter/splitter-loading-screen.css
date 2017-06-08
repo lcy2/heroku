@@ -13,13 +13,13 @@ body {
   top: 0;
   background: #009900;
 
-  transition: all 1.5s cubic-bezier(.06,.5,.41,1);
-  -webkit-transition: all 1.5s cubic-bezier(.06,.5,.41,1); /** Chrome & Safari **/
-  -moz-transition: all 1.5s cubic-bezier(.06,.5,.41,1); /** Firefox **/
-  -o-transition: all 1.5s cubic-bezier(.06,.5,.41,1); /** Opera **/
+  transition: all 1.5s ease-in-out;
+  -webkit-transition: all 1.5s ease-in-out; /** Chrome & Safari **/
+  -moz-transition: all 1.5s ease-in-out; /** Firefox **/
+  -o-transition: all 1.5s ease-in-out; /** Opera **/
 
-  -webkit-transition-delay: 0.75s; /* Safari */
-  transition-delay: 0.75s;
+  -webkit-transition-delay: 2s; /* Safari */
+  transition-delay: 2s;
 }
 
 .moved {
@@ -58,10 +58,10 @@ body {
   -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
   animation: sk-bounce 2.0s infinite ease-in-out;
 
-  transition: opacity 1s ease-out;
-  -webkit-transition: opacity 1s ease-out; /** Chrome & Safari **/
-  -moz-transition: opacity 1s ease-out; /** Firefox **/
-  -o-transition: opacity 1s ease-out; /** Opera **/
+  transition: opacity 2s ease-out;
+  -webkit-transition: opacity 2s ease-out; /** Chrome & Safari **/
+  -moz-transition: opacity 2s ease-out; /** Firefox **/
+  -o-transition: opacity 2s ease-out; /** Opera **/
 }
 
 .dot2 {
