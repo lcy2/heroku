@@ -1,6 +1,6 @@
 {% extends 'splitter/trip_base.html' %}
 {% load static %}
-{% block loading %}{% include "splitter/loading_screen.html" %}{% endblock %}
+{% block loading %}{% include "splitter/loading_screen.html" with loading_msg="Loading Map..." only %}{% endblock %}
 {% block trip_base %}
   {% csrf_token %}
   <div class="container-fluid">

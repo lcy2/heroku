@@ -1,9 +1,11 @@
 {% load static %}
+<link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
 <div id="loading">
   <div class="spinner">
     <div class="dot1"></div>
     <div class="dot2"></div>
   </div>
+  <div id="loading_msg">{{ loading_msg }}</div>
 </div>
 <link rel="stylesheet" type="text/css" href="{% static 'splitter/splitter-loading-screen.css' %}" />
 <script src="{% static 'splitter/splitter-loading-screen.js' %}"></script>

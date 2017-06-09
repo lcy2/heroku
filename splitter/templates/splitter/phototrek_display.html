@@ -1,7 +1,7 @@
 {% extends 'splitter/base.html' %}
 {% load static %}
 {% block title %}: {{ trip.trip_name }}{% endblock %}
-{% block loading %}{% include "splitter/loading_screen.html" %}{% endblock %}
+{% block loading %}{% include "splitter/loading_screen.html" with loading_msg="Loading Map..." only %}{% endblock %}
 {% block main %}
   {% csrf_token %}
   <div id="content_panel">

@@ -71,6 +71,20 @@ body {
   animation-delay: -1.0s;
 }
 
+#loading_msg {
+  font-family: 'Lobster', cursive;
+  width: 100%;
+  text-align: center;
+  font-size: xx-large;
+  color: rgba(255, 255, 255, 0.8);
+
+  transition: opacity 2s ease-out;
+  -webkit-transition: opacity 2s ease-out; /** Chrome & Safari **/
+  -moz-transition: opacity 2s ease-out; /** Firefox **/
+  -o-transition: opacity 2s ease-out; /** Opera **/
+}
+
+
 @-webkit-keyframes sk-rotate { 100% { -webkit-transform: rotate(360deg) }}
 @keyframes sk-rotate { 100% { transform: rotate(360deg); -webkit-transform: rotate(360deg) }}
 
