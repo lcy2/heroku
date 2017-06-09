@@ -59,7 +59,17 @@ function populate_album(pic_items){
     $(this).data('pk', pic_items[index].pk);
     if (is_album){
       map.off('click', 'points', marker_clicker);
-      $(this).find('img.media-object').on('click', lp_wrapper(pic_items[index].pk));
+      $(this).find('img.media-object').on('click', function(e){
+        if (pic_items[index].geo){
+          map.flyTo({
+            center: [
+              pic_items[index].geo.lon,
+              pic_items[index].geo.lat,
+            ]
+          });
+        }
+        lp_wrapper(pic_items[index].pk)(e);
+      });
     } else {
       $(this).find('img.media-object').on('click', function(){
         if (pic_items[index].geo){

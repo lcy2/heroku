@@ -25,7 +25,17 @@ function populate_album(pic_items){
     last_img.data('pk', el.pk);
 
     if (is_album){
-      last_img.on('click', lp_wrapper(pic_items[index].pk));
+      last_img.on('click', function(e){
+        if (pic_items[index].geo){
+          map.flyTo({
+            center: [
+              pic_items[index].geo.lon,
+              pic_items[index].geo.lat,
+            ]
+          });
+        }
+        lp_wrapper(pic_items[index].pk)(e);
+      });
     } else {
       last_img.on('click', function(){
         if (pic_items[index].geo){
