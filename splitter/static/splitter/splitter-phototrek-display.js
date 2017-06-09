@@ -157,7 +157,6 @@ function populate_map(collections){
   }
 }
 
-//centers the map to 1st item (upon initialization)
 function center_map(collections){
   var i = 0;
   while (i < collections.length && !collections[i].geo){
@@ -165,11 +164,17 @@ function center_map(collections){
   }
   if (i == collections.length){
     if (is_album){
-      map.setCenter([2.3522, 38.8566]); // center at Paris if no geotag
+      map.jumpTo({
+        center: [2.3522, 38.8566],
+        offset: [0, -150],
+      }); // center at Paris if no geotag
 
     }
   } else {
-    map.setCenter([collections[i].geo.lon, collections[i].geo.lat]);
+    map.jumpTo({
+      center: [collections[i].geo.lon, collections[i].geo.lat],
+      offset: [0, -150],
+    });
   }
 }
 

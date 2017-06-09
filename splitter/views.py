@@ -54,6 +54,9 @@ def gateway_switch(request, action):
         'picdel': gateway.pic_delete,
         'setcover': gateway.set_album_cover,
     }
+    action_dir = {
+        'newtrav': gateway.new_traveler,
+    }
     if action in action_dir_trip:
         if 'HTTP_REFERER' in request.META:
             p = re.compile(r'(?<=\/)[0-9]+(?=[\/#]|$)')
@@ -74,6 +77,9 @@ def gateway_switch(request, action):
         seg = Segment.objects.filter(pk__in = seg_pk)
         pk = seg[0].trip.pk;
         return action_dir_seg[action](request, pk, seg = seg)
+
+    elif action in action_dir:
+        return action_dir[action](request)
 
     messages.error(request, "Went down the wrong rabbit hole.")
     return redirect("splitter:index")

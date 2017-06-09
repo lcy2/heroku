@@ -395,3 +395,20 @@ def new_trip(request):
     messages.success(request, "Trip created :)")
     messages.info(request, "Fill out the rest of the details.")
     return redirect('splitter:trip_edit', pk=trip.pk)
+
+
+# for handling the creation of new travelers unassociated with actual users
+def new_traveler(request):
+    if not request.user or request.user.is_anonymous():
+        return JsonResponse({
+            'message': 'Please log in.',
+            'warning_level': 'warning',
+        }, status = 401)
+
+    new_trav = Traveler(traveler_name = request.POST['trav_name'])
+    new_trav.save()
+    return JsonResponse({
+        'message': 'New traveler ' + request.POST['trav_name'] + ' added.',
+        'warning_level': 'success',
+        'new_pk': new_trav.pk,
+    })

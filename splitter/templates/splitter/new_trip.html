@@ -1,6 +1,7 @@
 {% extends 'splitter/base.html' %}
 {% load static %}
 {% block main %}
+  {% csrf_token %}
   <div class="container bordered_container">
     <form action="{% url 'splitter:new_trip2' %}" method="post">
       {% csrf_token %}
@@ -16,8 +17,9 @@
             <label class="control-label">Travellers: </label>
             <select name="travelers" title="Ghost Trip" class="selectpicker" multiple data-selected-text-format="count>2" data-count-selected-text="{0} Travelers">
               {% for trav in travelers %}
-                <option value="{{ trav.pk }}" {% if trav.user == user %}selected{% endif %}>{{trav.traveler_name}}</option>
+                <option value="{{ trav.pk }}" {% if trav.user == user %}selected{% endif %}>[{{trav.pk}}] {{trav.traveler_name}}</option>
               {% endfor %}
+              <option data-divider="true"></option>
             </select>
           </div>
           <div class="col-sm-3">
@@ -29,7 +31,6 @@
       </div>
     </form>
   </div>
-
 {% endblock %}
 
 {% block override %}
