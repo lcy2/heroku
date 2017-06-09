@@ -58,6 +58,7 @@ function populate_album(pic_items){
     $(this).data('item_index', index);
     $(this).data('pk', pic_items[index].pk);
     if (is_album){
+      map.off('click', 'points', marker_clicker);
       $(this).find('img.media-object').on('click', lp_wrapper(pic_items[index].pk));
     } else {
       $(this).find('img.media-object').on('click', function(){
@@ -98,6 +99,10 @@ function populate_album(pic_items){
     $('div.set_cover').on('click', set_cover);
 
   }
+}
+function marker_clicker(e){
+  map.off('click', 'points', marker_clicker);
+  lp_wrapper(e.features[0].properties.pk)();
 }
 
 function populate_map(collections){
@@ -150,9 +155,7 @@ function populate_map(collections){
   map.addLayer(point_layer);
 
   if (is_album){
-    map.on('click', 'points', function (e) {
-      lp_wrapper(e.features[0].properties.pk)();
-    });
+    map.on('click', 'points', marker_clicker);
       // Change the cursor to a pointer when the mouse is over the places layer.
     map.on('mouseenter', 'points', function () {
         map.getCanvas().style.cursor = 'pointer';
@@ -175,14 +178,11 @@ function center_map(collections){
     if (is_album){
       map.jumpTo({
         center: [2.3522, 38.8566],
-        offset: [0, -150],
       }); // center at Paris if no geotag
-
     }
   } else {
     map.jumpTo({
       center: [collections[i].geo.lon, collections[i].geo.lat],
-      offset: [0, -150],
     });
   }
 }

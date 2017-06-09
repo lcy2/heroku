@@ -84,14 +84,11 @@ function center_map(collections){
     if (is_album){
       map.jumpTo({
         center: [2.3522, 38.8566],
-        offset: [0, -150],
       }); // center at Paris if no geotag
-
     }
   } else {
     map.jumpTo({
       center: [collections[i].geo.lon, collections[i].geo.lat],
-      offset: [0, -150],
     });
   }
 }
