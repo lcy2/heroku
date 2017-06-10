@@ -2,6 +2,7 @@ var map, pic_data, is_album;
 var prevID = -1;
 var imgHeight = 135;
 var mediaMargin = 10;
+var is_first = true;
 
 
 
@@ -34,7 +35,7 @@ function populate_album(pic_items){
             ]
           });
         }
-        lp_wrapper(pic_items[index].pk)(e);
+        load_pics(pic_items[index].pk);
       });
     } else {
       last_img.on('click', function(){
@@ -153,7 +154,7 @@ function populate_map(collections){
 
   if (is_album){
     map.on('click', 'points', function (e) {
-      lp_wrapper(e.features[0].properties.pk)();
+      load_pics(e.features[0].properties.pk);
     });
       // Change the cursor to a pointer when the mouse is over the places layer.
     map.on('mouseenter', 'points', function () {
@@ -174,14 +175,32 @@ function center_map(collections){
   }
   if (i == collections.length){
     if (is_album){
-      map.jumpTo({
-        center: [2.3522, 38.8566],
-      }).panBy([0, 150]); // center at Paris if no geotag
+      if (is_first){
+        map.jumpTo({
+          center: [2.3522, 48.8566],
+        });
+        is_first = false;
+      } else {
+        map.once('zoomend', function(){
+          map.jumpTo({
+            center: [2.3522, 48.8566],
+          }); // center at Paris if no geotag
+        })
+      }
     }
   } else {
-    map.jumpTo({
-      center: [collections[i].geo.lon, collections[i].geo.lat],
-    }).panBy([0, 150]);
+    if (is_first){
+      map.jumpTo({
+        center: [collections[i].geo.lon, collections[i].geo.lat],
+      });
+      is_first = false;
+    } else {
+      map.once('zoomend', function(){
+        map.jumpTo({
+          center: [collections[i].geo.lon, collections[i].geo.lat],
+        });
+      })
+    }
   }
 }
 
@@ -202,6 +221,7 @@ function newDataProcess(data){
 }
 // initially, load in the albums interface
 function load_albums(){
+
   $.ajax({
     url: '/splitter/gateway/rafd',
     type: 'POST',
@@ -209,6 +229,7 @@ function load_albums(){
     dataType: 'json',
     success: function (data) {
       newDataProcess(data);
+      $('#thumb_list').scrollLeft(album_scroll);
     },
     error: function(xhr, err){
       var response = $.parseJSON(xhr.responseText);
@@ -216,43 +237,43 @@ function load_albums(){
     }
   });
 }
-function lp_wrapper(pk){
-  function load_pics(){
-    $.ajax({
-      url: '/splitter/gateway/rpfd',
-      type: 'POST',
-      data: {
-        'thumbsize': imgHeight,
-        'seg_pk': pk,
-      },
-      dataType: 'json',
-      success: function (data) {
-        seg_pk = data.seg_pk;
-        edit_actions = [];
-        newDataProcess(data);
+function load_pics(pk){
+  album_scroll = $('#thumb_list').scrollLeft();
+  $('#thumb_list').scrollLeft(0);
+  $.ajax({
+    url: '/splitter/gateway/rpfd',
+    type: 'POST',
+    data: {
+      'thumbsize': imgHeight,
+      'seg_pk': pk,
+    },
+    dataType: 'json',
+    success: function (data) {
+      seg_pk = data.seg_pk;
+      edit_actions = [];
+      newDataProcess(data);
 
-        var ba_button = $('<div id="back_to_album" class="pull-right text-right"><button class="btn btn-primary" type="button">Back to Albums</button></div>');
-        $('#info_panel').append(ba_button);
-        ba_button.css({bottom: '-50px', opacity: 0});
+      var ba_button = $('<div id="back_to_album" class="pull-right text-right"><button class="btn btn-primary" type="button">Back to Albums</button></div>');
+      $('#info_panel').append(ba_button);
+      ba_button.css({bottom: '-50px', opacity: 0});
+      ba_button.animate({
+          'bottom': 0,
+          'opacity': 1,
+      }, 250);
+
+      ba_button.on('click', function(){
+        load_albums();
         ba_button.animate({
-            'bottom': 0,
-            'opacity': 1,
-        }, 250);
-
-        ba_button.on('click', function(){
-          load_albums();
-          ba_button.animate({
-              'bottom': '-50px',
-              'opacity': 0,
-          }, 250, function(){
-            $('#back_to_album').remove();
-          });
+            'bottom': '-50px',
+            'opacity': 0,
+        }, 250, function(){
+          $('#back_to_album').remove();
         });
-      }
-    });
-  }
-  return load_pics;
+      });
+    }
+  });
 }
+
 
 $(document).ready(function(){
   // setting the csrf token
@@ -286,11 +307,10 @@ $(document).ready(function(){
     if (map.areTilesLoaded()){
       if (document.readyState === "complete"){
         slide_up();
-        map.off('sourcedata');
       } else {
         $(window).one('load', function(){
           slide_up();
-          map.off('sourcedata');
+          //map.off('sourcedata');
         });
       }
     }

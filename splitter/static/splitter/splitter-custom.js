@@ -4,5 +4,15 @@ function message_log(msg, warning_class = 'info'){
     + ' alert-dismissible" role="alert"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>'
     + msg
     + '</div>');
-  $new_msg.appendTo($('#message_panel')).slideDown('slow');
+  $new_msg.appendTo($('#message_panel')).slideDown('fast');
+
+  setTimeout(function(){
+    $new_msg.slideUp('fast');
+  }, 3000);
 }
+
+$(document).ready(function(){
+  setTimeout(function(){
+    $('.alert').slideUp('fast');
+  }, 10000)
+});

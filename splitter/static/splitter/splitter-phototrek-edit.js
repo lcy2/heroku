@@ -3,6 +3,12 @@ var timeoutLimit = 500;
 var imgHeight = 135;
 var mediaMargin = 15;
 var geo_lock = false;
+var album_scroll = 0;
+var is_first = true;
+
+
+// TODO: NEED to refactor the map control codes to make things simpler / more managable
+
 
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
@@ -68,7 +74,7 @@ function populate_album(pic_items){
             ]
           });
         }
-        lp_wrapper(pic_items[index].pk)(e);
+        load_pics(pic_items[index].pk);
       });
     } else {
       $(this).find('img.media-object').on('click', function(){
@@ -112,7 +118,7 @@ function populate_album(pic_items){
 }
 function marker_clicker(e){
   map.off('click', 'points', marker_clicker);
-  lp_wrapper(e.features[0].properties.pk)();
+  load_pics(e.features[0].properties.pk);
 }
 
 function populate_map(collections){
@@ -165,6 +171,7 @@ function populate_map(collections){
   map.addLayer(point_layer);
 
   if (is_album){
+    map.off('click', 'points', marker_clicker);
     map.on('click', 'points', marker_clicker);
       // Change the cursor to a pointer when the mouse is over the places layer.
     map.on('mouseenter', 'points', function () {
@@ -186,14 +193,32 @@ function center_map(collections){
   }
   if (i == collections.length){
     if (is_album){
-      map.jumpTo({
-        center: [2.3522, 38.8566],
-      }); // center at Paris if no geotag
+      if (is_first){
+        map.jumpTo({
+          center: [2.3522, 48.8566],
+        });
+        is_first = false;
+      } else if (map.isMoving()){
+        map.once('zoomend', function(){
+          map.jumpTo({
+            center: [2.3522, 48.8566],
+          }); // center at Paris if no geotag
+        })
+      }
     }
   } else {
-    map.jumpTo({
-      center: [collections[i].geo.lon, collections[i].geo.lat],
-    });
+    if (is_first){
+      map.jumpTo({
+        center: [collections[i].geo.lon, collections[i].geo.lat],
+      });
+      is_first = false;
+    } else if (map.isMoving()){
+      map.once('zoomend', function(){
+        map.jumpTo({
+          center: [collections[i].geo.lon, collections[i].geo.lat],
+        });
+      })
+    }
   }
 }
 
@@ -433,26 +458,33 @@ function initialize_marker(ci, center){
   });
   update_geo_field(ci, center);
   // replace the click listener after the first click
-  map.on('click', mm_wrapper(ci));
+  map.setLayoutProperty('points', 'visibility', 'none');
+  map.once('click', mm_wrapper(ci));
 }
 
 
 function mm_wrapper(ci){
   function move_marker(e){
-    var bullseye = {
-      "type": "Point",
-      "coordinates": [e.lngLat.lng, e.lngLat.lat],
+    if (map.getLayer('bullseye')){
+      var bullseye = {
+        "type": "Point",
+        "coordinates": [e.lngLat.lng, e.lngLat.lat],
+      }
+      map.getSource('bullseye').setData(bullseye);
+      update_geo_field(ci, e.lngLat);
+      map.once('click', mm_wrapper(ci));
     }
-    map.getSource('bullseye').setData(bullseye);
-    update_geo_field(ci, e.lngLat);
   }
   return move_marker;
 }
+/*
 function removeMapListeners(){
+  console.log('removing stuff');
   $.each(map._listeners.click.filter(function(entry){
     return entry.name === "move_marker";
   }), function(i, el){
     map.off('click', el);
+    console.log("Found it!");
   });
   if (map._oneTimeListeners && map._oneTimeListeners.click){
     $.each(map._oneTimeListeners.click.filter(function(entry){
@@ -462,9 +494,11 @@ function removeMapListeners(){
     });
   }
 }
+*/
 
 function edit_geo(){
   if (!geo_lock){
+    geo_lock = true;
     var target = $(this);
     var old_content = target.html();
     var default_content = target.find('span').html();
@@ -536,7 +570,6 @@ function edit_geo(){
               target.one('click', edit_geo);
               target.removeClass("flex_div");
               $('body').off('focusout');
-              removeMapListeners();
               geo_lock = false;
 
             }
@@ -552,10 +585,10 @@ function edit_geo(){
 
 function edit_pic_geo(){
   if (!geo_lock){
+    geo_lock = true;
     var target = $(this);
     var old_content = target.html();
     var default_content = target.find('span').html();
-
     target.html('<input class="input-sm form-control" type="text" value="" />');
     var child_input = target.find('input');
 
@@ -569,10 +602,8 @@ function edit_pic_geo(){
         return parseFloat(el);
       });
       var center = {
-        'lngLat': {
-          'lng': latlon[1],
-          'lat': latlon[0],
-        }
+        'lng': latlon[1],
+        'lat': latlon[0],
       }
       initialize_marker(child_input, center);
 
@@ -623,8 +654,6 @@ function edit_pic_geo(){
           target.one('click', edit_pic_geo);
           target.removeClass("flex_div");
           $('body').off('focusout');
-          // unbind all the click event listeners
-          removeMapListeners();
           geo_lock = false;
         }
       }, timeoutLimit);
@@ -643,6 +672,7 @@ function load_albums(){
     dataType: 'json',
     success: function (data) {
       newDataProcess(data);
+      $('#thumb_list').scrollTop(album_scroll);
     },
     error: function(xhr, err){
       var response = $.parseJSON(xhr.responseText);
@@ -655,59 +685,59 @@ function load_albums(){
   });
 }
 
-function lp_wrapper(pk){
-  function load_pics(){
-    $.ajax({
-      url: '/splitter/gateway/rpfd',
-      type: 'POST',
-      data: {
-        'thumbsize': imgHeight,
-        'seg_pk': pk,
-      },
-      dataType: 'json',
-      success: function (data) {
-        seg_pk = data.seg_pk;
-        edit_actions = [];
-        newDataProcess(data);
-        var ba_button = $('<span id="back_to_album" class="pull-right text-right"><button class="btn btn-primary" type="button">Back to Albums</button></span>');
-        $('#btn_col').append(ba_button);
-        ba_button.on('click', function(){
-          // save current results
-          $.ajax({
-            url: '/splitter/gateway/picedits',
-            type: 'POST',
-            data: {
-              'pk': seg_pk,
-              'target': 'json',
-              'content': JSON.stringify(edit_actions),
-            },
-            dataType: 'json',
-            success: function(data){
-              message_log(data.message);
-              // clear actions
-              edit_actions = [];
 
-              // going back to album list
-              load_albums();
+function load_pics(pk){
+  album_scroll = $('#thumb_list').scrollTop();
+  $('#thumb_list').scrollTop(0);
+  $.ajax({
+    url: '/splitter/gateway/rpfd',
+    type: 'POST',
+    data: {
+      'thumbsize': imgHeight,
+      'seg_pk': pk,
+    },
+    dataType: 'json',
+    success: function (data) {
+      seg_pk = data.seg_pk;
+      edit_actions = [];
+      newDataProcess(data);
+      var ba_button = $('<span id="back_to_album" class="pull-right text-right"><button class="btn btn-primary" type="button">Back to Albums</button></span>');
+      $('#btn_col').append(ba_button);
+      ba_button.on('click', function(){
+        // save current results
+        $.ajax({
+          url: '/splitter/gateway/picedits',
+          type: 'POST',
+          data: {
+            'pk': seg_pk,
+            'target': 'json',
+            'content': JSON.stringify(edit_actions),
+          },
+          dataType: 'json',
+          success: function(data){
+            message_log(data.message);
+            // clear actions
+            edit_actions = [];
 
-              // remove button
-              $('#back_to_album').remove();
-            },
-            error: function(xhr, err){
-              var response = $.parseJSON(xhr.responseText);
-              message_log(response.message, response.warning_level);
-            },
-          });
+            // going back to album list
+            load_albums();
+
+            // remove button
+            $('#back_to_album').remove();
+          },
+          error: function(xhr, err){
+            var response = $.parseJSON(xhr.responseText);
+            message_log(response.message, response.warning_level);
+          },
         });
-      },
-      error: function(xhr, err){
-        var response = $.parseJSON(xhr.responseText);
-        message_log(response.message, response.warning_level);
-        load_albums();
-      },
-    });
-  }
-  return load_pics;
+      });
+    },
+    error: function(xhr, err){
+      var response = $.parseJSON(xhr.responseText);
+      message_log(response.message, response.warning_level);
+      load_albums();
+    },
+  });
 }
 
 function rtfgClick(e){
@@ -895,15 +925,13 @@ $(document).ready(function(){
   map.on('load', function(){
     load_albums();
   });
-  map.on('sourcedata', function(){
+  map.once('sourcedata', function(){
     if (map.areTilesLoaded()){
       if (document.readyState === "complete"){
         slide_up();
-        map.off('sourcedata');
       } else {
         $(window).one('load', function(){
           slide_up();
-          map.off('sourcedata');
         });
       }
     }
