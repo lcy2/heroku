@@ -3,6 +3,7 @@ var prevID = -1;
 var imgHeight = 135;
 var mediaMargin = 10;
 var is_first = true;
+var album_scroll = 0;
 
 
 
@@ -27,28 +28,40 @@ function populate_album(pic_items){
 
     if (is_album){
       last_img.on('click', function(e){
-        if (pic_items[index].geo){
-          map.flyTo({
-            center: [
-              pic_items[index].geo.lon,
-              pic_items[index].geo.lat,
-            ]
-          });
+        if (last_img.hasClass('media_selected')){
+          load_pics(pic_items[index].pk);
+        } else {
+          if (pic_items[index].geo){
+            map.flyTo({
+              center: [
+                pic_items[index].geo.lon,
+                pic_items[index].geo.lat,
+              ],
+              offset: [0, -150],
+            });
+          }
+          $('.media_selected').removeClass('media_selected');
+          last_img.addClass('media_selected');
         }
-        load_pics(pic_items[index].pk);
       });
     } else {
       last_img.on('click', function(){
-        if (pic_items[index].geo){
-          map.flyTo({
-            center: [
-              pic_items[index].geo.lon,
-              pic_items[index].geo.lat,
-            ],
-            offset: [0, -150],
-          });
+        if (last_img.hasClass('media_selected')){
+          lity(pic_items[index].src);
+        } else {
+          $('.media_selected').removeClass('media_selected');
+          last_img.addClass('media_selected');
+          if (pic_items[index].geo){
+            map.flyTo({
+              center: [
+                pic_items[index].geo.lon,
+                pic_items[index].geo.lat,
+              ],
+              offset: [0, -150],
+            });
+          }
         }
-        lity(pic_items[index].src);
+
 
       });
     }
@@ -63,6 +76,7 @@ function populate_album(pic_items){
 
   });
 
+  /*
   $('#thumb_list').off('scroll');
   $('#thumb_list').on('scroll', function(){
     var itemID = Math.floor($(this).scrollLeft() / (($(this).prop("scrollWidth") - $(this).width()) / (pic_items.length - 0.0001)));
@@ -82,6 +96,7 @@ function populate_album(pic_items){
     }
     prevID = itemID;
   })
+  */
 
 }
 
@@ -174,33 +189,13 @@ function center_map(collections){
     i ++;
   }
   if (i == collections.length){
-    if (is_album){
-      if (is_first){
-        map.jumpTo({
-          center: [2.3522, 48.8566],
-        });
-        is_first = false;
-      } else {
-        map.once('zoomend', function(){
-          map.jumpTo({
-            center: [2.3522, 48.8566],
-          }); // center at Paris if no geotag
-        })
-      }
-    }
+    map.jumpTo({
+      center: [2.3522, 48.8566],
+    }).panBy([0, 150]);
   } else {
-    if (is_first){
-      map.jumpTo({
-        center: [collections[i].geo.lon, collections[i].geo.lat],
-      });
-      is_first = false;
-    } else {
-      map.once('zoomend', function(){
-        map.jumpTo({
-          center: [collections[i].geo.lon, collections[i].geo.lat],
-        });
-      })
-    }
+    map.jumpTo({
+      center: [collections[i].geo.lon, collections[i].geo.lat],
+    }).panBy([0, 150]);
   }
 }
 
@@ -214,7 +209,10 @@ function newDataProcess(data){
     prevID = -1;
     populate_album(pic_data);
     populate_map(pic_data);
-    center_map(pic_data);
+    if (is_first){
+      center_map(pic_data);
+      is_first = false;
+    }
   } else {
     message_log("Populate with some photos first.");
   }

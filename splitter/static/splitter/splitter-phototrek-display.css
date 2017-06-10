@@ -18,6 +18,10 @@ div.img_wrapper {
 div.img_wrapper:hover {
   cursor: pointer;
 }
+.media_selected {
+  -webkit-filter: sepia(100%); /* Safari 6.0 - 9.0 */
+  filter: sepia(100%);
+}
 
 #thumb_wrapper {
   position: absolute;

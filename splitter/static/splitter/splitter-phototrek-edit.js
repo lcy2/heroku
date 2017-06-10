@@ -47,6 +47,7 @@ function populate_album(pic_items){
   $('#thumb_list').html(fill_text);
 
   // map flies to the relevant item when scrolled to
+  /*
   $('#thumb_list').off('scroll');
   $('#thumb_list').on('scroll', function(){
     var itemID = Math.floor($(this).scrollTop() / (($(this).prop("scrollHeight") - $(this).height()) / (pic_items.length - 0.0001)));
@@ -59,22 +60,29 @@ function populate_album(pic_items){
       });
     }
   });
+  */
 
   $('.media').each(function(index, el){
-    $(this).data('item_index', index);
-    $(this).data('pk', pic_items[index].pk);
+    var $parent = $(this);
+    $parent.data('item_index', index);
+    $parent.data('pk', pic_items[index].pk);
     if (is_album){
       map.off('click', 'points', marker_clicker);
-      $(this).find('img.media-object').on('click', function(e){
-        if (pic_items[index].geo){
-          map.flyTo({
-            center: [
-              pic_items[index].geo.lon,
-              pic_items[index].geo.lat,
-            ]
-          });
+      $parent.find('img.media-object').on('click', function(e){
+        if ($parent.hasClass('media_selected')){
+          load_pics(pic_items[index].pk);
+        } else {
+          $('.media_selected').removeClass('media_selected');
+          $parent.addClass('media_selected');
+          if (pic_items[index].geo){
+            map.flyTo({
+              center: [
+                pic_items[index].geo.lon,
+                pic_items[index].geo.lat,
+              ]
+            });
+          }
         }
-        load_pics(pic_items[index].pk);
       });
     } else {
       $(this).find('img.media-object').on('click', function(){
@@ -192,33 +200,13 @@ function center_map(collections){
     i ++;
   }
   if (i == collections.length){
-    if (is_album){
-      if (is_first){
-        map.jumpTo({
-          center: [2.3522, 48.8566],
-        });
-        is_first = false;
-      } else if (map.isMoving()){
-        map.once('zoomend', function(){
-          map.jumpTo({
-            center: [2.3522, 48.8566],
-          }); // center at Paris if no geotag
-        })
-      }
-    }
+    map.jumpTo({
+      center: [2.3522, 48.8566],
+    });
   } else {
-    if (is_first){
-      map.jumpTo({
-        center: [collections[i].geo.lon, collections[i].geo.lat],
-      });
-      is_first = false;
-    } else if (map.isMoving()){
-      map.once('zoomend', function(){
-        map.jumpTo({
-          center: [collections[i].geo.lon, collections[i].geo.lat],
-        });
-      })
-    }
+    map.jumpTo({
+      center: [collections[i].geo.lon, collections[i].geo.lat],
+    });
   }
 }
 
@@ -227,7 +215,11 @@ function newDataProcess(data){
   is_album = data.is_album;
   populate_album(pic_data);
   populate_map(pic_data);
-  center_map(pic_data);
+  if (is_first){
+    center_map(pic_data);
+    is_first = false;
+  }
+
 }
 
 
