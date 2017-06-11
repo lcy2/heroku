@@ -31,6 +31,7 @@ function populate_album(pic_items){
         if (last_img.hasClass('media_selected')){
           load_pics(pic_items[index].pk);
         } else {
+          refresh_info_text(pic_items[index]);
           if (pic_items[index].geo){
             map.flyTo({
               center: [
