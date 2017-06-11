@@ -27,11 +27,11 @@ def index(request):
     private_trips = []
     if user and not user.is_anonymous():
         try:
-            private_trips = user.traveler.trip_set.all()
+            private_trips = user.traveler.trip_set.all().order_by('trip_start')
         except ObjectDoesNotExist:
             pass
 
-    public_trips = Trip.objects.filter(is_private = False)
+    public_trips = Trip.objects.filter(is_private = False).order_by('trip_start')
 
     context = {
         'private_trips': private_trips,
