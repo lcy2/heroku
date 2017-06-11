@@ -1,4 +1,4 @@
-var map, pic_data, is_album;
+var map, pic_data, is_album, lightbox;
 var prevID = -1;
 var imgHeight = 135;
 var mediaMargin = 10;
@@ -48,7 +48,7 @@ function populate_album(pic_items){
     } else {
       last_img.on('click', function(){
         if (last_img.hasClass('media_selected')){
-          lity(pic_items[index].src);
+          open_lity(index, pic_items);
         } else {
           $('.media_selected').removeClass('media_selected');
           last_img.addClass('media_selected');
@@ -76,29 +76,33 @@ function populate_album(pic_items){
     target_element.scrollLeft -= (e.deltaY * 25);
 
   });
+}
 
-  /*
-  $('#thumb_list').off('scroll');
-  $('#thumb_list').on('scroll', function(){
-    var itemID = Math.floor($(this).scrollLeft() / (($(this).prop("scrollWidth") - $(this).width()) / (pic_items.length - 0.0001)));
+function open_lity(index, pic_items){
+  lity(pic_items[index].src);
+  // add the two arrows
+  var $left_arrow = $('<div class="lity_arrows" id="left_arrow"><span class="glyphicon glyphicon-chevron-left"></span></div>');
+  var $right_arrow = $('<div class="lity_arrows" id="right_arrow"><span class="glyphicon glyphicon-chevron-right"></span></div>');
+  $('.lity').append($left_arrow);
+  $('.lity').append($right_arrow);
 
-    if (itemID && pic_items[itemID].geo){
-      map.flyTo({
-        center: [
-          pic_items[itemID].geo.lon,
-          pic_items[itemID].geo.lat,
-        ],
-        offset: [0, -150],
-      });
+  function go_left(){
+    index = (index - 1 + pic_items.length) % pic_items.length;
+    $('.lity-content > img').attr('src', pic_items[index].src);
+    $('.media_selected').removeClass('media_selected');
+    $('.img_wrapper:eq(' + index + ')').addClass('media_selected');
+  }
 
-      if (itemID != prevID){
-        refresh_info_text(pic_items[itemID]);
-      }
-    }
-    prevID = itemID;
-  })
-  */
+  function go_right(){
+    index = (index + 1) % pic_items.length;
+    $('.lity-content > img').attr('src', pic_items[index].src);
+    $('.media_selected').removeClass('media_selected');
+    $('.img_wrapper:eq(' + index + ')').addClass('media_selected');
+  }
 
+
+  $left_arrow.on('click', go_left);
+  $right_arrow.on('click', go_right);
 }
 
 function refresh_info_text(pic_item){
@@ -169,9 +173,14 @@ function populate_map(collections){
   map.addLayer(point_layer);
 
   if (is_album){
-    map.on('click', 'points', function (e) {
+    function lp_wrapper(e){
       load_pics(e.features[0].properties.pk);
-    });
+      map.off('click', 'points', lp_wrapper);
+    }
+    map.on('click', 'points', lp_wrapper);
+  }
+
+  if (is_first){
       // Change the cursor to a pointer when the mouse is over the places layer.
     map.on('mouseenter', 'points', function () {
         map.getCanvas().style.cursor = 'pointer';

@@ -66,3 +66,21 @@ div.img_wrapper:hover {
   position: relative;
   height: 100%;
 }
+
+.lity_arrows {
+  position: absolute;
+  top: 40%;
+  z-index: 9995;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 2.5em;
+}
+.lity_arrows:hover {
+  color: rgba(255, 255, 255, 1);
+  cursor: pointer;
+}
+#left_arrow {
+  left: 20px;
+}
+#right_arrow {
+  right: 20px;
+}

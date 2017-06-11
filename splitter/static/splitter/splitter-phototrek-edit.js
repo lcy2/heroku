@@ -181,7 +181,10 @@ function populate_map(collections){
   if (is_album){
     map.off('click', 'points', marker_clicker);
     map.on('click', 'points', marker_clicker);
+  }
+
       // Change the cursor to a pointer when the mouse is over the places layer.
+  if (is_first){
     map.on('mouseenter', 'points', function () {
         map.getCanvas().style.cursor = 'pointer';
     });
