@@ -1,0 +1,34 @@
+{% extends 'splitter/trip_base.html' %}
+{% load static %}
+{% block trip_base %}
+<div class="row spacey_row">
+  <div class="col-sm-7 col-md-9">
+    <div id="map">
+    </div>
+  </div>
+  <div class="col-sm-5 col-md-3">
+    <div id="output_panel">
+    </div>
+  </div>
+</div>
+<div class="row spacey_row" id="btn_row"><div class="col-xs-12">
+  <div class="dropdown pull-right">
+    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">Calculate Route <span class="caret"></span></button>
+    <ul class="dropdown-menu">
+      <li><a id="calc_rt">Roundtrip</a></li>
+      <li><a id="calc_ow">One Way</a></li>
+    </ul>
+  </div>
+</div></div>
+TODO: geocoding utility to quickly hop to locations
+then add subsequent location to the list
+submit to API to get optimized trip
+{% endblock %}
+{% block trip_override %}
+  <script src='https://api.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.0/mapbox-gl-geocoder.min.js'></script>
+  <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.0/mapbox-gl-geocoder.css' type='text/css' />
+  <link rel="stylesheet" type="text/css" href="{% static 'splitter/testplan.css' %}" />
+  <script src="{% static 'splitter/testplan.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,31 @@
+#map,
+#output_panel {
+  height: 500px;
+}
+#geocoder-container > div {
+    min-width:50%;
+    margin-left:25%;
+}
+#waypoint_btn {
+  margin: 0 7px;
+}
+#output_panel {
+  overflow-y: auto;
+}
+.waypoint {
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  max-height: 100px;
+  padding: 3px;
+  color: #eee;
+  margin: 5px 0;
+}
+
+.waypoint > span {
+  display: block;
+  margin: 5px 3px;
+}
+
+.dropdown-menu a:hover {
+  cursor: pointer;
+}

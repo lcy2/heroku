@@ -142,3 +142,46 @@ def new_trip(request):
         'travelers': Traveler.objects.all()
     }
     return render(request, 'splitter/new_trip.html', context)
+
+def testplan(request):
+    return render(request, 'splitter/testplan.html', {})
+
+@login_required
+def outward(request):
+    if 'target' not in request.GET:
+        return JsonResponse({'message': 'Unknown request.', 'warning_level': 'warning'}, status = 400)
+
+    def mapbox_tsp():
+        params = ['latlon_string', 'access_token', 'mode']
+        if not all([p in request.GET for p in params]):
+            return JsonResponse({'message': 'Missing parameters.'}, status = 400)
+        url = 'https://api.mapbox.com/optimized-trips/v1/mapbox/' + request.GET['mode'] + '/' + request.GET['latlon_string']
+        query = {
+            'access_token': request.GET['access_token'],
+            'geometries': 'geojson',
+            'overview': 'full',
+            'roundtrip': request.GET['roundtrip'] if 'roundtrip' in request.GET else 'true',
+            'source': 'first',
+            'destination': 'last',
+        }
+        url += '?' + urlencode(query)
+        return requests.get(url).json()
+
+    def mapbox_dir():
+        params = ['latlon_string', 'access_token', 'mode']
+        if not all([p in request.GET for p in params]):
+            return JsonResponse({'message': 'Missing parameters.'}, status = 400)
+        url = 'https://api.mapbox.com/directions/v5/mapbox/' + request.GET['mode'] + '/' + request.GET['latlon_string']
+        query = {
+            'access_token': request.GET['access_token'],
+            'geometries': 'geojson',
+        }
+        url += '?' + urlencode(query)
+        return requests.get(url).json()
+
+    outward_action = {
+        'mapbox_tsp': mapbox_tsp,
+        'mapbox_dir': mapbox_dir,
+    }
+
+    return JsonResponse(outward_action[request.GET['target']]())
