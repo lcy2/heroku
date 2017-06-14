@@ -39,10 +39,12 @@ function populate_map(collections){
       },
       "layout": {
           "icon-image": "{icon}-15",
+          "icon-allow-overlap": true,
           "text-field": "{title}",
           "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
           "text-offset": [0, 0.6],
           "text-anchor": "top",
+          "text-optional" : true,
       },
       "paint": {
         "text-color" : "#ffffff",
@@ -56,7 +58,10 @@ function populate_map(collections){
   map.addLayer(point_layer);
 
   map.on('click', 'points', function (e) {
-    map.flyTo({center: e.features[0].geometry.coordinates});
+    map.flyTo({
+      center: e.features[0].geometry.coordinates,
+      offset: [0, 125],
+    });
     new mapboxgl.Popup()
       .setLngLat(e.features[0].geometry.coordinates)
       .setHTML(e.features[0].properties.thumbnail)
@@ -76,20 +81,27 @@ function populate_map(collections){
 
 //centers the map to 1st item (upon initialization)
 function center_map(collections){
-  var i = 0;
-  while (i < collections.length && !collections[i].geo){
-    i ++;
-  }
-  if (i == collections.length){
-    if (is_album){
-      map.jumpTo({
-        center: [2.3522, 38.8566],
-      }); // center at Paris if no geotag
+  var has_geo = $.map(collections, function(el, index){
+    if (el.geo){
+      return true;
+    } else {
+      return null;
     }
+  });
+
+  if (has_geo.length){
+    var bounds = new mapboxgl.LngLatBounds();
+    $.each(collections, function(index, el){
+      bounds.extend(new mapboxgl.LngLat(el.geo.lon, el.geo.lat));
+    });
+    map.fitBounds(bounds, {
+      padding: {top: 10, bottom: 20, left: 10, right: 10},
+      duration: 0,
+    });
   } else {
     map.jumpTo({
-      center: [collections[i].geo.lon, collections[i].geo.lat],
-    });
+      center: [2.3522, 38.8566],
+    }); // center at Paris if no geotag
   }
 }
 
