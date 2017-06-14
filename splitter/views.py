@@ -143,8 +143,8 @@ def new_trip(request):
     }
     return render(request, 'splitter/new_trip.html', context)
 
-def testplan(request):
-    return render(request, 'splitter/testplan.html', {})
+def trip_plan(request):
+    return render(request, 'splitter/trip_plan.html', {})
 
 @login_required
 def outward(request):

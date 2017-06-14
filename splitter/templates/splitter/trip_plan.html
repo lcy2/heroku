@@ -1,0 +1,46 @@
+{% extends 'splitter/base.html' %}
+{% load static %}
+{% block loading %}{% include "splitter/loading_screen.html" with loading_msg="Loading Map..." only %}{% endblock %}
+{% block main %}
+<div class="container bordered_container">
+  <div class="page-header">
+    <h1>Trip Planner</h1>
+  </div>
+  <div class="row spacey_row">
+    <div class="col-sm-7 col-md-9">
+      <div id="map">
+      </div>
+    </div>
+    <div class="col-sm-5 col-md-3">
+      <div id="output_panel">
+      </div>
+    </div>
+  </div>
+  <div class="row spacey_row" id="btn_row"><div class="col-xs-12">
+    <div class="pull-right">
+      <select id="roundtrip" class="selectpicker" data-width="fit">
+        <option value="1">Roundtrip</option>
+        <option value="0">One Way</option>
+      </select>
+      <select id="trans_mode" class="selectpicker" data-width="fit">
+        <option value="driving">Driving</option>
+        <option value="walking">Walking</option>
+        <option value="cycling">Cycling</option>
+      </select>
+      <button id="calc_btn" class="btn btn-primary" type="button">Calculate Route</button>
+    </div>
+  </div></div>
+</div>
+{% endblock %}
+{% block override %}
+  <script src='https://api.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.0/mapbox-gl-geocoder.min.js'></script>
+  <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.0/mapbox-gl-geocoder.css' type='text/css' />
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="{% static 'splitter/splitter-trip-plan.css' %}" />
+  <script src="{% static 'splitter/splitter-trip-plan.js' %}"></script>
+{% endblock %}

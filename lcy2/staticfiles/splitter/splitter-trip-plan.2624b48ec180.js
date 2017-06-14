@@ -384,6 +384,7 @@ $(document).ready(function(){
     map.on('mouseup', onUp);
     ///////////////////////////////
 
+
   });
 
   $('.selectpicker').selectpicker();
@@ -398,5 +399,17 @@ $(document).ready(function(){
   $('#calc_btn').on('click', function(){
     var locations = gather_waypoints();
     find_path(locations, $('#trans_mode').val(), rt = $('#roundtrip').val() == '1');
+  });
+
+  map.once('sourcedata', function(){
+    if (map.areTilesLoaded()){
+      if (document.readyState === "complete"){
+        slide_up();
+      } else {
+        $(window).one('load', function(){
+          slide_up();
+        });
+      }
+    }
   });
 });
