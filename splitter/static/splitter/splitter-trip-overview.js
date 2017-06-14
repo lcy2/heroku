@@ -92,7 +92,9 @@ function center_map(collections){
   if (has_geo.length){
     var bounds = new mapboxgl.LngLatBounds();
     $.each(collections, function(index, el){
-      bounds.extend(new mapboxgl.LngLat(el.geo.lon, el.geo.lat));
+      if (el.geo){
+        bounds.extend(new mapboxgl.LngLat(el.geo.lon, el.geo.lat));
+      }
     });
     map.fitBounds(bounds, {
       padding: {top: 10, bottom: 20, left: 10, right: 10},
