@@ -79,7 +79,7 @@ function draw_line(coordinates){
         "line-color": "#888",
         "line-width": 8
     }
-});
+  });
 }
 
 function get_detailed_directions(locs, mode){
@@ -157,6 +157,14 @@ function find_path(locs, mode, rt=true){
   });
 }
 
+function refresh_ids(){
+  $('.waypoint').each(function(index, el){
+    $(el).find('span:first').html(index);
+  })
+  populate_map(gather_waypoints());
+}
+
+
 function add_waypoint(lnglat){
   if (!waypoint_title){
     message_log("Awaiting server response.", "info");
@@ -171,13 +179,23 @@ function add_waypoint(lnglat){
     return el.toFixed(5);
   }).join(', ');
 
-  var $waypoint = $('<div class="waypoint"><span>'
-    + ($('.waypoint').length + 1) + ': '
+  var $waypoint = $('<div class="waypoint"><div><span>'
+    + ($('.waypoint').length + 1) + '</span>: '
     + $('.mapboxgl-ctrl-geocoder > input').val()
-    + '</span><span class="label label-default">'
+    + '</div><div class="delete_media pull-right"><small><span class="glyphicon glyphicon-trash"></span></small></div><div><span class="label label-default">'
     + location_string
-    + '</span></div>');
+    + '</span></div></div>');
   $('#output_panel').append($waypoint);
+  $waypoint.hover(function(){
+    $(this).find('.delete_media').show();
+  }, function(){
+    $(this).find('.delete_media').hide();
+  });
+  $waypoint.find('.delete_media').on('click', function(){
+    $waypoint.remove();
+    refresh_ids();
+  });
+
   $('.mapboxgl-ctrl-geocoder > input').val('');
   waypoint_title = '';
 }
