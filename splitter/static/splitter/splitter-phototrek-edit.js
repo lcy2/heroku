@@ -163,10 +163,12 @@ function populate_map(collections){
       },
       "layout": {
           "icon-image": "{icon}-15",
+          "icon-allow-overlap": true,
           "text-field": "{title}",
           "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
           "text-offset": [0, 0.6],
           "text-anchor": "top",
+          "text-optional" : true,
       },
       "paint": {
         "text-color" : "#ffffff",

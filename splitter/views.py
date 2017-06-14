@@ -179,9 +179,21 @@ def outward(request):
         url += '?' + urlencode(query)
         return requests.get(url).json()
 
+    def mapbox_rgeo():
+        params = ['latlon_string', 'access_token']
+        if not all([p in request.GET for p in params]):
+            return JsonResponse({'message': 'Missing parameters.'}, status = 400)
+        url = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + request.GET['latlon_string'] + '.json'
+        query = {
+            'access_token': request.GET['access_token'],
+        }
+        url += "?" + urlencode(query)
+        return requests.get(url).json()
+
     outward_action = {
         'mapbox_tsp': mapbox_tsp,
         'mapbox_dir': mapbox_dir,
+        'mapbox_rgeo': mapbox_rgeo,
     }
 
     return JsonResponse(outward_action[request.GET['target']]())

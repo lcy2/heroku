@@ -12,23 +12,29 @@
   </div>
 </div>
 <div class="row spacey_row" id="btn_row"><div class="col-xs-12">
-  <div class="dropdown pull-right">
-    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">Calculate Route <span class="caret"></span></button>
-    <ul class="dropdown-menu">
-      <li><a id="calc_rt">Roundtrip</a></li>
-      <li><a id="calc_ow">One Way</a></li>
-    </ul>
+  <div class="pull-right">
+    <select id="roundtrip" class="selectpicker" data-width="fit">
+      <option value="1">Roundtrip</option>
+      <option value="0">One Way</option>
+    </select>
+    <select id="trans_mode" class="selectpicker" data-width="fit">
+      <option value="driving">Driving</option>
+      <option value="walking">Walking</option>
+      <option value="cycling">Cycling</option>
+    </select>
+    <button id="calc_btn" class="btn btn-primary" type="button">Calculate Route</button>
   </div>
 </div></div>
-TODO: geocoding utility to quickly hop to locations
-then add subsequent location to the list
-submit to API to get optimized trip
 {% endblock %}
 {% block trip_override %}
   <script src='https://api.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.js'></script>
   <link href='https://api.mapbox.com/mapbox-gl-js/v0.37.0/mapbox-gl.css' rel='stylesheet' />
   <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.0/mapbox-gl-geocoder.min.js'></script>
   <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.1.0/mapbox-gl-geocoder.css' type='text/css' />
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
   <link rel="stylesheet" type="text/css" href="{% static 'splitter/testplan.css' %}" />
   <script src="{% static 'splitter/testplan.js' %}"></script>
 {% endblock %}

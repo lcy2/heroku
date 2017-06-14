@@ -29,3 +29,16 @@
 .dropdown-menu a:hover {
   cursor: pointer;
 }
+
+.oneway:last-child {
+  background-color: rgba(162, 8, 8, 0.6);
+}
+.waypoint:first-child {
+  background-color: rgba(28, 138, 30, 0.6);
+}
+.waypoint:first-child > span:first-child::after {
+  content: " (Origin)";
+}
+.oneway:last-child > span:first-child::after {
+  content: " (Destination)";
+}

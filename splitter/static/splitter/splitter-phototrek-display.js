@@ -19,7 +19,6 @@ function format_date(timestamp){
 
 function populate_album(pic_items){
   $('#thumb_list').empty();
-
   $.each(pic_items, function(index, el){
     var last_img = $('<div class="img_wrapper"><img src="' + el.thumbnail + '" /></div>');
     $('#thumb_list').append(last_img);
@@ -27,6 +26,9 @@ function populate_album(pic_items){
     last_img.data('pk', el.pk);
 
     if (is_album){
+      var $screener = $('<div class="detail_screen"><h1>' + el.member_ct + '</h1><p>snapshots<br />available</p></div>');
+      last_img.append($screener);
+
       last_img.on('click', function(e){
         if (last_img.hasClass('media_selected')){
           load_pics(pic_items[index].pk);
@@ -41,8 +43,11 @@ function populate_album(pic_items){
               offset: [0, -150],
             });
           }
+          $('.media_selected > .detail_screen').hide();
           $('.media_selected').removeClass('media_selected');
+
           last_img.addClass('media_selected');
+          $screener.show();
         }
       });
     } else {
@@ -70,11 +75,16 @@ function populate_album(pic_items){
   });
   // map flies to the relevant item when scrolled to
 
+  $('.img_wrapper:first-child').addClass('media_selected');
+  if (is_album){
+    $('.media_selected > .detail_screen').show();
+  }
+
+
+
   $('#thumb_list').on('mousewheel', function(e) {
     var target_element = $(this)[0];
-
     target_element.scrollLeft -= (e.deltaY * 25);
-
   });
 }
 
@@ -119,6 +129,7 @@ function refresh_info_text(pic_item){
   fill_text += '<div class="geo_section">';
   fill_text += '<span class="label label-default">' + (pic_item.geo ? (pic_item.geo.lat.toFixed(5) + ', ' + pic_item.geo.lon.toFixed(5)) : 'Unknown') + '</span><br />';
   fill_text += '</div>';
+
   $('#pic_info').html(fill_text);
 }
 
@@ -156,10 +167,12 @@ function populate_map(collections){
       },
       "layout": {
           "icon-image": "{icon}-15",
+          "icon-allow-overlap": true,
           "text-field": "{title}",
           "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
           "text-offset": [0, 0.6],
           "text-anchor": "top",
+          "text-optional" : true,
       },
       "paint": {
         "text-color" : "#ffffff",
