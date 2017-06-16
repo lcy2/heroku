@@ -1,5 +1,7 @@
+var access_token = 'pk.eyJ1IjoibGljaGFuZ3lpODg4IiwiYSI6ImNqMzJiMW14cDAwMDAzM3MzZ3djcmt4N3QifQ.XknNEOZ93pNGqvU_2oOv5Q';
 var waypoint_title = '';
 var waypoints = [];
+var isDragging, isCursorOverPoint, hasMoved;
 var gmapStyle = [
   {
     "elementType": "geometry",
@@ -311,7 +313,7 @@ function find_path(wps, mode, rt=true){
       dir_disp.setDirections(response);
       // style the markers
       var orders = response.routes[0].waypoint_order;
-      var colors = get_color_steps('#3CA55C', '#90893a', orders.length + 1);
+      var colors = get_color_steps('#3CA55C', '#B5AC49', orders.length + 1);
       $.each([0].concat($.map(orders, function(el, index){
         return el+ 1;
       })), function(index, el){
@@ -322,7 +324,7 @@ function find_path(wps, mode, rt=true){
       });
       if (!rt){
         var wp_icon = waypoints[waypoints.length-1].getIcon();
-        wp_icon.fillColor = '#90893a';
+        wp_icon.fillColor = '#B5AC49';
         wp_icon.fillOpacity = 1;
         waypoints[waypoints.length-1].setIcon(wp_icon);
       }

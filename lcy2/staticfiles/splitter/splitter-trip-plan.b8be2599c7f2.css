@@ -25,10 +25,10 @@
 }
 
 .oneway:last-child {
-  background-color: rgba(144, 137, 58, 1);
+  background-color: rgba(162, 8, 8, 0.6);
 }
 .waypoint:first-child {
-  background-color: rgba(60, 165, 92, 0.8);
+  background-color: rgba(28, 138, 30, 0.6);
 }
 .waypoint:first-child > span:first-child::after {
   content: " (Origin)";
