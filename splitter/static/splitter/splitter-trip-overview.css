@@ -1,6 +1,3 @@
-div.mapboxgl-popup-content {
-  padding: 15px 15px 0;
-}
 #map {
   height: 500px;
 }
@@ -12,6 +9,10 @@ div.mapboxgl-popup-content {
   top: 15px;
   left: 40px;
   z-index: 1;
+}
+.thumbnail_img {
+  min-width: 135px;
+  min-height: 135px;
 }
 
 @media only screen and (max-width: 768px) {

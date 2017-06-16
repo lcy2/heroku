@@ -18,8 +18,8 @@ body {
   -moz-transition: all 1.5s ease-in-out; /** Firefox **/
   -o-transition: all 1.5s ease-in-out; /** Opera **/
 
-  -webkit-transition-delay: 2s; /* Safari */
-  transition-delay: 2s;
+  -webkit-transition-delay: 1s; /* Safari */
+  transition-delay: 1s;
 }
 
 .moved {

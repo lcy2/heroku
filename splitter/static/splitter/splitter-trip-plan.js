@@ -273,7 +273,7 @@ function get_color_steps(start, end, steps){
   var output = []
 
   for (var i = 0; i < 3; i ++){
-    step_height.push((end_nums[i] - start_nums[i]) / steps);
+    step_height.push((end_nums[i] - start_nums[i]) / (steps);
   }
   for (var i = 0; i < steps; i ++){
     output.push('#' + $.map(start_nums, function(el, index){
@@ -496,25 +496,13 @@ function initMap(){
     },
   });
   dir_disp.setMap(map);
+
+  google.maps.event.addListener(map, 'idle', function(){
+    slide_up();
+  });
 }
 
 $(document).ready(function(){
-  /*
-  // setting the csrf token
-  var csrftoken = $('[name=csrfmiddlewaretoken]').val();
-  function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-  }
-  $.ajaxSetup({
-      beforeSend: function(xhr, settings) {
-          if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-              xhr.setRequestHeader("X-CSRFToken", csrftoken);
-          }
-      }
-  });
-  */
-
   $('.selectpicker').selectpicker();
   $('#roundtrip').on('changed.bs.select', function(e, clickedIndex, newValue, oldValue){
     if (clickedIndex == '0'){

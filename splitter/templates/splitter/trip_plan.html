@@ -1,5 +1,6 @@
 {% extends 'splitter/base.html' %}
 {% load static %}
+{% block loading %}{% include "splitter/loading_screen.html" with loading_msg="Loading Map..." only %}{% endblock %}
 {% block main %}
 <div class="container bordered_container">
   <div class="page-header">
@@ -38,10 +39,10 @@
 {% endblock %}
 {% block override %}
   <!-- Latest compiled and minified CSS -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB97NC_evojQAyY2oNMRkjnVNPpo6iBDeU&callback=initMap&libraries=places" type="text/javascript"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
   <!-- Latest compiled and minified JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
   <link rel="stylesheet" type="text/css" href="{% static 'splitter/splitter-trip-plan.css' %}" />
   <script src="{% static 'splitter/splitter-trip-plan.js' %}"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB97NC_evojQAyY2oNMRkjnVNPpo6iBDeU&callback=initMap&libraries=places" type="text/javascript"></script>
 {% endblock %}

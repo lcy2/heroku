@@ -208,7 +208,7 @@ def output_album_json(request, trip):
             'thumbnail': seg.segment_img,
             'time_start': format(seg.segment_start, 'U') if seg.segment_start else None,
             'time_end': format(seg.segment_end, 'U') if seg.segment_end else None,
-            'geo': {'lat': seg.segment_lat, 'lon': seg.segment_lon} if seg.segment_lat and seg.segment_lon else None,
+            'geo': {'lat': seg.segment_lat, 'lng': seg.segment_lon} if seg.segment_lat and seg.segment_lon else None,
             'pk': seg.pk,
             'member_ct': seg.segment_detail['data'][-1]['id'] + 1 if seg.segment_detail['data'] else 0
         },
