@@ -308,11 +308,15 @@ function populate_album(pic_items){
   });
   $('#thumb_list').html(fill_text);
 
+  var marker_id = 0
   $('.media').each(function(index, el){
     var $parent = $(this);
     $parent.data('item_index', index);
     $parent.data('pk', pic_items[index].pk);
-    $parent.data('marker', markers[index]);
+    if (pic_items[index].geo){
+      $parent.data('marker', markers[marker_id]);
+      marker_id ++;
+    }
     if (is_album){
       $parent.find('img.media-object').on('click', function(e){
         if ($parent.hasClass('media_selected')){
@@ -321,14 +325,14 @@ function populate_album(pic_items){
           $('.media_selected').removeClass('media_selected');
           $parent.addClass('media_selected');
           if (pic_items[index].geo){
-            map.panTo(pic_items[index].geo);
+            map.panTo($parent.data('marker').getPosition());
           }
         }
       });
     } else {
       $(this).find('img.media-object').on('click', function(){
         if (pic_items[index].geo){
-          map.panTo(pic_items[index].geo);
+          map.panTo($parent.data('marker').getPosition());
         }
       });
     }
@@ -640,12 +644,6 @@ function hack_pic_time(){
       }
     }, timeoutLimit);
   });
-}
-
-
-function update_geo_field(ci, lngLat){
-  ci.val(lngLat.lat + ", " + lngLat.lng);
-  ci.focus();
 }
 
 function submit_location(){

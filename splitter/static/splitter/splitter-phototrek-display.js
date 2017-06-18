@@ -1,9 +1,269 @@
+var gmapStyle = [
+  {
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#8ec3b9"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1a3646"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.country",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#4b6878"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "labels",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#64779e"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.province",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#4b6878"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.man_made",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#334e87"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#283d6a"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#6f9ba5"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#3C7680"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#304a7d"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#98a5be"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#2c6675"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#255763"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#b0d5ce"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "road.local",
+    "elementType": "labels",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#98a5be"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#283d6a"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#3a4762"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#0e1626"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#4e6d70"
+      }
+    ]
+  }
+];
 var map, pic_data, is_album, lightbox;
-var prevID = -1;
 var imgHeight = 135;
 var mediaMargin = 10;
 var is_first = true;
 var album_scroll = 0;
+var markers = [];
 
 
 
@@ -19,11 +279,16 @@ function format_date(timestamp){
 
 function populate_album(pic_items){
   $('#thumb_list').empty();
+  var marker_id = 0;
   $.each(pic_items, function(index, el){
     var last_img = $('<div class="img_wrapper"><img src="' + el.thumbnail + '" /></div>');
     $('#thumb_list').append(last_img);
     last_img.data('item_index', index);
     last_img.data('pk', el.pk);
+    if (pic_items[index].geo){
+      last_img.data('marker', markers[marker_id]);
+      marker_id ++;
+    }
 
     if (is_album){
       var $screener = $('<div class="detail_screen"><h1>' + el.member_ct + '</h1><p>snapshots<br />available</p></div>');
@@ -35,11 +300,10 @@ function populate_album(pic_items){
         } else {
           refresh_info_text(pic_items[index]);
           if (pic_items[index].geo){
-            var proj = this.getProjection();
-            var pointA = proj.fromLatLngToContainerPixel(geo);
-            pointA.y = pointA.y + 150;
-            map.panTo(proj.fromContainerPixelToLatLng(pointA));
+            map.panTo(last_img.data('marker').getPosition());
+            map.panBy(0, 150);
           }
+
           $('.media_selected > .detail_screen').hide();
           $('.media_selected').removeClass('media_selected');
 
@@ -54,30 +318,23 @@ function populate_album(pic_items){
         } else {
           $('.media_selected').removeClass('media_selected');
           last_img.addClass('media_selected');
+          refresh_info_text(pic_items[index]);
+
           if (pic_items[index].geo){
-            map.flyTo({
-              center: [
-                pic_items[index].geo.lng,
-                pic_items[index].geo.lat,
-              ],
-              offset: [0, -150],
-            });
+            map.panTo(last_img.data('marker').getPosition());
+            map.panBy(0, 150);
           }
         }
 
-
       });
     }
-
   });
-  // map flies to the relevant item when scrolled to
+
 
   $('.img_wrapper:first-child').addClass('media_selected');
   if (is_album){
     $('.media_selected > .detail_screen').show();
   }
-
-
 
   $('#thumb_list').on('mousewheel', function(e) {
     var target_element = $(this)[0];
@@ -124,98 +381,61 @@ function refresh_info_text(pic_item){
   fill_text += '</div>';
 
   fill_text += '<div class="geo_section">';
-  fill_text += '<span class="label label-default">' + (pic_item.geo ? (pic_item.geo.lat.toFixed(5) + ', ' + pic_item.geo.lon.toFixed(5)) : 'Unknown') + '</span><br />';
+  fill_text += '<span class="label label-default">' + (pic_item.geo ? (pic_item.geo.lat.toFixed(5) + ', ' + pic_item.geo.lng.toFixed(5)) : 'Unknown') + '</span><br />';
   fill_text += '</div>';
 
   $('#pic_info').html(fill_text);
 }
 
 function populate_map(collections){
-  // mapbox coordinates are switched
+  if (markers){
+    $.each(markers, function(index, el){
+      el.setMap(null);
+    });
+  }
+  markers = [];
 
-  var geo_feats = $.map(collections, function(el, index){
+
+  $.each(collections, function(index, el){
     if (el.geo){
-      var geo_pt = {
-        "type": "Feature",
-        "geometry": {
-            "type": "Point",
-            "coordinates": [el.geo.lon, el.geo.lat]
-        },
-        "properties": {
-            "title": el.title,
-            "icon": "marker",
-            'pk': el.pk,
-        }
+      var waypoint_icon = {
+        path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z",
+        fillColor: '#FFFFFF',
+        fillOpacity: .8,
+        anchor: new google.maps.Point(12, 24),
+        scale: 1.5,
+        labelOrigin: new google.maps.Point(12, 11),
+        strokeColor: '#AAAAAA',
       }
-      return geo_pt;
+      var waypoint_marker = new google.maps.Marker({
+        position:el.geo,
+        map: map,
+        icon: waypoint_icon,
+        zIndex: 1,
+        label: {
+          text: el.title,
+          fontWeight: 'bold',
+        },
+      });
+      waypoint_marker.pk = el.pk
+      if (is_album){
+        google.maps.event.addListener(waypoint_marker, 'click', function(){
+          load_pics(this.pk);
+        });
+      }
+      markers.push(waypoint_marker);
     }
-    return null;
+
   });
 
-  var point_layer = {
-      "id": "points",
-      "type": "symbol",
-      "source": {
-          "type": "geojson",
-          "data": {
-              "type": "FeatureCollection",
-              "features": geo_feats,
-          }
-      },
-      "layout": {
-          "icon-image": "{icon}-15",
-          "icon-allow-overlap": true,
-          "text-field": "{title}",
-          "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-          "text-offset": [0, 0.6],
-          "text-anchor": "top",
-          "text-optional" : true,
-      },
-      "paint": {
-        "text-color" : "#ffffff",
-      }
-  };
-
-  if (map.getLayer('points')){
-    map.removeLayer("points");
-    map.removeSource("points");
-  }
-  map.addLayer(point_layer);
-
-  if (is_album){
-    function lp_wrapper(e){
-      load_pics(e.features[0].properties.pk);
-      map.off('click', 'points', lp_wrapper);
-    }
-    map.on('click', 'points', lp_wrapper);
-  }
-
-  if (is_first){
-      // Change the cursor to a pointer when the mouse is over the places layer.
-    map.on('mouseenter', 'points', function () {
-        map.getCanvas().style.cursor = 'pointer';
-    });
-
-    // Change it back to a pointer when it leaves.
-    map.on('mouseleave', 'points', function () {
-        map.getCanvas().style.cursor = '';
-    });
-  }
 }
 
 function center_map(collections){
-  var i = 0;
-  while (i < collections.length && !collections[i].geo){
-    i ++;
-  }
-  if (i == collections.length){
-    map.jumpTo({
-      center: [2.3522, 48.8566],
-    }).panBy([0, 150]);
-  } else {
-    map.jumpTo({
-      center: [collections[i].geo.lon, collections[i].geo.lat],
-    }).panBy([0, 150]);
+  for (var i = 0; i< collections.length; i++){
+    if (collections[i].geo){
+      map.setCenter(collections[i].geo);
+      return;
+    }
   }
 }
 
@@ -226,9 +446,8 @@ function newDataProcess(data){
 
     refresh_info_text(pic_data[0]);
 
-    prevID = -1;
-    populate_album(pic_data);
     populate_map(pic_data);
+    populate_album(pic_data);
     if (is_first){
       center_map(pic_data);
       is_first = false;
@@ -237,7 +456,8 @@ function newDataProcess(data){
     message_log("Populate with some photos first.");
   }
 }
-// initially, load in the albums interface
+
+
 function load_albums(){
 
   $.ajax({
@@ -255,6 +475,7 @@ function load_albums(){
     }
   });
 }
+
 function load_pics(pk){
   album_scroll = $('#thumb_list').scrollLeft();
   $('#thumb_list').scrollLeft(0);
@@ -293,7 +514,7 @@ function load_pics(pk){
 }
 
 
-$(document).ready(function(){
+function initMap(){
   // setting the csrf token
   var csrftoken = $('[name=csrfmiddlewaretoken]').val();
   function csrfSafeMethod(method) {
@@ -308,30 +529,27 @@ $(document).ready(function(){
       }
   });
 
-  // initialize map
-  mapboxgl.accessToken = 'pk.eyJ1IjoibGljaGFuZ3lpODg4IiwiYSI6ImNqMzJiMW14cDAwMDAzM3MzZ3djcmt4N3QifQ.XknNEOZ93pNGqvU_2oOv5Q';
-  map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/dark-v9',
-    zoom: 13,
-  });
-  // Add zoom and rotation controls to the map.
-  map.addControl(new mapboxgl.NavigationControl());
 
-  map.on('load', function(){
-    load_albums();
+  // initialize map
+  map = new google.maps.Map($('#map')[0], {
+    center: {lng: 2.3522, lat: 48.8566},
+    zoom: 13,
+    disableDefaultUI: true,
+    scaleControl: true,
+    zoomControl: true,
+    styles: gmapStyle,
   });
-  map.on('sourcedata', function(){
-    if (map.areTilesLoaded()){
-      if (document.readyState === "complete"){
-        slide_up();
-      } else {
-        $(window).one('load', function(){
-          slide_up();
-          //map.off('sourcedata');
-        });
-      }
-    }
+
+  geocoder = new google.maps.Geocoder;
+  // set up the crosshair marker
+
+
+  google.maps.event.addListener(map, 'idle', function(){
+    //slide_up();
   });
+  load_albums();
+}
+
+$(document).ready(function(){
 
 });
