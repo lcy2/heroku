@@ -1,11 +1,272 @@
-var map, itemHeights, pic_data, is_album, seg_pk, edit_actions;
+var gmapStyle = [
+  {
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#8ec3b9"
+      }
+    ]
+  },
+  {
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1a3646"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.country",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#4b6878"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "labels",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.land_parcel",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#64779e"
+      }
+    ]
+  },
+  {
+    "featureType": "administrative.province",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#4b6878"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.man_made",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#334e87"
+      }
+    ]
+  },
+  {
+    "featureType": "landscape.natural",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#283d6a"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#6f9ba5"
+      }
+    ]
+  },
+  {
+    "featureType": "poi",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#3C7680"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#304a7d"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#98a5be"
+      }
+    ]
+  },
+  {
+    "featureType": "road",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#2c6675"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "geometry.stroke",
+    "stylers": [
+      {
+        "color": "#255763"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#b0d5ce"
+      }
+    ]
+  },
+  {
+    "featureType": "road.highway",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#023e58"
+      }
+    ]
+  },
+  {
+    "featureType": "road.local",
+    "elementType": "labels",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#98a5be"
+      }
+    ]
+  },
+  {
+    "featureType": "transit",
+    "elementType": "labels.text.stroke",
+    "stylers": [
+      {
+        "color": "#1d2c4d"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.line",
+    "elementType": "geometry.fill",
+    "stylers": [
+      {
+        "color": "#283d6a"
+      }
+    ]
+  },
+  {
+    "featureType": "transit.station",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#3a4762"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "geometry",
+    "stylers": [
+      {
+        "color": "#0e1626"
+      }
+    ]
+  },
+  {
+    "featureType": "water",
+    "elementType": "labels.text.fill",
+    "stylers": [
+      {
+        "color": "#4e6d70"
+      }
+    ]
+  }
+];
+var map, itemHeights, pic_data, is_album, seg_pk, edit_actions, bullseye, geocoder, old_content;
 var timeoutLimit = 500;
 var imgHeight = 135;
 var mediaMargin = 15;
 var geo_lock = false;
 var album_scroll = 0;
 var is_first = true;
-
+var markers = [];
+var dragging = false;
 
 // TODO: NEED to refactor the map control codes to make things simpler / more managable
 
@@ -14,11 +275,11 @@ function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
-
 function populate_album(pic_items){
   var fill_text = '';
 
   $.each(pic_items, function(index, el){
+    fill_text += '<div class="container-fluid"><div class="row spacey_row"><div class="col-xs-12">'
     fill_text += '<div class="media">';
     fill_text += '<div class="media-left media-top"><img class="media-object thumbnail_img" src="' + el.thumbnail + '" /></div>';
     fill_text += '<div class="media-body">';
@@ -27,47 +288,32 @@ function populate_album(pic_items){
 
     if (is_album){
       fill_text += '<span class="label label-default">' + (el.time_start ? format_date(el.time_start) : '&nbsp;') + '</span> - ';
-      fill_text += '<span class="label label-default">' + (el.time_end ? format_date(el.time_end) : '&nbsp;') + '</span><br />';
+      fill_text += '<span class="label label-default">' + (el.time_end ? format_date(el.time_end) : '&nbsp;') + '</span>';
     } else {
       fill_text +='<span class="label label-default">' + (el.time ? format_date(el.time) : '&nbsp;') + '</span>';
     }
     fill_text += '</div>';
 
     fill_text += '<div class="geo_section">';
-    fill_text += '<span class="label label-default">' + (el.geo ? (el.geo.lat.toFixed(5) + ', ' + el.geo.lon.toFixed(5)) : 'Unknown') + '</span><br />';
+    fill_text += '<span class="label label-default">' + (el.geo ? (el.geo.lat.toFixed(5) + ', ' + el.geo.lng.toFixed(5)) : 'Unknown') + '</span>';
     fill_text += '</div>';
 
     fill_text += '<div class="delete_media"><small><span class="glyphicon glyphicon-trash"></span></small></div>';
     if (!is_album){
       fill_text += '<div class="set_cover"><small><span class="glyphicon glyphicon-picture"></span></small></div>';
     }
+    fill_text += '<div class="geo_confirm"><button class="btn btn-default btn-xs">Confirm</button></div>'
 
-    fill_text += '</div></div>';
+    fill_text += '</div></div></div></div></div>';
   });
   $('#thumb_list').html(fill_text);
-
-  // map flies to the relevant item when scrolled to
-  /*
-  $('#thumb_list').off('scroll');
-  $('#thumb_list').on('scroll', function(){
-    var itemID = Math.floor($(this).scrollTop() / (($(this).prop("scrollHeight") - $(this).height()) / (pic_items.length - 0.0001)));
-    if (itemID && pic_items[itemID].geo){
-      map.flyTo({
-        center: [
-          pic_items[itemID].geo.lon,
-          pic_items[itemID].geo.lat,
-        ]
-      });
-    }
-  });
-  */
 
   $('.media').each(function(index, el){
     var $parent = $(this);
     $parent.data('item_index', index);
     $parent.data('pk', pic_items[index].pk);
+    $parent.data('marker', markers[index]);
     if (is_album){
-      map.off('click', 'points', marker_clicker);
       $parent.find('img.media-object').on('click', function(e){
         if ($parent.hasClass('media_selected')){
           load_pics(pic_items[index].pk);
@@ -75,24 +321,14 @@ function populate_album(pic_items){
           $('.media_selected').removeClass('media_selected');
           $parent.addClass('media_selected');
           if (pic_items[index].geo){
-            map.flyTo({
-              center: [
-                pic_items[index].geo.lon,
-                pic_items[index].geo.lat,
-              ]
-            });
+            map.panTo(pic_items[index].geo);
           }
         }
       });
     } else {
       $(this).find('img.media-object').on('click', function(){
         if (pic_items[index].geo){
-          map.flyTo({
-            center: [
-              pic_items[index].geo.lon,
-              pic_items[index].geo.lat,
-            ]
-          });
+          map.panTo(pic_items[index].geo);
         }
       });
     }
@@ -115,111 +351,75 @@ function populate_album(pic_items){
     $('div.geo_section').one('click', edit_geo);
     $('div.delete_media').on('click', del_med);
 
+
   } else {
     $('div.media .media-heading').one('click', edit_pic_title);
     $('div.time_section').one('click', hack_pic_time);
     $('div.geo_section').one('click', edit_pic_geo);
     $('div.delete_media').on('click', del_pic_med);
     $('div.set_cover').on('click', set_cover);
-
   }
-}
-function marker_clicker(e){
-  map.off('click', 'points', marker_clicker);
-  load_pics(e.features[0].properties.pk);
+  $('.geo_confirm button').on('click', submit_location);
 }
 
 function populate_map(collections){
-  // mapbox coordinates are switched
+  if (markers){
+    $.each(markers, function(index, el){
+      el.setMap(null);
+    });
+  }
+  markers = [];
 
-  var geo_feats = $.map(collections, function(el, index){
+
+  $.each(collections, function(index, el){
     if (el.geo){
-      var geo_pt = {
-        "type": "Feature",
-        "geometry": {
-            "type": "Point",
-            "coordinates": [el.geo.lon, el.geo.lat]
-        },
-        "properties": {
-            "title": el.title,
-            "icon": "marker",
-            "pk": el.pk,
-        }
+      var waypoint_icon = {
+        path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z",
+        fillColor: '#FFFFFF',
+        fillOpacity: .8,
+        anchor: new google.maps.Point(12, 24),
+        scale: 1.5,
+        labelOrigin: new google.maps.Point(12, 11),
+        strokeColor: '#AAAAAA',
       }
-      return geo_pt;
+      var waypoint_marker = new google.maps.Marker({
+        position:el.geo,
+        map: map,
+        icon: waypoint_icon,
+        zIndex: 1,
+        label: {
+          text: el.title,
+          fontWeight: 'bold',
+        },
+      });
+      waypoint_marker.pk = el.pk
+      if (is_album){
+        google.maps.event.addListener(waypoint_marker, 'click', function(){
+          load_pics(this.pk);
+        });
+      }
+      markers.push(waypoint_marker);
     }
-    return null;
+
   });
 
-  var point_layer = {
-      "id": "points",
-      "type": "symbol",
-      "source": {
-          "type": "geojson",
-          "data": {
-              "type": "FeatureCollection",
-              "features": geo_feats,
-          }
-      },
-      "layout": {
-          "icon-image": "{icon}-15",
-          "icon-allow-overlap": true,
-          "text-field": "{title}",
-          "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-          "text-offset": [0, 0.6],
-          "text-anchor": "top",
-          "text-optional" : true,
-      },
-      "paint": {
-        "text-color" : "#ffffff",
-      }
-  };
-  if (map.getLayer('points')){
-    map.removeLayer("points");
-    map.removeSource("points");
-  }
-  map.addLayer(point_layer);
-
-  if (is_album){
-    map.off('click', 'points', marker_clicker);
-    map.on('click', 'points', marker_clicker);
-  }
-
-      // Change the cursor to a pointer when the mouse is over the places layer.
-  if (is_first){
-    map.on('mouseenter', 'points', function () {
-        map.getCanvas().style.cursor = 'pointer';
-    });
-
-    // Change it back to a pointer when it leaves.
-    map.on('mouseleave', 'points', function () {
-        map.getCanvas().style.cursor = '';
-    });
-  }
 }
 
 //centers the map to 1st item (upon initialization)
 function center_map(collections){
-  var i = 0;
-  while (i < collections.length && !collections[i].geo){
-    i ++;
-  }
-  if (i == collections.length){
-    map.jumpTo({
-      center: [2.3522, 48.8566],
-    });
-  } else {
-    map.jumpTo({
-      center: [collections[i].geo.lon, collections[i].geo.lat],
-    });
+  for (var i = 0; i< collections.length; i++){
+    if (collections[i].geo){
+      map.setCenter(collections[i].geo);
+      return;
+    }
   }
 }
 
 function newDataProcess(data){
   pic_data = data.item_data;
   is_album = data.is_album;
-  populate_album(pic_data);
   populate_map(pic_data);
+  populate_album(pic_data);
   if (is_first){
     center_map(pic_data);
     is_first = false;
@@ -298,8 +498,16 @@ function edit_pic_title(){
   });
 }
 
+
+function refresh_after_deletion(){
+  $('.media').each(function(index, el){
+    var $parent = $(this);
+    $parent.data('item_index', index);
+  });
+}
 function del_med(){
   var target = $(this).closest('.media');
+  console.log(target.data('item_index'));
   if (confirm("Delete this item?")){
     $.ajax({
       url: '/splitter/gateway/picdel',
@@ -311,8 +519,9 @@ function del_med(){
       success: function(data){
         message_log(data.message);
         pic_data.splice(target.data('item_index'), 1);
-        populate_album(pic_data);
-        populate_map(pic_data);
+        target.data('marker').setMap(null);
+        target.remove();
+        refresh_after_deletion();
       },
       error: function(xhr, err){
         var response = $.parseJSON(xhr.responseText);
@@ -330,8 +539,9 @@ function del_pic_med(){
       'item_id': target.data('pk'),
     });
     pic_data.splice(target.data('item_index'), 1);
-    populate_album(pic_data);
-    populate_map(pic_data);
+    target.data('marker').setMap(null);
+    target.remove();
+    refresh_after_deletion();
   }
 }
 
@@ -386,7 +596,7 @@ function hack_time(){
           success: function(data){
             message_log(data.message);
             var fill_text = '<span class="label label-default">' + inputs.first().val() + '</span> - ';
-            fill_text += '<span class="label label-default">' + inputs.last().val() + '</span><br />';
+            fill_text += '<span class="label label-default">' + inputs.last().val() + '</span>';
             target.html(fill_text);
           },
           error: function(xhr, err){
@@ -438,77 +648,123 @@ function update_geo_field(ci, lngLat){
   ci.focus();
 }
 
-function initialize_marker(ci, center){
-  // add a marker to where I clicked
-  var bullseye = {
-    "type": "Point",
-    "coordinates": [center.lng, center.lat],
-  }
-  map.addSource('bullseye', {type: 'geojson', data: bullseye});
-  map.addLayer({
-    "id": "bullseye",
-    "type": "symbol",
-    "source": "bullseye",
-    "layout": {
-        "icon-image": "circle-stroked-15",
-    }
-  });
-  update_geo_field(ci, center);
-  // replace the click listener after the first click
-  map.setLayoutProperty('points', 'visibility', 'none');
-  map.once('click', mm_wrapper(ci));
-}
+function submit_location(){
+  // submit location to the database
+  var target = $(this).closest('.media');
+  var child_input = target.find('input');
+  var latlon = child_input.val().split(', ');
 
+  // refresh the map
+  var new_position = {
+    'lat': parseFloat(latlon[0]),
+    'lng': parseFloat(latlon[1]),
+  };
+  if (is_album){
+    $.ajax({
+      url: '/splitter/gateway/picedits',
+      type: 'POST',
+      data: {
+        'pk': target.data('pk'),
+        'target': 'geo',
+        'content': child_input.val(),
+      },
+      dataType: 'json',
+      success: function(data){
+        message_log(data.message, 'success');
+        pic_data[target.data('item_index')].geo = new_position;
+        target.data('marker').setPosition(new_position);
+        target.find('.geo_section').html('<span class="label label-default">' + new_position.lat.toFixed(5) + ', ' + new_position.lng.toFixed(5) + '</span>');
+      },
+      error: function(xhr, err){
+        var response = $.parseJSON(xhr.responseText);
+        message_log(response.message, response.warning_level);
+        target.find('.geo_section').html(old_content);
+      },
+      complete: function(data) {
 
-function mm_wrapper(ci){
-  function move_marker(e){
-    if (map.getLayer('bullseye')){
-      var bullseye = {
-        "type": "Point",
-        "coordinates": [e.lngLat.lng, e.lngLat.lat],
+        remove_geo_suite();
+        target.find('.geo_confirm').hide();
+        target.find('.geo_section').one('click', edit_geo);
+        geo_lock = false;
+
       }
-      map.getSource('bullseye').setData(bullseye);
-      update_geo_field(ci, e.lngLat);
-      map.once('click', mm_wrapper(ci));
-    }
-  }
-  return move_marker;
-}
-/*
-function removeMapListeners(){
-  console.log('removing stuff');
-  $.each(map._listeners.click.filter(function(entry){
-    return entry.name === "move_marker";
-  }), function(i, el){
-    map.off('click', el);
-    console.log("Found it!");
-  });
-  if (map._oneTimeListeners && map._oneTimeListeners.click){
-    $.each(map._oneTimeListeners.click.filter(function(entry){
-      return entry.name === "move_marker";
-    }), function(i, el){
-      map.off('click', el);
     });
+  } else {
+    edit_actions.push({
+      'type': 'edit',
+      'item_id': target.data('pk'),
+      'target': 'loc',
+      'content': new_position,
+    })
+    remove_geo_suite();
+    target.find('.geo_section').html('<span class="label label-default">' + new_position.lat.toFixed(5) + ', ' + new_position.lng.toFixed(5) + '</span>');
+    target.find('.geo_confirm').hide();
+    target.find('.geo_section').one('click', edit_geo);
+    pic_data[target.data('geo')] = new_position;
+    target.data('marker').setPosition(new_position);
+    geo_lock = false;
   }
 }
-*/
+
+function add_geo_suite(ci, loc = map.getCenter()){
+  // add a geocoder to the map
+  $('#content_panel > div:first').append('<input type="text" id="searchTextField" class="form-control"></input>');
+  var searchBox = new google.maps.places.SearchBox($('#searchTextField')[0], {});
+  searchBox.addListener('places_changed', function(){
+    var places = searchBox.getPlaces();
+    if (places.length == 0){
+      return;
+    }
+    bullseye.setPosition(places[0].geometry.location);
+    map.setCenter(places[0].geometry.location);
+    ci.val(bullseye.getPosition().lat() + ", " + bullseye.getPosition().lng());
+  });
+  bullseye.addListener('dragend', function(){
+    console.log('dragging');
+    geocoder.geocode({'location': bullseye.getPosition()}, function(results, status){
+      if (status === 'OK'){
+        if (results[1]){
+          //message_log(results[0].formatted_address);
+          $('#searchTextField').val(results[0].formatted_address);
+        } else {
+          message_log("No results found.");
+        }
+      } else {
+        message_log("Geocoder failed due to: " + status, 'warning');
+      }
+    });
+    ci.val(bullseye.getPosition().lat() + ", " + bullseye.getPosition().lng());
+  });
+
+  bullseye.setMap(map);
+  bullseye.setPosition(loc);
+  map.setCenter(loc);
+}
+
+function remove_geo_suite(){
+  bullseye.setMap(null);
+  $('#searchTextField').remove();
+}
 
 function edit_geo(){
   if (!geo_lock){
-    geo_lock = true;
     var target = $(this);
-    var old_content = target.html();
     var default_content = target.find('span').html();
+
+    old_content = target.html();
+
+    geo_lock = true;
 
     target.html('<input class="input-sm form-control" type="text" value="" />');
     var child_input = target.find('input');
+    target.closest('.media').find('.geo_confirm').show();
+    //console.log(target.closest('.media').find('.geo_confirm'));
 
     if (default_content == "Unknown"){
-      child_input.val("");
-      initialize_marker(child_input, map.getCenter());
+      add_geo_suite(child_input);
     } else {
       child_input.val(default_content);
-      // there's already a latlon, fly to it
+      // there's already a latlng, fly to it
       var latlon = $.map(default_content.split(', '), function(el, index){
         return parseFloat(el);
       });
@@ -516,64 +772,11 @@ function edit_geo(){
         'lng': latlon[1],
         'lat': latlon[0],
       }
-      initialize_marker(child_input, center);
+      add_geo_suite(child_input, center);
 
-      map.flyTo({
-        center: latlon.reverse(),
-        zoom: 13,
-      });
+      map.panTo(center);
     }
-    child_input.focus();
 
-    $('body').on('focusout', function(){
-      setTimeout(function(){
-        if (!child_input.is(":focus") && !$('.mapboxgl-canvas').is(":focus")){
-          // submit location to the database
-          $.ajax({
-            url: '/splitter/gateway/picedits',
-            type: 'POST',
-            data: {
-              'pk': target.closest('.media').data('pk'),
-              'target': 'geo',
-              'content': child_input.val(),
-            },
-            dataType: 'json',
-            success: function(data){
-              message_log(data.message);
-              var latlon = $.map(child_input.val().split(', '), function(el, index){
-                return parseFloat(el).toFixed(5);
-              });
-              target.html('<span class="label label-default">' + latlon.join(', ') + '</span><br />');
-
-              // refresh the map
-              pic_data[target.closest('.media').data('item_index')].geo = {
-                'lat': latlon[0],
-                'lon': latlon[1],
-              };
-              populate_map(pic_data);
-            },
-            error: function(xhr, err){
-              var response = $.parseJSON(xhr.responseText);
-              message_log(response.message, response.warning_level);
-              target.html(old_content);
-            },
-            complete: function(data) {
-              if (map.getLayer('bullseye')){
-                // get rid of the tiny marker
-                map.removeLayer("bullseye");
-                map.removeSource("bullseye");
-              }
-
-              target.one('click', edit_geo);
-              target.removeClass("flex_div");
-              $('body').off('focusout');
-              geo_lock = false;
-
-            }
-          });
-        }
-      }, timeoutLimit);
-    });
   } else {
     $('div.geo_section').one('click', edit_geo);
   }
@@ -584,14 +787,14 @@ function edit_pic_geo(){
   if (!geo_lock){
     geo_lock = true;
     var target = $(this);
-    var old_content = target.html();
+    old_content = target.html();
     var default_content = target.find('span').html();
     target.html('<input class="input-sm form-control" type="text" value="" />');
     var child_input = target.find('input');
+    target.closest('.media').find('.geo_confirm').show();
 
     if (default_content == "Unknown"){
-      child_input.val("");
-      initialize_marker(child_input, map.getCenter());
+      add_geo_suite(child_input);
     } else {
       child_input.val(default_content);
       // there's already a latlon, fly to it
@@ -602,59 +805,10 @@ function edit_pic_geo(){
         'lng': latlon[1],
         'lat': latlon[0],
       }
-      initialize_marker(child_input, center);
+      add_geo_suite(child_input, center);
 
-      map.flyTo({
-        center: latlon.reverse(),
-        zoom: 13,
-      });
+      map.panTo(center);
     }
-    child_input.focus();
-
-    $('body').on('focusout', function(){
-      setTimeout(function(){
-        if (!child_input.is(":focus") && !$('.mapboxgl-canvas').is(":focus")){
-          var latlon = child_input.val().split(', ');
-
-          // validate it's actually a pair of floats
-          if (latlon.length == 2 && latlon.every(isNumeric)){
-
-            var geo = {
-              'lat': parseFloat(latlon[0]),
-              'lon': parseFloat(latlon[1]),
-            }
-
-            edit_actions.push({
-              'type': 'edit',
-              'item_id': target.closest('.media').data('pk'),
-              'target': 'loc',
-              'content': geo,
-            });
-
-
-            target.html('<span class="label label-default">' + geo.lat.toFixed(5) + ', ' + geo.lon.toFixed(5) + '</span><br />');
-
-            // refresh the map
-            pic_data[target.closest('.media').data('item_index')].geo = geo;
-            populate_map(pic_data);
-          } else {
-            target.html(old_content);
-            message_log('Invalid content');
-          }
-
-          if (map.getLayer('bullseye')){
-            // get rid of the tiny marker
-            map.removeLayer("bullseye");
-            map.removeSource("bullseye");
-          }
-
-          target.one('click', edit_pic_geo);
-          target.removeClass("flex_div");
-          $('body').off('focusout');
-          geo_lock = false;
-        }
-      }, timeoutLimit);
-    });
   } else {
     $('div.geo_section').one('click', edit_pic_geo);
   }
@@ -818,8 +972,7 @@ function rtfgClick(e){
 
 }
 
-
-$(document).ready(function(){
+function initMap(){
   // setting the csrf token
   var csrftoken = $('[name=csrfmiddlewaretoken]').val();
   function csrfSafeMethod(method) {
@@ -834,16 +987,43 @@ $(document).ready(function(){
       }
   });
 
-  mapboxgl.accessToken = 'pk.eyJ1IjoibGljaGFuZ3lpODg4IiwiYSI6ImNqMzJiMW14cDAwMDAzM3MzZ3djcmt4N3QifQ.XknNEOZ93pNGqvU_2oOv5Q';
-  map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/dark-v9',
+
+  // initialize map
+  map = new google.maps.Map($('#map')[0], {
+    center: {lng: 2.3522, lat: 48.8566},
     zoom: 13,
+    disableDefaultUI: true,
+    scaleControl: true,
+    zoomControl: true,
+    styles: gmapStyle,
   });
-  // Add zoom and rotation controls to the map.
-  map.addControl(new mapboxgl.NavigationControl());
+  // add the crosshair marker
+  var target_icon = {
+    path: "M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z",
+    fillColor: '#FFFFFF',
+    fillOpacity: .8,
+    strokeWeight: 0,
+    anchor: new google.maps.Point(12, 12),
+    scale: 1,
+  }
+
+  geocoder = new google.maps.Geocoder;
+  // set up the crosshair marker
+  bullseye = new google.maps.Marker({
+    position:map.getCenter(),
+    draggable: true,
+    icon: target_icon,
+    zIndex: 2,
+  });
+
+  google.maps.event.addListener(map, 'idle', function(){
+    //slide_up();
+  });
+  load_albums();
+}
 
 
+$(document).ready(function(){
 
   $('#cancel_lity').on('click', function(){
     $('[data-lity-close]').trigger('click');
@@ -915,24 +1095,5 @@ $(document).ready(function(){
       }
 
     });
-
-
   });
-
-  map.on('load', function(){
-    load_albums();
-  });
-  map.once('sourcedata', function(){
-    if (map.areTilesLoaded()){
-      if (document.readyState === "complete"){
-        slide_up();
-      } else {
-        $(window).one('load', function(){
-          slide_up();
-        });
-      }
-    }
-  });
-
-
 });

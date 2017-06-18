@@ -35,13 +35,10 @@ function populate_album(pic_items){
         } else {
           refresh_info_text(pic_items[index]);
           if (pic_items[index].geo){
-            map.flyTo({
-              center: [
-                pic_items[index].geo.lon,
-                pic_items[index].geo.lat,
-              ],
-              offset: [0, -150],
-            });
+            var proj = this.getProjection();
+            var pointA = proj.fromLatLngToContainerPixel(geo);
+            pointA.y = pointA.y + 150;
+            map.panTo(proj.fromContainerPixelToLatLng(pointA));
           }
           $('.media_selected > .detail_screen').hide();
           $('.media_selected').removeClass('media_selected');
@@ -60,7 +57,7 @@ function populate_album(pic_items){
           if (pic_items[index].geo){
             map.flyTo({
               center: [
-                pic_items[index].geo.lon,
+                pic_items[index].geo.lng,
                 pic_items[index].geo.lat,
               ],
               offset: [0, -150],

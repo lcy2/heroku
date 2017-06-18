@@ -259,7 +259,7 @@ var gmapStyle = [
       }
     ]
   }
-]
+];
 var dir_serv, dir_disp;
 
 function get_color_steps(start, end, steps){
@@ -273,7 +273,7 @@ function get_color_steps(start, end, steps){
   var output = []
 
   for (var i = 0; i < 3; i ++){
-    step_height.push((end_nums[i] - start_nums[i]) / (steps);
+    step_height.push((end_nums[i] - start_nums[i]) / (steps));
   }
   for (var i = 0; i < steps; i ++){
     output.push('#' + $.map(start_nums, function(el, index){

@@ -117,7 +117,7 @@ def refresh_trek_from_google(request, trip):
 
         seg_pos_ct = 0
         seg_lats = []
-        seg_lons = []
+        seg_lngs = []
         seg_start = sys.maxint
         seg_end = 0
 
@@ -140,15 +140,15 @@ def refresh_trek_from_google(request, trip):
                 xmllink = 'georss:where/gml:Point/gml:pos'
                 node = el.find(xmllink, album_feed.nsmap)
                 if node:
-                    sd_lat, sd_lon = map(float, node.text.split())
+                    sd_lat, sd_lng = map(float, node.text.split())
                     seg_det.update({
                         'geo': {
                             'lat': sd_lat,
-                            'lon': sd_lon,
+                            'lng': sd_lng,
                         }
                     })
                     seg_lats.append(sd_lat)
-                    seg_lons.append(sd_lon)
+                    seg_lngs.append(sd_lng)
                     seg_pos_ct += 1
 
             # check if time data exists
@@ -172,7 +172,7 @@ def refresh_trek_from_google(request, trip):
         # if there's enough geo info in the album
         if seg_pos_ct > 0:
             seg.segment_lat = seg_lats[seg_pos_ct / 2]
-            seg.segment_lon = seg_lons[seg_pos_ct / 2]
+            seg.segment_lng = seg_lngs[seg_pos_ct / 2]
             seg.save()
 
         # if there's enough time info in the album
@@ -208,9 +208,9 @@ def output_album_json(request, trip):
             'thumbnail': seg.segment_img,
             'time_start': format(seg.segment_start, 'U') if seg.segment_start else None,
             'time_end': format(seg.segment_end, 'U') if seg.segment_end else None,
-            'geo': {'lat': seg.segment_lat, 'lng': seg.segment_lon} if seg.segment_lat and seg.segment_lon else None,
+            'geo': {'lat': seg.segment_lat, 'lng': seg.segment_lng} if seg.segment_lat and seg.segment_lng else None,
             'pk': seg.pk,
-            'member_ct': seg.segment_detail['data'][-1]['id'] + 1 if seg.segment_detail['data'] else 0
+            'member_ct': seg.segment_detail['data'][-1]['id'] + 1 if seg.segment_detail['data'] else 0,
         },
         segments
     )
@@ -245,7 +245,7 @@ def output_pics_json(request, trip):
             'title': pic['name'],
             'thumbnail': get_fit_thumb(pic['thumbnails'], int(request.POST['thumbsize']))['url'] if 'thumbsize' in request.POST else pic['thumbnails'][0]['url'],
             'time': format(datetime.fromtimestamp(pic['time'], tz = pytz.UTC), 'U') if 'time' in pic else None,
-            'geo': {'lat': pic['geo']['lat'], 'lon': pic['geo']['lon']} if 'geo' in pic else None,
+            'geo': {'lat': pic['geo']['lat'], 'lng': pic['geo']['lng']} if 'geo' in pic else None,
             'pk': pic['id'],
             'src': pic['img'],
         },
@@ -279,7 +279,7 @@ def pic_edits(request, trip, seg):
         return True
     def geo_edits(post_data):
         try:
-            seg.segment_lat, seg.segment_lon = map(float, post_data['content'].split(','))
+            seg.segment_lat, seg.segment_lng = map(float, post_data['content'].split(','))
         except ValueError:
             return False
         return True
@@ -413,3 +413,15 @@ def new_traveler(request):
         'warning_level': 'success',
         'new_pk': new_trav.pk,
     })
+
+def fix_lng():
+    for seg in Segment.objects.all():
+        sd = seg.segment_detail
+        for entry in sd['data']:
+            if 'geo' in entry:
+                print entry['geo']
+                if 'lon' in entry['geo']:
+                    entry['geo']['lng'] = entry['geo']['lon']
+                    del entry['geo']['lon']
+        seg.segment_detail = sd
+        seg.save()

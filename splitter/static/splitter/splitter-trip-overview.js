@@ -258,7 +258,7 @@ var gmapStyle = [
       }
     ]
   }
-]
+];
 var markers = [];
 
 
@@ -333,7 +333,7 @@ function newDataProcess(data){
   var markerCluster = new MarkerClusterer(map, markers, {
     styles: [{
       textColor: 'white',
-      url: '../static/exlibs/clustermarkers/m1.svg',
+      url: '/static/exlibs/clustermarkers/m1.svg',
       height: 36,
       width: 36,
     }],
@@ -371,7 +371,7 @@ function initMap(){
   });
 
   google.maps.event.addListener(map, 'idle', function(){
-    //slide_up();
+    slide_up();
   });
   google.maps.event.addListener(map, 'click', function(){
     if (infowindow){

@@ -2,11 +2,6 @@
 #output_panel {
   height: 500px;
 }
-#geocoder-container > div {
-    min-width:50%;
-    margin-left:25%;
-}
-
 #output_panel {
   overflow-y: auto;
   border: 1px solid #eee;

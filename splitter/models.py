@@ -50,7 +50,7 @@ class Segment(models.Model):
     segment_name = models.CharField(max_length = 50)
     segment_start = models.DateField(blank = True, null = True)
     segment_end = models.DateField(blank = True, null = True)
-    segment_lon = models.FloatField(blank = True, null = True)
+    segment_lng = models.FloatField(blank = True, null = True)
     segment_lat = models.FloatField(blank = True, null = True)
     segment_img = models.URLField(blank = True)
     segment_album = models.CharField(max_length = 30, blank = True)

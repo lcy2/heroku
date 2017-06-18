@@ -1,10 +1,20 @@
 #map {
   height: 500px;
 }
+#searchTextField {
+  position: absolute;
+  right: 50px;
+  top: 20px;
+  width: 300px;
+}
 
 #thumb_list {
   overflow-y: auto;
   height: 500px;
+  position: relative;
+  padding-right: 0;
+}
+#thumb_list .container-fluid {
   position: relative;
 }
 
@@ -13,10 +23,6 @@
 }
 #btn_col {
   padding: 0;
-}
-
-.flex_div {
-  display: flex;
 }
 
 img.thumbnail_img {
@@ -39,20 +45,24 @@ div.media-body {
 
 div.delete_media {
   position: absolute;
-  right: 25px;
-  bottom: 5px;
   display: none;
+  left: 0;
 }
 
 div.set_cover {
   position: absolute;
-  right: 50px;
-  bottom: 5px;
+  left: 15px;
+  display: none;
+}
+
+div.geo_confirm {
+  position: absolute;
+  left: 30px;
   display: none;
 }
 
 div.delete_media:hover,
-div.set_cover:hover {
+div.set_cover:hover, {
   cursor: pointer;
 }
 
