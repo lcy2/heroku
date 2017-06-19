@@ -1,10 +1,5 @@
 html, body { height: 100% }
 
-
-.media-heading {
-  color: #eee;
-}
-
 .img_wrapper > img {
   object-fit: cover;
   width: 135px;
@@ -36,6 +31,21 @@ div.img_wrapper:hover {
   font-size: 20px;
   display: none;
   line-height: 1;
+}
+.media {
+  padding-right: 10px;
+  max-width: 300px;
+}
+.media-body {
+  width: auto;
+}
+.media-left > img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+}
+.media-heading {
+  color: #eee;
 }
 
 

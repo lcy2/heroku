@@ -15,6 +15,26 @@
   min-height: 135px;
 }
 
+.media {
+  padding-right: 10px;
+  max-width: 300px;
+}
+.media-body {
+  width: auto;
+}
+.media-left > img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+}
+.media-heading {
+  color: #eee;
+}
+.spacey_row {
+  margin-left: -30px;
+  margin-right: -30px;
+}
+
 @media only screen and (max-width: 768px) {
   #map {
     height: 200px;

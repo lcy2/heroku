@@ -1,7 +1,7 @@
 {% extends 'splitter/base.html' %}
 {% load static %}
 {% block title %}: {{ trip.trip_name }}{% endblock %}
-
+{% block loading %}{% include "splitter/loading_screen.html" with loading_msg="Loading Map..." only %}{% endblock %}
 {% block main %}
   {% csrf_token %}
   <div id="content_panel">
@@ -18,12 +18,14 @@
   </div>
 {% endblock %}
 {% block override %}
-  <script src="{% static 'exlibs/lity.min.js' %}"></script>
+
   <link rel="stylesheet" href="{% static 'exlibs/lity.min.css' %}" />
-  <script src="{% static 'exlibs/jquery.mousewheel.min.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'exlibs/snazzy-info-window.min.css' %}" />
   <link rel="stylesheet" href="{% static 'splitter/splitter-phototrek-display.css' %}" />
-  <script src="{% static 'splitter/splitter-phototrek-display.js' %}"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css" integrity="sha256-nFp4rgCvFsMQweFQwabbKfjrBwlaebbLkE29VFR0K40=" crossorigin="anonymous" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js" integrity="sha256-urCxMaTtyuE8UK5XeVYuQbm/MhnXflqZ/B9AOkyTguo=" crossorigin="anonymous"></script>
+  <script async defer src="{% static 'splitter/splitter-phototrek-display.js' %}"></script>
+  <script async defer src="{% static 'exlibs/jquery.mousewheel.min.js' %}"></script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB97NC_evojQAyY2oNMRkjnVNPpo6iBDeU&callback=initMap&libraries=places" type="text/javascript"></script>
+  <script async defer src="{% static 'exlibs/snazzy-info-window.min.js' %}"></script>
+  <script async defer src="{% static 'exlibs/lity.min.js' %}"></script>
+
 {% endblock %}

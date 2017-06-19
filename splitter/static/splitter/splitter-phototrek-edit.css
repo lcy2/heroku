@@ -1,6 +1,23 @@
 #map {
   height: 500px;
 }
+
+#map .media {
+  padding-right: 10px;
+  max-width: 300px;
+}
+#map .media-body {
+  width: auto;
+}
+#map .media-left > img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+}
+#map .media-heading {
+  color: #eee;
+}
+
 #searchTextField {
   position: absolute;
   right: 50px;
@@ -31,7 +48,7 @@ img.thumbnail_img {
   height: 135px;
 }
 
-img.media-object:hover {
+img.thumbnail_img:hover {
   cursor: pointer;
 }
 

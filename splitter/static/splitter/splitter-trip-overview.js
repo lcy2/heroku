@@ -298,28 +298,44 @@ function populate_map(collections){
         scale: 1.5,
         labelOrigin: new google.maps.Point(12, 11),
         strokeColor: '#AAAAAA',
+        strokeWeight: 2,
       }
       var waypoint_marker = new google.maps.Marker({
         position:el.geo,
         map: map,
         icon: waypoint_icon,
         zIndex: 1,
-        label: {
-          text: (index + 1).toString(),
-          fontWeight: 'bold',
-        },
       });
       bounds.extend(el.geo);
 
-      google.maps.event.addListener(waypoint_marker, 'click', function(){
-        if (infowindow){
-          infowindow.close();
-        }
-        infowindow = new google.maps.InfoWindow();
-        infowindow.setContent('<div class="thumbnail"><img class="thumbnail_img" src="'
-          + el.thumbnail + '" /><div class="caption"><strong>' + el.title + '</strong></div></div>');
-        infowindow.open(map, this);
+      var boxtext = '<div class="media"><div class="media-left"><img class="media-object" src="' + el.thumbnail + '" /></div><div class="media-body"><div class="media-heading"><h5>' + el.title + '</h5></div></div></div>';
+      var infobox = new SnazzyInfoWindow({
+        marker: waypoint_marker,
+        placement: 'bottom',
+        content: boxtext,
+        showCloseButton: false,
+        padding: '0',
+        backgroundColor: 'rgba(50, 50, 50, 0.8)',
+        border: true,
+        borderRadius: '5px',
+        shadow: false,
+        fontColor: '#000',
+        fontSize: '15px',
+        closeWhenOthersOpen: true,
       });
+      waypoint_marker.addListener('mouseover', function(){
+        infobox.open();
+      });
+
+      waypoint_marker.addListener('mouseout', function(){
+        infobox.close();
+      });
+
+      waypoint_marker.addListener('click', function(){
+        infobox.open();
+      })
+
+
       markers.push(waypoint_marker);
     }
 
@@ -330,14 +346,6 @@ function populate_map(collections){
 function newDataProcess(data){
   pic_data = data.item_data;
   populate_map(pic_data);
-  var markerCluster = new MarkerClusterer(map, markers, {
-    styles: [{
-      textColor: 'white',
-      url: '/static/exlibs/clustermarkers/m1.svg',
-      height: 36,
-      width: 36,
-    }],
-  });
 }
 
 

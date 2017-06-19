@@ -18,8 +18,9 @@
 {% endif %}
 {% endblock %}
 {% block trip_override %}
-  <script src="{% static 'exlibs/markerclusterer.js' %}"></script>
   <link rel="stylesheet" href="{% static 'splitter/splitter-trip-overview.css' %}" />
-  <script src="{% static 'splitter/splitter-trip-overview.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'exlibs/snazzy-info-window.min.css' %}" />
+  <script async defer src="{% static 'splitter/splitter-trip-overview.js' %}"></script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB97NC_evojQAyY2oNMRkjnVNPpo6iBDeU&callback=initMap&libraries=places" type="text/javascript"></script>
+  <script async defer src="{% static 'exlibs/snazzy-info-window.min.js' %}"></script>
 {% endblock %}
