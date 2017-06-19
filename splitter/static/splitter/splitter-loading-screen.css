@@ -12,7 +12,9 @@ body {
   left: 0;
   top: 0;
   background: #009900;
+}
 
+.moved {
   transition: all 1.5s ease-in-out;
   -webkit-transition: all 1.5s ease-in-out; /** Chrome & Safari **/
   -moz-transition: all 1.5s ease-in-out; /** Firefox **/
@@ -20,9 +22,7 @@ body {
 
   -webkit-transition-delay: 1s; /* Safari */
   transition-delay: 1s;
-}
 
-.moved {
   transform: translate(0, -100%);
   -webkit-transform: translate(0, -100%); /** Chrome & Safari **/
   -o-transform: translate(0, -100%); /** Opera **/
