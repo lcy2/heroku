@@ -443,8 +443,9 @@ function populate_map(collections){
         infobox.close();
       });
 
-    });
-  }
+
+    }
+  });
 }
 
 //centers the map to 1st item (upon initialization)
