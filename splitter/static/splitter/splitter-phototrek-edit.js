@@ -419,32 +419,32 @@ function populate_map(collections){
         });
       }
       markers.push(waypoint_marker);
-    }
-    var boxtext = '<div class="media"><div class="media-left"><img class="media-object" src="' + el.thumbnail + '" /></div><div class="media-body"><div class="media-heading"><h5>' + el.title + '</h5></div></div></div>';
-    var infobox = new SnazzyInfoWindow({
-      marker: waypoint_marker,
-      placement: 'bottom',
-      content: boxtext,
-      showCloseButton: false,
-      padding: '0',
-      backgroundColor: 'rgba(50, 50, 50, 0.8)',
-      border: true,
-      borderRadius: '5px',
-      shadow: false,
-      fontColor: '#000',
-      fontSize: '15px',
-      closeWhenOthersOpen: true,
-    });
-    waypoint_marker.addListener('mouseover', function(){
-      infobox.open();
-    });
 
-    waypoint_marker.addListener('mouseout', function(){
-      infobox.close();
+      var boxtext = '<div class="media"><div class="media-left"><img class="media-object" src="' + el.thumbnail + '" /></div><div class="media-body"><div class="media-heading"><h5>' + el.title + '</h5></div></div></div>';
+      var infobox = new SnazzyInfoWindow({
+        marker: waypoint_marker,
+        placement: 'bottom',
+        content: boxtext,
+        showCloseButton: false,
+        padding: '0',
+        backgroundColor: 'rgba(50, 50, 50, 0.8)',
+        border: true,
+        borderRadius: '5px',
+        shadow: false,
+        fontColor: '#000',
+        fontSize: '15px',
+        closeWhenOthersOpen: true,
+      });
+      waypoint_marker.addListener('mouseover', function(){
+        infobox.open();
+      });
+
+      waypoint_marker.addListener('mouseout', function(){
+        infobox.close();
+      });
+
     });
-
-  });
-
+  }
 }
 
 //centers the map to 1st item (upon initialization)
