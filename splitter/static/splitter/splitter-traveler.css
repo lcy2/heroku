@@ -1,0 +1,35 @@
+img {
+  -webkit-filter: blur(5px); /* Safari */
+  filter: blur(1px);
+}
+
+.path {
+  stroke-dasharray: 5000;
+  stroke-dashoffset: 5000;
+  animation: dash 10s linear normal forwards;
+  opacity: 0.5;
+  -webkit-animation-delay: 2s; /* Safari 4.0 - 8.0 */
+  animation-delay: 2s;
+}
+
+svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+}
+
+.image_cropper {
+  position: relative;
+  overflow: hidden;
+  max-width: 500px;
+}
+
+@keyframes dash {
+  from {
+    stroke-dashoffset: 5000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}

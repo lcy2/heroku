@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Splitter{% block title %}{% endblock %}</title>
+
+  </head>
+  <body>
+    {% for trip in trips %}
+      {{ trip.trip_name }}
+      <div class="image_cropper">
+        <img src="{{ trip.profile_pic }}" />
+        {% if trip.profile_misc.svg %}
+          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+            {% for svg in trip.profile_misc.svg %}
+              <path class="path" fill="transparent" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="10" d="{{ svg }}"/>
+            {% endfor %}
+          </svg>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+
+
+
+    <link rel="stylesheet" type="text/css" href="{% static 'splitter/splitter-traveler.css' %}" />
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-100462331-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+  </body>
+</html>

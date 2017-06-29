@@ -14,6 +14,7 @@ from social_django.models import UserSocialAuth
 from .models import Trip, Segment, Traveler
 from . import gateway
 from .decorators import check_trip_access
+from .utils import watershed_image
 
 from lxml import objectify
 from urllib import urlencode
@@ -27,7 +28,7 @@ def index(request):
     private_trips = []
     if user and not user.is_anonymous():
         try:
-            private_trips = user.traveler.trip_set.all().order_by('trip_start')
+            private_trips = (user.traveler.trip_set.all() | user.trip_set.all()).distinct().order_by('trip_start')
         except ObjectDoesNotExist:
             pass
 
@@ -146,6 +147,8 @@ def new_trip(request):
 def trip_plan(request):
     return render(request, 'splitter/trip_plan.html', {})
 
+
+# legacy mapbox json calls
 @login_required
 def outward(request):
     if 'target' not in request.GET:
@@ -197,3 +200,27 @@ def outward(request):
     }
 
     return JsonResponse(outward_action[request.GET['target']]())
+
+
+def traveler(request, trav):
+    try:
+        traveler = Traveler.objects.get(traveler_name = trav)
+    except ObjectDoesNotExist:
+        messages.warning("traveler doesn't exist.")
+        return redirect('splitter:index')
+
+    user = request.user
+    trips = traveler.trip_set.filter(is_private= False)
+    if user and not user.is_anonymous():
+        trips = (user.traveler.trip_set.all() | user.trip_set.all() & traveler.trip_set.all() | trips).distinct()
+
+    if not trips:
+        messages.warning("No viewable trips available.")
+        return redirect('splitter:index')
+
+    context = {
+        'traveler': traveler,
+        'trips': trips,
+    }
+
+    return render(request, 'splitter/traveler.html', context)

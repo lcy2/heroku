@@ -406,6 +406,12 @@ def new_traveler(request):
             'warning_level': 'warning',
         }, status = 401)
 
+    if (Traveler.objects.filter(traveler_name = request.POST['trav_name'])):
+        return JsonResponse({
+            'message': 'Traveler name is already taken.',
+            'warning_level': 'info',
+        })
+
     new_trav = Traveler(traveler_name = request.POST['trav_name'])
     new_trav.save()
     return JsonResponse({
@@ -413,15 +419,3 @@ def new_traveler(request):
         'warning_level': 'success',
         'new_pk': new_trav.pk,
     })
-
-def fix_lng():
-    for seg in Segment.objects.all():
-        sd = seg.segment_detail
-        for entry in sd['data']:
-            if 'geo' in entry:
-                print entry['geo']
-                if 'lon' in entry['geo']:
-                    entry['geo']['lng'] = entry['geo']['lon']
-                    del entry['geo']['lon']
-        seg.segment_detail = sd
-        seg.save()

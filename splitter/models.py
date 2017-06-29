@@ -20,6 +20,9 @@ class Traveler(models.Model):
     def __str__(self):
         return repr(self)
 
+    def get_absolute_url(self):
+        return reverse('splitter:traveler', kwargs={'trav': self.traveler_name})
+
 class Trip(models.Model):
     # name of the trip
     trip_name = models.CharField(max_length = 50, default = "Unname Trip")
@@ -31,6 +34,7 @@ class Trip(models.Model):
     time_modified = models.DateTimeField(auto_now = True)
     time_created = models.DateTimeField(auto_now_add = True)
     profile_pic = models.URLField(default = 'https://unsplash.it/360/200/?random')
+    profile_misc = JSONField(blank = True, null = True, default = dict)
     authorized_viewers = models.ManyToManyField(User, blank = True)
     is_private = models.BooleanField(default = True)
 
