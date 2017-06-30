@@ -359,6 +359,10 @@ def edit_trip_info(request, trip, *args):
         messages.error(request, "Malformed URL for the banner picture.")
         return redirect('splitter:trip_edit', pk=trip.pk)
 
+    if len(request.POST['pp_url']) > 200:
+        messages.error(request, "URL too long. Please limit it to 200 characters.")
+        return redirect('splitter:trip_edit', pk=trip.pk)
+
     trip.trip_description = request.POST['description']
     trip.trip_start = datetime.strptime(request.POST['start_date'], '%Y/%m/%d').date()
     trip.trip_end = datetime.strptime(request.POST['end_date'], '%Y/%m/%d').date()

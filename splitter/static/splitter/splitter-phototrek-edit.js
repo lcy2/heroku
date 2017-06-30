@@ -258,7 +258,7 @@ var gmapStyle = [
     ]
   }
 ];
-var map, itemHeights, pic_data, is_album, seg_pk, edit_actions, bullseye, geocoder, old_content;
+var map, itemHeights, pic_data, is_album, seg_pk, edit_actions, bullseye, geocoder, old_content, colors;
 var timeoutLimit = 500;
 var imgHeight = 135;
 var mediaMargin = 15;
@@ -277,6 +277,10 @@ function get_color_steps(start, end, steps){
   });
   var step_height = [];
   var output = []
+
+  if (steps == 1){
+    return [start];
+  }
 
   for (var i = 0; i < 3; i ++){
     step_height.push((end_nums[i] - start_nums[i]) / (steps - 1));
@@ -340,6 +344,9 @@ function populate_album(pic_items){
       $parent.find('img.media-object').on('click', function(e){
         if ($parent.hasClass('media_selected')){
           load_pics(pic_items[index].pk);
+          if ($parent.data('marker')){
+            new google.maps.event.trigger($parent.data('marker'), 'mouseout');
+          }
         } else {
           $('.media_selected').removeClass('media_selected');
           $parent.addClass('media_selected');
@@ -385,6 +392,57 @@ function populate_album(pic_items){
   $('.geo_confirm button').on('click', submit_location);
 }
 
+function add_marker(el, color){
+  var waypoint_icon = {
+    path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z",
+    fillColor: color,
+    fillOpacity: .8,
+    anchor: new google.maps.Point(12, 24),
+    scale: 1.5,
+    labelOrigin: new google.maps.Point(12, 11),
+    strokeColor: '#AAAAAA',
+    strokeWeight: 2,
+  }
+  var waypoint_marker = new google.maps.Marker({
+    position:el.geo,
+    map: map,
+    icon: waypoint_icon,
+    zIndex: 1,
+  });
+
+  var boxtext = '<div class="media"><div class="media-left"><img class="media-object" src="' + el.thumbnail + '" /></div><div class="media-body"><div class="media-heading"><h5>' + el.title + '</h5></div></div></div>';
+  var infobox = new SnazzyInfoWindow({
+    marker: waypoint_marker,
+    placement: 'bottom',
+    content: boxtext,
+    showCloseButton: false,
+    padding: '0',
+    backgroundColor: 'rgba(50, 50, 50, 0.8)',
+    border: true,
+    borderRadius: '5px',
+    shadow: false,
+    fontColor: '#000',
+    fontSize: '15px',
+    closeWhenOthersOpen: true,
+  });
+  waypoint_marker.addListener('mouseover', function(){
+    infobox.open();
+  });
+
+  waypoint_marker.addListener('mouseout', function(){
+    infobox.close();
+  });
+
+  if (is_album){
+    google.maps.event.addListener(waypoint_marker, 'click', function(){
+      infobox.close()
+      load_pics(el.pk);
+    });
+  }
+  markers.push(waypoint_marker);
+}
+
+
 function populate_map(collections){
   if (markers){
     $.each(markers, function(index, el){
@@ -392,58 +450,11 @@ function populate_map(collections){
     });
   }
   markers = [];
-  var colors = get_color_steps('#3CA55C', '#90893a', collections.length);
+  colors = get_color_steps('#3CA55C', '#90893a', collections.length);
 
   $.each(collections, function(index, el){
     if (el.geo){
-      var waypoint_icon = {
-        path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z",
-        fillColor: colors[index],
-        fillOpacity: .8,
-        anchor: new google.maps.Point(12, 24),
-        scale: 1.5,
-        labelOrigin: new google.maps.Point(12, 11),
-        strokeColor: '#AAAAAA',
-        strokeWeight: 2,
-      }
-      var waypoint_marker = new google.maps.Marker({
-        position:el.geo,
-        map: map,
-        icon: waypoint_icon,
-        zIndex: 1,
-      });
-
-      if (is_album){
-        google.maps.event.addListener(waypoint_marker, 'click', function(){
-          load_pics(el.pk);
-        });
-      }
-      markers.push(waypoint_marker);
-
-      var boxtext = '<div class="media"><div class="media-left"><img class="media-object" src="' + el.thumbnail + '" /></div><div class="media-body"><div class="media-heading"><h5>' + el.title + '</h5></div></div></div>';
-      var infobox = new SnazzyInfoWindow({
-        marker: waypoint_marker,
-        placement: 'bottom',
-        content: boxtext,
-        showCloseButton: false,
-        padding: '0',
-        backgroundColor: 'rgba(50, 50, 50, 0.8)',
-        border: true,
-        borderRadius: '5px',
-        shadow: false,
-        fontColor: '#000',
-        fontSize: '15px',
-        closeWhenOthersOpen: true,
-      });
-      waypoint_marker.addListener('mouseover', function(){
-        infobox.open();
-      });
-
-      waypoint_marker.addListener('mouseout', function(){
-        infobox.close();
-      });
-
-
+      add_marker(el, colors[index]);
     }
   });
 }
@@ -550,7 +561,6 @@ function refresh_after_deletion(){
 }
 function del_med(){
   var target = $(this).closest('.media');
-  console.log(target.data('item_index'));
   if (confirm("Delete this item?")){
     $.ajax({
       url: '/splitter/gateway/picdel',
@@ -709,7 +719,11 @@ function submit_location(){
       success: function(data){
         message_log(data.message, 'success');
         pic_data[target.data('item_index')].geo = new_position;
-        target.data('marker').setPosition(new_position);
+        if (target.data('marker')){
+          target.data('marker').setPosition(new_position);
+        } else {
+          add_marker(pic_data[target.data('item_index')], colors[target.data('item_index')]);
+        }
         target.find('.geo_section').html('<span class="label label-default">' + new_position.lat.toFixed(5) + ', ' + new_position.lng.toFixed(5) + '</span>');
       },
       error: function(xhr, err){
@@ -736,9 +750,13 @@ function submit_location(){
     remove_geo_suite();
     target.find('.geo_section').html('<span class="label label-default">' + new_position.lat.toFixed(5) + ', ' + new_position.lng.toFixed(5) + '</span>');
     target.find('.geo_confirm').hide();
-    target.find('.geo_section').one('click', edit_geo);
-    pic_data[target.data('geo')] = new_position;
-    target.data('marker').setPosition(new_position);
+    target.find('.geo_section').one('click', edit_pic_geo);
+    pic_data[target.data('item_index')].geo = new_position;
+    if (target.data('marker')){
+      target.data('marker').setPosition(new_position);
+    } else {
+      add_marker(pic_data[target.data('item_index')], colors[target.data('item_index')]);
+    }
     geo_lock = false;
   }
 }
@@ -974,7 +992,6 @@ function rtfgClick(e){
   if (confirm("This action might modify / delete current records in this trip. Continue?")){
     // first delete everything in the del queue
     if (del_list.length){
-      console.log(del_list);
       $.ajax({
         url: '/splitter/gateway/picdel',
         type: 'POST',
@@ -986,7 +1003,10 @@ function rtfgClick(e){
           message_log(data.message);
           if (refresh_list.length){
             ajax_call(0);
+          } else {
+            load_albums();
           }
+          $('#back_to_album').remove();
         },
         error: function(xhr, err){
           var response = $.parseJSON(xhr.responseText);
@@ -996,7 +1016,7 @@ function rtfgClick(e){
       });
     } else if (refresh_list.length) {
       ajax_call(0);
-
+      $('#back_to_album').remove();
     } else {
       message_log("No item is slated to change.");
     }

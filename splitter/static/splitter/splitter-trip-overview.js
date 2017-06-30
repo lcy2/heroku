@@ -272,6 +272,10 @@ function get_color_steps(start, end, steps){
   var step_height = [];
   var output = []
 
+  if (steps == 1){
+    return [start];
+  }
+  
   for (var i = 0; i < 3; i ++){
     step_height.push((end_nums[i] - start_nums[i]) / (steps - 1));
   }
