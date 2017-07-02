@@ -6,27 +6,34 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Splitter{% block title %}{% endblock %}</title>
-
+    <link rel="stylesheet" type="text/css" href="{% static 'splitter/splitter-traveler.css' %}" />
   </head>
   <body>
     {% for trip in trips %}
-      {{ trip.trip_name }}
       <div class="image_cropper">
         <img src="{{ trip.profile_pic }}" />
         {% if trip.profile_misc.svg %}
-          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
-            {% for svg in trip.profile_misc.svg %}
-              <path class="path" fill="transparent" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="10" d="{{ svg }}"/>
+          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {{trip.profile_misc.svg.bounds}}">
+            {% for svg in trip.profile_misc.svg.paths %}
+              <path class="path" fill="transparent" stroke="#FFFFFF" stroke-width="2" stroke-miterlimit="10" d="{{ svg }}"/>
             {% endfor %}
           </svg>
         {% endif %}
+        <a href="{{ trip.get_absolute_url }}">
+          <div class='title'>{{ trip.trip_name }}</div>
+        </a>
       </div>
     {% endfor %}
-
-
-
-
-    <link rel="stylesheet" type="text/css" href="{% static 'splitter/splitter-traveler.css' %}" />
+    <div class="navi_indicator">
+      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 10 90">
+        <circle cx="5" cy="5" r="4" stroke="white" stroke-width="1" fill="transparent" />
+        <circle cx="5" cy="85" r="4" stroke="white" stroke-width="1" fill="transparent" />
+        <circle id="dialer" cx="5" cy="5" r="2" stroke="none" stroke-width="1" fill="white" />
+      </svg>
+    </div>
+    <script src="{% static 'exlibs/zenscroll-min.js' %}"></script>
+    <script src="{% static 'exlibs/anime.min.js' %}"></script>
+    <script src="{% static 'splitter/splitter-traveler.js' %}"></script>
     <script>
       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

@@ -151,16 +151,19 @@ def watershed_image(url):
     contours = navigate_points(markers, 10)
     new_img = img.copy()
 
-    output = []
+    bounds = ' '.join(reversed(map(str, markers.shape)))
+
+    paths = []
     for contour in contours:
         epsilon = 0.001*cv2.arcLength(contour,False)
         approx = cv2.approxPolyDP(contour,epsilon,False)
-        output.append(svg_path_from_contour(approx))
-    return output
+        paths.append(svg_path_from_contour(approx))
+    return (paths, bounds)
 
 def watershed_all():
     trips = Trip.objects.all()
     for trip in trips:
-        trip.profile_misc['svg'] = watershed_image(trip.profile_pic)
+        trip.profile_misc['svg'] = dict()
+        trip.profile_misc['svg']['paths'], trip.profile_misc['svg']['bounds'] = watershed_image(trip.profile_pic)
         trip.save()
         print "Watershedded %s" % trip.trip_name
