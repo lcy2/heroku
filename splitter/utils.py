@@ -18,7 +18,7 @@ def navigate_points(ws_marker, n = 3):
 
     def is_step_accessible(location, grid_size):
         def in_grid(location, grid_size):
-            sys.stdout.write("checking grid %r, %r\r" % (location, grid_size))
+            #sys.stdout.write("checking grid %r, %r\r" % (location, grid_size))
 
             return (0 < location[0] < grid_size[0] - 1) and (0 < location[1] < grid_size[1] - 1)
 
@@ -30,20 +30,27 @@ def navigate_points(ws_marker, n = 3):
 
     output = []
     for i in xrange(n):
+        # filter out the available border points
+        avail_bp = filter(lambda x: not visited[x], border_points)
+
         # pick a random point on the border
-        seed = random.choice(border_points)
+        try:
+            seed = random.choice(avail_bp)
+        except IndexError:
+            break
 
         # find the initial pointing
         branches = filter(lambda x: is_step_accessible(x, ws_marker.shape), [vector_add(seed, x) for x in directions])
 
         seed_ctr = 0
+
         # get a new seed if its location is bad
-        while not branches and seed_ctr < 100:
-            seed = random.choice(border_points)
+        while avail_bp and not branches and seed_ctr < 200:
+            seed = random.choice(avail_bp)
             branches = filter(lambda x: is_step_accessible(x, ws_marker.shape), [vector_add(seed, x) for x in directions])
             seed_ctr += 1
 
-        if seed_ctr == 100:
+        if not avail_bp or seed_ctr == 100:
             break
 
         visited[seed] = True
@@ -59,15 +66,20 @@ def navigate_points(ws_marker, n = 3):
             last_id = 'b'
 
             while queue:
-                print queue
+                print '%s\r' % queue[0][1]
                 step, id = queue.popleft()
                 last_id = id
 
                 # are there next steps?
                 next_steps = filter(lambda x: is_step_accessible(x, ws_marker.shape), [vector_add(step, x) for x in directions])
 
+                # if there are no next steps, this is a short termination -> get rid of it
                 if not next_steps:
                     if queue:
+                        # also return its cells back to unvisited
+                        for step in listings[id]:
+                            visited[step[::-1]]
+
                         del listings[id]
                     # if no more queue -> sole survivor, exit loop
                     continue
@@ -87,7 +99,6 @@ def navigate_points(ws_marker, n = 3):
                     visited[next_step] = True
                     listings[new_id] = trajectory[:]
                     listings[new_id].append(next_step[::-1])
-
 
             contour_segments.append(np.array(listings[last_id], dtype=np.int32))
 
@@ -119,36 +130,47 @@ def cv_img_from_url(url):
 def watershed_image(url):
     img = cv_img_from_url(url)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (5, 5), 14)
+    #blurred = cv2.GaussianBlur(gray, (5, 5), 14)
+
+
+    def shed_from_thresh(thresh):
+        kernel = np.ones((3,3),np.uint8)
+        opening = cv2.morphologyEx(thresh,cv2.MORPH_OPEN,kernel, iterations = 2)
+
+        # sure background area
+        sure_bg = cv2.dilate(opening,kernel,iterations=3)
+
+        # Finding sure foreground area
+        dist_transform = cv2.distanceTransform(opening,cv2.DIST_L2,5)
+        ret, sure_fg = cv2.threshold(dist_transform,0.7*dist_transform.max(),255,0)
+
+        # Finding unknown region
+        sure_fg = np.uint8(sure_fg)
+        unknown = cv2.subtract(sure_bg,sure_fg)
+
+        # Marker labelling
+        ret, markers = cv2.connectedComponents(sure_fg)
+
+        # Add one to all labels so that sure background is not 0, but 1
+        markers = markers+1
+
+        # Now, mark the region of unknown with zero
+        markers[unknown==255] = 0
+
+        markers = cv2.watershed(img,markers)
+        return markers
 
     ret, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+    markers = shed_from_thresh(thresh)
 
-    kernel = np.ones((3,3),np.uint8)
-    opening = cv2.morphologyEx(thresh,cv2.MORPH_OPEN,kernel, iterations = 2)
+    ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    # put the borders from the second set of markers together
+    markers[shed_from_thresh(thresh) == -1] = -1
 
-    # sure background area
-    sure_bg = cv2.dilate(opening,kernel,iterations=3)
+    # put all the borders into the same image
 
-    # Finding sure foreground area
-    dist_transform = cv2.distanceTransform(opening,cv2.DIST_L2,5)
-    ret, sure_fg = cv2.threshold(dist_transform,0.7*dist_transform.max(),255,0)
 
-    # Finding unknown region
-    sure_fg = np.uint8(sure_fg)
-    unknown = cv2.subtract(sure_bg,sure_fg)
-
-    # Marker labelling
-    ret, markers = cv2.connectedComponents(sure_fg)
-
-    # Add one to all labels so that sure background is not 0, but 1
-    markers = markers+1
-
-    # Now, mark the region of unknown with zero
-    markers[unknown==255] = 0
-
-    markers = cv2.watershed(img,markers)
-
-    contours = navigate_points(markers, 10)
+    contours = navigate_points(markers, 5)
     new_img = img.copy()
 
     bounds = ' '.join(reversed(map(str, markers.shape)))

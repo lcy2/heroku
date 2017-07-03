@@ -13,7 +13,7 @@
       <div class="image_cropper">
         <img src="{{ trip.profile_pic }}" />
         {% if trip.profile_misc.svg %}
-          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {{trip.profile_misc.svg.bounds}}">
+          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin slice" viewBox="0 0 {{trip.profile_misc.svg.bounds}}">
             {% for svg in trip.profile_misc.svg.paths %}
               <path class="path" fill="transparent" stroke="#FFFFFF" stroke-width="2" stroke-miterlimit="10" d="{{ svg }}"/>
             {% endfor %}

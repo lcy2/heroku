@@ -4,6 +4,7 @@ body {
   /*overflow-y: hidden;*/
   background-color: #000;
   overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 img {
@@ -31,7 +32,8 @@ img {
   position: absolute;
   left: 0;
   top: 0;
-  height: 100%;
+  min-width: 100vw;
+  min-height: 100vh;
 }
 .path {
   opacity: 0;
@@ -40,9 +42,10 @@ img {
 .image_cropper {
   position: relative;
   overflow: hidden;
-  min-width: 100vw;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
   margin: 0;
+  object-fit: cover;
 
 
   -webkit-touch-callout: none;
