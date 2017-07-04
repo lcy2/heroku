@@ -5,6 +5,7 @@ var gallery = document.getElementsByTagName("img");
 var svg_scale = 1;
 var dialer_state = -1;
 var move_locked = false;
+var dialer_fade;
 
 document.body.onmousedown = function(e) {
   if (gallery.length == 1) {
@@ -26,12 +27,10 @@ document.body.onmousedown = function(e) {
   navi.style.top = vorigin + "px";
   dialer.setAttribute('cy', ball_offset);
 
-  anime({
-    targets: navi,
-    opacity: 0.8,
-    duration: 500,
-    easing: "easeOutQuad",
-  });
+  if (dialer_fade.reversed){
+    dialer_fade.reverse();
+  }
+  dialer_fade.play();
 
 }
 
@@ -41,66 +40,66 @@ document.body.onmouseup = function(e){
     return;
   }
 
-  var dialer = document.getElementById("dialer");
+  if (mousedown){
+    var dialer = document.getElementById("dialer");
 
-  if (gallery_pos == 0){
-    if (dialer.getAttribute('cy') == 85) {
-      gallery_move_down();
+    if (gallery_pos == 0){
+      if (dialer.getAttribute('cy') == 85) {
+        gallery_move_down();
+      } else {
+        move_locked = true;
+        anime({
+          targets: dialer,
+          cy: [Math.max((e.clientY - vorigin ) / svg_scale, 5), 5],
+          duration: 100,
+          easing: "easeOutQuad",
+          complete: function(){
+            move_locked = false;
+          },
+        });
+      }
+
+    } else if (gallery_pos == gallery.length - 1) {
+      if (dialer.getAttribute('cy') == 5) {
+        gallery_move_up();
+      } else {
+        move_locked = true;
+        anime({
+          targets: dialer,
+          cy: [Math.min((e.clientY - vorigin ) / svg_scale, 85), 85],
+          duration: 100,
+          easing: "easeOutQuad",
+          complete: function(){
+            move_locked = false;
+          },
+        });
+      }
     } else {
-      move_locked = true;
-      anime({
-        targets: dialer,
-        cy: [Math.max((e.clientY - vorigin ) / svg_scale, 5), 5],
-        duration: 100,
-        easing: "easeOutQuad",
-        complete: function(){
-          move_locked = false;
-        },
-      });
+      if (dialer.getAttribute('cy') == 5) {
+        gallery_move_up();
+      } else if (dialer.getAttribute('cy') == 85) {
+        gallery_move_down();
+      } else {
+        move_locked = true;
+        anime({
+          targets: dialer,
+          cy: [Math.max(Math.min((e.clientY - vorigin ) / svg_scale, 85), 5), 45],
+          duration: 100,
+          easing: "easeOutQuad",
+          complete: function(){
+            move_locked = false;
+          },
+        });
+      }
     }
 
-  } else if (gallery_pos == gallery.length - 1) {
-    if (dialer.getAttribute('cy') == 5) {
-      gallery_move_up();
-    } else {
-      move_locked = true;
-      anime({
-        targets: dialer,
-        cy: [Math.min((e.clientY - vorigin ) / svg_scale, 85), 85],
-        duration: 100,
-        easing: "easeOutQuad",
-        complete: function(){
-          move_locked = false;
-        },
-      });
+    mousedown = false;
+
+    if (!dialer_fade.reversed){
+      dialer_fade.reverse();
     }
-  } else {
-    if (dialer.getAttribute('cy') == 5) {
-      gallery_move_up();
-    } else if (dialer.getAttribute('cy') == 85) {
-      gallery_move_down();
-    } else {
-      move_locked = true;
-      anime({
-        targets: dialer,
-        cy: [Math.max(Math.min((e.clientY - vorigin ) / svg_scale, 85), 5), 45],
-        duration: 100,
-        easing: "easeOutQuad",
-        complete: function(){
-          move_locked = false;
-        },
-      });
-    }
+    dialer_fade.play();
   }
-
-  mousedown = false;
-
-  anime({
-    targets: document.getElementsByClassName('navi_indicator')[0],
-    opacity: 0,
-    duration: 500,
-    easing: "easeOutQuad",
-  });
 }
 
 
@@ -184,11 +183,7 @@ document.body.onmousemove = function(e) {
         }
       }
 
-
-
-
-
-      // all other items
+    // all other items
     } else {
       // if it's sufficiently far up, snap to the top
       if (!move_locked && (e.clientY - vorigin) / svg_scale <= 30 && dialer.getAttribute('cy') > 5){
@@ -327,4 +322,20 @@ window.onload = function(){
   zenscroll.setup(500, 0);
   zenscroll.toY(0);
   display_img();
+
+  dialer_fade = anime({
+    targets: navi,
+    opacity: [0,  0.8],
+    duration: 500,
+    easing: "easeOutQuad",
+    autoplay: false,
+  });
+
+  var anchors = document.getElementsByTagName('a');
+  for (var i = 0, item; item = anchors[i]; i ++){
+    item.onmousedown = function(e){
+      e.stopPropagation();
+      return false;
+    }
+  }
 }
