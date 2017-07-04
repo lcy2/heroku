@@ -11,10 +11,12 @@ img {
   position: relative;
   -webkit-filter: blur(10px);
   filter: blur(10px);
-  min-width: 100vw;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
   opacity: 0;
   display: block;
+  object-fit: cover;
+  object-position: 0 0;
 }
 
 
@@ -32,8 +34,8 @@ img {
   position: absolute;
   left: 0;
   top: 0;
-  min-width: 100vw;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
 }
 .path {
   opacity: 0;
@@ -45,7 +47,6 @@ img {
   width: 100vw;
   height: 100vh;
   margin: 0;
-  object-fit: cover;
 
 
   -webkit-touch-callout: none;
@@ -77,40 +78,4 @@ div.navi_indicator svg {
   width: 20px;
   height: 180px;
   display: block;
-}
-
-@keyframes dash {
-  from {
-    stroke-dashoffset: 1000;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-@keyframes fadeout {
-  from {
-    opacity: 0.5;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes fadein_title {
-  from {
-    opacity: 0;
-    left: 5%;
-  }
-  to {
-    opacity: 0.8;
-    left: 10%;
-  }
-}
-@keyframes fadein {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
