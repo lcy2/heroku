@@ -27,6 +27,39 @@ def navigate_points(ws_marker, n = 3):
     def reform_step(step):
         return tuple(zip(*step))
 
+    class Contour_Branch(object):
+        def __init__(self, starting_point, parent=None):
+            self.parent = parent if parent else self
+            self.children = []
+            self.contour = [starting_point]
+            self.killed = False
+
+        def terminate(self):
+
+            return self.parent._terminate(self)
+
+        def _terminate(self, target):
+            if target == self:
+                raise ValueError("Trying to remove the root node")
+
+            self.children.remove(target)
+            if self.children or self.parent == self:
+                return target.contour
+            else:
+                return target.contour + self.terminate()
+
+
+        def get_full_contour_output(self):
+            if self.parent == self:
+                return map(lambda x: x[::-1], self.contour)
+            else:
+                return self.parent.get_full_contour_output() + map(lambda x: x[::-1], self.contour)
+
+        def get_propogation_front(self):
+            return self.contour[-1]
+
+        def __repr__(self):
+            return repr(self.contour[-1])
 
     output = []
     for i in xrange(n):
@@ -37,6 +70,7 @@ def navigate_points(ws_marker, n = 3):
         try:
             seed = random.choice(avail_bp)
         except IndexError:
+            print "No more border points available."
             break
 
         # find the initial pointing
@@ -50,7 +84,7 @@ def navigate_points(ws_marker, n = 3):
             branches = filter(lambda x: is_step_accessible(x, ws_marker.shape), [vector_add(seed, x) for x in directions])
             seed_ctr += 1
 
-        if not avail_bp or seed_ctr == 100:
+        if not avail_bp or seed_ctr == 200:
             break
 
         visited[seed] = True
@@ -59,16 +93,17 @@ def navigate_points(ws_marker, n = 3):
         contour_segments = []
         for branch in branches:
             # find the longest branch within this branch direction
-            # use DFS, -> queue
-            queue = deque([(branch, 'b')])
-            listings = dict()
-            listings['b'] = [branch[::-1]]
-            last_id = 'b'
-
+            # use BFS, -> queue
+            root = Contour_Branch(branch)
+            queue = deque([root])
+            printctr = 0
             while queue:
-                print '%s\r' % queue[0][1]
-                step, id = queue.popleft()
-                last_id = id
+                printctr += 1
+                if printctr % 100 == 0:
+                    print "processing: point %d" % printctr
+
+                cb = queue.popleft()
+                step = cb.get_propogation_front()
 
                 # are there next steps?
                 next_steps = filter(lambda x: is_step_accessible(x, ws_marker.shape), [vector_add(step, x) for x in directions])
@@ -77,35 +112,34 @@ def navigate_points(ws_marker, n = 3):
                 if not next_steps:
                     if queue:
                         # also return its cells back to unvisited
-                        for step in listings[id]:
-                            visited[step[::-1]]
-
-                        del listings[id]
+                        unvisits = cb.terminate()
+                        visited[reform_step(unvisits)] = False
+                        continue
                     # if no more queue -> sole survivor, exit loop
-                    continue
+                    contour_segments.append(np.array(cb.get_full_contour_output(), dtype=np.int32))
+                    break
 
                 # if there is only one branch, just keep on propagating
                 if len(next_steps) == 1:
-                    queue.append((next_steps[0], id))
-                    listings[id].append(next_steps[0][::-1])
+                    cb.contour.append(next_steps[0])
                     visited[next_steps[0]] = True
+                    queue.append(cb)
                     continue
 
                 # if branching occurs:
-                trajectory = listings.pop(id)
-                for i, next_step in enumerate(next_steps):
-                    new_id = id + str(i)
-                    queue.append((next_step, new_id))
+                for next_step in next_steps:
+                    cb_next = Contour_Branch(next_step, cb)
+                    cb.children.append(cb_next)
+                    queue.append(cb_next)
                     visited[next_step] = True
-                    listings[new_id] = trajectory[:]
-                    listings[new_id].append(next_step[::-1])
-
-            contour_segments.append(np.array(listings[last_id], dtype=np.int32))
 
         # rank according to how long the segments are
+        # stitch together the longest two branches
         contour_segments.sort(key=lambda x: -x.shape[0])
         if len(contour_segments) > 1:
-            output.append(np.concatenate((np.flipud(contour_segments[0]), contour_segments[1]), 0))
+            output.append(np.concatenate((np.flipud(contour_segments[0]), np.array([seed[::-1]]), contour_segments[1]), 0))
+            for cs in contour_segments[2:]:
+                visited[reform_step([c[::-1] for c in cs])] = False
         elif len(contour_segments) == 1:
             output.append(contour_segments[0])
         else:
@@ -133,7 +167,7 @@ def watershed_image(url):
     #blurred = cv2.GaussianBlur(gray, (5, 5), 14)
 
 
-    def shed_from_thresh(thresh):
+    def shed_from_thresh(img, thresh):
         kernel = np.ones((3,3),np.uint8)
         opening = cv2.morphologyEx(thresh,cv2.MORPH_OPEN,kernel, iterations = 2)
 
@@ -161,17 +195,17 @@ def watershed_image(url):
         return markers
 
     ret, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
-    markers = shed_from_thresh(thresh)
+    markers = shed_from_thresh(img, thresh)
 
     ret, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     # put the borders from the second set of markers together
-    markers[shed_from_thresh(thresh) == -1] = -1
-
-    # put all the borders into the same image
-
+    markers[shed_from_thresh(img, thresh) == -1] = -1
 
     contours = navigate_points(markers, 5)
-    new_img = img.copy()
+    # filter out the contours that are shorter than 5% of the longest contour
+    if contours:
+        min_contour_len = cv2.arcLength(contours[0], False) * 0.05
+        contours = filter(lambda x: cv2.arcLength(x, False) >= min_contour_len, contours)
 
     bounds = ' '.join(reversed(map(str, markers.shape)))
 
