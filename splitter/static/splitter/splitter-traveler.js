@@ -5,7 +5,7 @@ var gallery = document.getElementsByTagName("img");
 var svg_scale = 1;
 var dialer_state = -1;
 var move_locked = false;
-var dialer_fade;
+var dialer_fade, last_touch_pos;
 
 document.body.onmousedown = function(e) {
   if (gallery.length == 1) {
@@ -33,7 +33,6 @@ document.body.onmousedown = function(e) {
   dialer_fade.play();
 
 }
-
 
 document.body.onmouseup = function(e){
   if (gallery.length == 1) {
@@ -101,7 +100,6 @@ document.body.onmouseup = function(e){
     dialer_fade.play();
   }
 }
-
 
 document.body.onmousemove = function(e) {
   if (gallery.length == 1) {
@@ -250,6 +248,20 @@ document.body.onmousemove = function(e) {
   }
 }
 
+
+document.body.addEventListener("touchstart", function(e){
+  var event = new MouseEvent('mousedown', {"clientX": e.touches[0].clientX, "clientY": e.touches[0].clientY});
+  document.body.dispatchEvent(event);
+}, true);
+document.body.addEventListener("touchend", function(e){
+  var event = new MouseEvent('mouseup', last_touch_pos);
+  document.body.dispatchEvent(event);
+}, true);
+document.body.addEventListener("touchmove", function(e){
+  last_touch_pos = {"clientX": e.touches[0].clientX, "clientY": e.touches[0].clientY}
+  var event = new MouseEvent('mousemove', last_touch_pos);
+  document.body.dispatchEvent(event);
+}, true);
 
 function gallery_move_up(){
   gallery_pos--;
