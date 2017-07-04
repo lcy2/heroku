@@ -201,7 +201,7 @@ def watershed_image(url):
     # put the borders from the second set of markers together
     markers[shed_from_thresh(img, thresh) == -1] = -1
 
-    contours = navigate_points(markers, 5)
+    contours = navigate_points(markers, 10)
     # filter out the contours that are shorter than 5% of the longest contour
     if contours:
         min_contour_len = cv2.arcLength(contours[0], False) * 0.05
