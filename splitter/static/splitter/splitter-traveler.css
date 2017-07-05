@@ -41,20 +41,22 @@ img {
   opacity: 0;
 }
 
+.image_cropper *,
 .image_cropper {
-  position: relative;
-  overflow: hidden;
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-
-
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+.image_cropper {
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
 }
 .image_cropper:after {
   background: linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.65) 50%, rgba(0,0,0,0) 100%); /* W3C */

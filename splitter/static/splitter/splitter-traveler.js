@@ -252,16 +252,16 @@ document.body.onmousemove = function(e) {
 document.body.addEventListener("touchstart", function(e){
   var event = new MouseEvent('mousedown', {"clientX": e.touches[0].clientX, "clientY": e.touches[0].clientY});
   document.body.dispatchEvent(event);
-}, true);
+});
 document.body.addEventListener("touchend", function(e){
   var event = new MouseEvent('mouseup', last_touch_pos);
   document.body.dispatchEvent(event);
-}, true);
+});
 document.body.addEventListener("touchmove", function(e){
   last_touch_pos = {"clientX": e.touches[0].clientX, "clientY": e.touches[0].clientY}
   var event = new MouseEvent('mousemove', last_touch_pos);
   document.body.dispatchEvent(event);
-}, true);
+});
 
 function gallery_move_up(){
   gallery_pos--;
@@ -347,7 +347,9 @@ window.onload = function(){
   for (var i = 0, item; item = anchors[i]; i ++){
     item.onmousedown = function(e){
       e.stopPropagation();
-      return false;
     }
+    item.addEventListener("touchstart", function(e){
+      e.stopPropagation();
+    });
   }
 }
