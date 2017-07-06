@@ -46,6 +46,7 @@ img {
   opacity: 0;
   z-index: 2;
   font-family: 'Satisfy', sans-serif;
+  maring-right: 50px;
 }
 
 .image_cropper svg {
