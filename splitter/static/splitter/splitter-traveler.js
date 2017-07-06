@@ -379,8 +379,9 @@ window.onload = function(){
     var targets = document.querySelectorAll('.image_cropper, #mobile_wrapper, .image_cropper svg, img');
 
     for (var i = 0; i< targets.length; i ++){
-      targets.style.height = new_height;
+      targets[i].style.height = new_height;
     }
+    myScroller.to(gallery[gallery_pos]);
   }
   document.body.onresize = responsive_resize;
   responsive_resize();
