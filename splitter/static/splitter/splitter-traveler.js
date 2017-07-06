@@ -376,16 +376,27 @@ window.onload = function(){
   // sets image_cropper, svg, mobile_wrapper, imgs
   function responsive_resize(){
     var new_height = window.innerHeight;
-    var targets = document.querySelectorAll('.image_cropper, #mobile_wrapper, .image_cropper svg, img');
 
-    for (var i = 0; i< targets.length; i ++){
-      targets[i].style.height = new_height;
+    var targets = document.getElementsByClassName('image_cropper');
+    for (var i = 0; i < targets.length; i++){
+      targets[i].setAttribute("style", "height:" + new_height + "px");
+      targets[i].getElementsByTagName('svg')[0].setAttribute("style", "height:" + new_height + "px");
     }
+    document.getElementById('mobile_wrapper').setAttribute("style", "height:" + new_height + "px");
+
+    targets = document.getElementsByTagName('img');
+    for (var i = 0; i < targets.length; i++){
+      targets[i].height = new_height;
+    }
+
     myScroller.to(gallery[gallery_pos]);
+
   }
   document.body.onresize = function(){
     responsive_resize();
     var newhtml = "resized!";
+
+
     var targets = document.querySelectorAll('.image_cropper, #mobile_wrapper, .image_cropper svg, img');
 
     for (var i = 0; i< targets.length; i ++){
