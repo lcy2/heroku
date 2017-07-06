@@ -394,22 +394,6 @@ window.onload = function(){
   }
   document.body.onresize = function(){
     responsive_resize();
-    var newhtml = "resized!";
-
-
-    var targets = document.querySelectorAll('.image_cropper, #mobile_wrapper, .image_cropper svg, img');
-
-    for (var i = 0; i< targets.length; i ++){
-      newhtml += " " + targets[i].style.height;
-    }
-
-    document.getElementById('debug').innerHTML = newhtml;
-    anime({
-      targets: document.getElementById('debug'),
-      opacity: [1, 0],
-      duration: 5000,
-      easing: "easeInQuad",
-    })
   }
   responsive_resize();
 
