@@ -78,7 +78,7 @@ img {
   margin: 0;
 }
 .image_cropper:after {
-  background: linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.65) 50%, rgba(0,0,0,0) 100%); /* W3C */
+  background: linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%); /* W3C */
   position: absolute;
   top: 0;
   left: 0;
