@@ -11,7 +11,7 @@ var myScroller;
 
 function gallery_move_up(){
   gallery_pos--;
-  if (gallery[gallery_pos].style.opacity == 0){
+  if (gallery[gallery_pos].getElementsByTagName('img')[0].style.opacity == 0){
     display_img(gallery_pos);
   }
   myScroller.to(gallery[gallery_pos]);
@@ -20,7 +20,7 @@ function gallery_move_up(){
 
 function gallery_move_down(){
   gallery_pos++;
-  if (gallery[gallery_pos].style.opacity == 0){
+  if (gallery[gallery_pos].getElementsByTagName('img')[0].style.opacity == 0){
     display_img(gallery_pos);
   }
   myScroller.to(gallery[gallery_pos]);
@@ -383,7 +383,10 @@ window.onload = function(){
     }
     myScroller.to(gallery[gallery_pos]);
   }
-  document.body.onresize = responsive_resize;
+  document.body.onresize = function(){
+    document.getElementById('debug').innerHTML = "resized!";
+    responsive_resize();
+  }
   responsive_resize();
 
 
