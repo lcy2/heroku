@@ -15,7 +15,7 @@ function gallery_move_up(){
     display_img(gallery_pos);
   }
   myScroller.to(gallery[gallery_pos]);
-  //window.location.hash = '#' + gallery_pos;
+  window.location.hash = '#' + gallery_pos;
 }
 
 function gallery_move_down(){
@@ -24,7 +24,7 @@ function gallery_move_down(){
     display_img(gallery_pos);
   }
   myScroller.to(gallery[gallery_pos]);
-  //window.location.hash = '#' + gallery_pos;
+  window.location.hash = '#' + gallery_pos;
 }
 
 function display_img(index = 0){
@@ -371,4 +371,20 @@ window.onload = function(){
     display_img();
     myScroller.toY(0);
   }
+
+  // set up the resizing for mobile
+  // sets image_cropper, svg, mobile_wrapper, imgs
+  function responsive_resize(){
+    var new_height = window.innerHeight;
+    var targets = document.querySelectorAll('.image_cropper, #mobile_wrapper, .image_cropper svg, img');
+
+    for (var i = 0; i< targets.length; i ++){
+      targets.style.height = new_height;
+    }
+  }
+  document.body.onresize = responsive_resize;
+  responsive_resize();
+
+
+
 }
