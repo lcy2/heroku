@@ -345,7 +345,7 @@ function populate_album(pic_items){
         if ($parent.hasClass('media_selected')){
           load_pics(pic_items[index].pk);
           if ($parent.data('marker')){
-            new google.maps.event.trigger($parent.data('marker'), 'mouseout');
+            google.maps.event.trigger($parent.data('marker'), 'mouseout');
           }
         } else {
           $('.media_selected').removeClass('media_selected');

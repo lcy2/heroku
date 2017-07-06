@@ -323,7 +323,7 @@ function populate_album(pic_items){
           album_id = index;
           load_pics(pic_items[index].pk);
           if (last_img.data('marker')){
-            new google.maps.event.trigger(last_img.data('marker'), 'mouseout');
+            google.maps.event.trigger(last_img.data('marker'), 'mouseout');
           }
         } else {
           refresh_info_text(pic_items[index]);
@@ -340,6 +340,7 @@ function populate_album(pic_items){
 
           google.maps.event.trigger(last_img.data('marker'), 'mouseover');
         }
+
       });
     } else {
       last_img.on('click', function(){
@@ -361,11 +362,12 @@ function populate_album(pic_items){
     }
   });
 
-
   if (is_album){
-    $('.media_selected > .detail_screen').show();
     $('.img_wrapper:nth-child(' + (album_id + 1) + ')').addClass('media_selected');
-    google.maps.event.trigger($('.img_wrapper:nth-child(' + (album_id + 1) + ')').data('marker'), 'mouseover');
+    $('.media_selected > .detail_screen').show();
+    if ($('.img_wrapper:nth-child(' + (album_id + 1) + ')').data('marker') && !is_first){
+      google.maps.event.trigger($('.img_wrapper:nth-child(' + (album_id + 1) + ')').data('marker'), 'mouseover');
+    }
   } else {
     $('.img_wrapper:first-child').addClass('media_selected');
     if ($('.img_wrapper:first-child').data('marker')){
@@ -497,11 +499,29 @@ function populate_map(collections){
 }
 
 function center_map(collections){
-  for (var i = 0; i< collections.length; i++){
-    if (collections[i].geo){
-      map.setCenter(collections[i].geo);
-      map.panBy(0, 150);
-      return;
+  // interject with setting the initial album_id from anchor
+  var hash = parseInt(window.location.hash.substr(1));
+  function isNumeric(n) {
+    return !isNaN(n) && isFinite(n);
+  }
+  if (isNumeric(hash) && hash > 0 && hash < collections.length && collections[hash].geo){
+    var $target = $('.img_wrapper:nth-child(' + (hash + 1) + ')');
+
+    map.panTo(collections[hash].geo);
+    map.panBy(0, 150);
+    $('.media_selected > .detail_screen').hide();
+    $('.media_selected').removeClass('media_selected');
+    $target.addClass('media_selected');
+    $target.find('.detail_screen').show();
+
+    return;
+  } else {
+    for (var i = 0; i< collections.length; i++){
+      if (collections[i].geo){
+        map.panTo(collections[i].geo);
+        map.panBy(0, 150);
+        return;
+      }
     }
   }
 }
@@ -584,7 +604,6 @@ function load_pics(pk){
   });
 }
 
-
 function initMap(){
   // setting the csrf token
   var csrftoken = $('[name=csrfmiddlewaretoken]').val();
@@ -613,7 +632,6 @@ function initMap(){
     },
     styles: gmapStyle,
   });
-
 
   google.maps.event.addListener(map, 'idle', function(){
     slide_up();
