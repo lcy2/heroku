@@ -337,6 +337,7 @@ function populate_album(pic_items){
 
           last_img.addClass('media_selected');
           $screener.show();
+          window.location.hash = '#' + index;
 
           google.maps.event.trigger(last_img.data('marker'), 'mouseover');
         }

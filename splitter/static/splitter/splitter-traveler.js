@@ -13,6 +13,7 @@ function gallery_move_up(){
     display_img(gallery_pos);
   }
   zenscroll.to(gallery[gallery_pos]);
+  window.location.hash = '#' + gallery_pos;
 }
 
 function gallery_move_down(){
@@ -21,6 +22,7 @@ function gallery_move_down(){
     display_img(gallery_pos);
   }
   zenscroll.to(gallery[gallery_pos]);
+  window.location.hash = '#' + gallery_pos;
 }
 
 function display_img(index = 0){
