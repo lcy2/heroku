@@ -9,27 +9,29 @@
     <link rel="stylesheet" type="text/css" href="{% static 'splitter/splitter-traveler.css' %}" />
   </head>
   <body>
-    {% for trip in trips %}
-      <div class="image_cropper">
-        <img src="{{ trip.profile_pic }}" />
-        {% if trip.profile_misc.svg %}
-          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin slice" viewBox="0 0 {{trip.profile_misc.svg.bounds}}">
-            {% for svg in trip.profile_misc.svg.paths %}
-              <path class="path" fill="transparent" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="{{ svg }}"/>
-            {% endfor %}
-          </svg>
-        {% endif %}
-        <a href="{{ trip.get_absolute_url }}">
-          <div class='title'>{{ trip.trip_name }}</div>
-        </a>
+    <div id="mobile_wrapper">
+      {% for trip in trips %}
+        <div class="image_cropper">
+          <img src="{{ trip.profile_pic }}" />
+          {% if trip.profile_misc.svg %}
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMinYMin slice" viewBox="0 0 {{trip.profile_misc.svg.bounds}}">
+              {% for svg in trip.profile_misc.svg.paths %}
+                <path class="path" fill="transparent" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="{{ svg }}"/>
+              {% endfor %}
+            </svg>
+          {% endif %}
+          <a href="{{ trip.get_absolute_url }}">
+            <div class='title'>{{ trip.trip_name }}</div>
+          </a>
+        </div>
+      {% endfor %}
+      <div class="navi_indicator">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 10 90">
+          <circle cx="5" cy="5" r="4" stroke="white" stroke-width="1" fill="transparent" />
+          <circle cx="5" cy="85" r="4" stroke="white" stroke-width="1" fill="transparent" />
+          <circle id="dialer" cx="5" cy="5" r="2" stroke="none" stroke-width="1" fill="white" />
+        </svg>
       </div>
-    {% endfor %}
-    <div class="navi_indicator">
-      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 10 90">
-        <circle cx="5" cy="5" r="4" stroke="white" stroke-width="1" fill="transparent" />
-        <circle cx="5" cy="85" r="4" stroke="white" stroke-width="1" fill="transparent" />
-        <circle id="dialer" cx="5" cy="5" r="2" stroke="none" stroke-width="1" fill="white" />
-      </svg>
     </div>
     <script src="{% static 'exlibs/zenscroll-min.js' %}"></script>
     <script src="{% static 'exlibs/anime.min.js' %}"></script>

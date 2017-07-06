@@ -1,19 +1,21 @@
+
 var vorigin = 5;
 var mousedown = false
 var gallery_pos = 0;
-var gallery = document.getElementsByTagName("img");
+var gallery = document.getElementsByClassName("image_cropper");
 var svg_scale = 1;
 var dialer_state = -1;
 var move_locked = false;
 var dialer_fade, last_touch_pos;
+var myScroller;
 
 function gallery_move_up(){
   gallery_pos--;
   if (gallery[gallery_pos].style.opacity == 0){
     display_img(gallery_pos);
   }
-  zenscroll.to(gallery[gallery_pos]);
-  window.location.hash = '#' + gallery_pos;
+  myScroller.to(gallery[gallery_pos]);
+  //window.location.hash = '#' + gallery_pos;
 }
 
 function gallery_move_down(){
@@ -21,8 +23,8 @@ function gallery_move_down(){
   if (gallery[gallery_pos].style.opacity == 0){
     display_img(gallery_pos);
   }
-  zenscroll.to(gallery[gallery_pos]);
-  window.location.hash = '#' + gallery_pos;
+  myScroller.to(gallery[gallery_pos]);
+  //window.location.hash = '#' + gallery_pos;
 }
 
 function display_img(index = 0){
@@ -359,14 +361,14 @@ window.onload = function(){
     return !isNaN(n) && isFinite(n);
   }
 
-  zenscroll.setup(500, 0);
+  myScroller = zenscroll.createScroller(document.getElementById("mobile_wrapper"), 500, 0);
 
   if (isNumeric(hash) && hash < gallery.length && hash >= 0){
     display_img(hash);
-    zenscroll.to(gallery[hash]);
+    myScroller.to(gallery[hash]);
     gallery_pos = hash;
   } else {
     display_img();
-    zenscroll.toY(0);
+    myScroller.toY(0);
   }
 }
