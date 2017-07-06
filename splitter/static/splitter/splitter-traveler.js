@@ -385,6 +385,11 @@ window.onload = function(){
   }
   document.body.onresize = function(){
     document.getElementById('debug').innerHTML = "resized!";
+    anime({
+      target: document.getElementById('debug'),
+      opacity: [1, 0],
+      duration: 5000,
+    })
     responsive_resize();
   }
   responsive_resize();
