@@ -28,7 +28,9 @@
 
     <div class="panel-footer text-right">
       {% if editable %}
+        {% if currencies|length > 1 %}
         <a role="button" class="btn btn-primary" href="{% url 'splitter:edit_currencies' pk=trip.pk %}">Edit Exchange Rates</a>
+        {% endif %}
       {% endif %}
       <a id="summary_btn" role="button" class="btn btn-primary" href="#summary" data-lity>Summary</a>
     </div>
