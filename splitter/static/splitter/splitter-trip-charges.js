@@ -328,7 +328,7 @@ $(document).ready(function(){
           if (sp_switch == "payment"){
             html += '-alt';
           }
-          html += '" role="progressbar"><span class="sum_number">' + amount + '&nbsp;</span><span>' + currency + '</span></div>';
+          html += '" role="progressbar"><span class="sum_number">' + amount.toFixed(2) + '&nbsp;</span><span>' + currency + '</span></div>';
           var $html = $(html);
           $html.data('animation', anime({
             targets: $html[0],
@@ -385,7 +385,16 @@ $(document).ready(function(){
             $traveler.find('.spending .total_amt').html("0.00");
             $traveler.find('.payment .total_amt').html("0.00");
           } else {
-            $traveler.find('.panel-heading .total_amt').html(((data.accounts[i].total_paid - data.accounts[i].total_spent) / xrate).toFixed(2));
+            var net_val = data.accounts[i].total_paid - data.accounts[i].total_spent;
+            var $net_amt = $traveler.find('.panel-heading .total_amt');
+            if (net_val < 0){
+              $net_amt.html("(" + Math.abs(net_val / xrate).toFixed(2) + ")");
+              $net_amt.css('color', '#990000');
+            } else {
+              $net_amt.html((net_val / xrate).toFixed(2));
+              $net_amt.css('color', 'inherit');
+            }
+
             $traveler.find('.spending .total_amt').html((data.accounts[i].total_spent / xrate).toFixed(2));
             $traveler.find('.payment .total_amt').html((data.accounts[i].total_paid / xrate).toFixed(2));
           }

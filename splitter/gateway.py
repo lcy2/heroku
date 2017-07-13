@@ -623,11 +623,8 @@ def charge_summary(request, trip):
     # calculate the proportions of each currency
     for trav_pk, account in trav_accounts.iteritems():
         account.calc_proportions(accounting['currencies'])
-        print trav_pk + " : "
-        print account
     response = {
         'accounts': [account.output() for account in trav_accounts.itervalues()],
         'message': "Summarized.",
     }
-    print response
     return JsonResponse(response)
