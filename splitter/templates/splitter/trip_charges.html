@@ -1,6 +1,7 @@
 {% extends 'splitter/trip_base.html' %}
 {% load static %}
 {% block trip_base %}
+{% csrf_token %}
 
   <div class="page-header">
     <h1>Accounting</h1>
@@ -37,7 +38,6 @@
   </div>
 
   {% if editable %}
-    {% csrf_token %}
     <div class="container-fluid" id="new_charge_form">
       <div class="row">
         <div class="col-xs-6 col-sm-4 col-md-3">
