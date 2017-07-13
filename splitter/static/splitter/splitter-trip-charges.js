@@ -10,9 +10,10 @@ function submit_form(dataObj){
     dataType: 'json',
     success: function(data){
       message_log(data.message, "success");
-      var new_charge = '<li class="list-group-item" data-hash="' + data.hash_val + '" title="' + data.footnote + '"><span class="label label-default">' + data.time + '</span> ' + data.title + '<small>' + data.footnote + '</small>';
-      new_charge += '<span class="glyphicon glyphicon-trash pull-right"></span>';
-      new_charge += '<span class="glyphicon glyphicon-edit pull-right"></span>';
+      var new_charge = '<li class="list-group-item clearfix" data-hash="' + data.hash_val + '" title="' + data.footnote + '">';
+      new_charge += '<div><span class="label label-default">' + data.time + '</span> ' + data.title + '<small>' + data.footnote + '</small></div>';
+      new_charge += '<div class="pull-right"><span class="glyphicon glyphicon-trash pull-right"></span>';
+      new_charge += '<span class="glyphicon glyphicon-edit pull-right"></span></div>';
       new_charge += '</li>';
       var new_prog = '<div class="progress">';
       for (var i = 0; i < data.breakdown.length; i ++){
@@ -60,8 +61,14 @@ function submit_form(dataObj){
 
       // bind click listener to the deletion glyphicon
       $new_charge.find(".glyphicon-trash").on('click', function(){
-        var $li = $(this).parent();
+        var $li = $(this).closest("li");
         mod_action($li, $li.next());
+      });
+
+      // bind click listener to the deletion glyphicon
+      $new_charge.find(".glyphicon-edit").on('click', function(){
+        var $li = $(this).closest("li");
+        mod_action($li, $li.next(), false);
       });
 
     },
@@ -303,11 +310,11 @@ $(document).ready(function(){
   });
 
   $(".glyphicon-trash").on('click', function(){
-    var $li = $(this).parent();
+    var $li = $(this).closest("li");
     mod_action($li, $li.next());
   });
   $(".glyphicon-edit").on('click', function(){
-    var $li = $(this).parent();
+    var $li = $(this).closest("li");
     mod_action($li, $li.next(), false);
   });
 
