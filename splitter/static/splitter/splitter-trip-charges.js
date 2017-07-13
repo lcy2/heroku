@@ -317,10 +317,8 @@ $(document).ready(function(){
       type: 'POST',
       success: function(data){
         message_log(data.message, "success");
-        var delay_ctr = 0;
-        console.log(data);
 
-        function add_progress(trav_index, trav_pk, currency, amount, portion, sp_switch){
+        function add_progress(trav_index, trav_pk, currency, amount, portion, sp_switch, delay_ctr){
           //sp_switch identifies whether this is for payment or spending progress
           // add a progress to the right container
           // to be animated to full width after the callee loop
@@ -330,18 +328,16 @@ $(document).ready(function(){
           }
           html += '" role="progressbar"><span class="sum_number">' + amount.toFixed(2) + '&nbsp;</span><span>' + currency + '</span></div>';
           var $html = $(html);
-          $html.data('animation', anime({
-            targets: $html[0],
-            width: portion * 100 + "%",
-            easing: "easeOutQuint",
-            duration: 1000,
-            delay: delay_ctr * 50,
-            autoplay: false,
-          }));
-          delay_ctr ++;
-
           var $progress = $('#traveler-' + trav_pk).find("." + sp_switch + " .progress");
           $progress.append($html);
+          $html.data('animation', anime({
+            targets: $html[0],
+            minWidth: (portion * 100) + "%",
+            duration: 500,
+            delay: delay_ctr * 100,
+            easing: 'easeOutQuad',
+            autoplay: false,
+          }));
         }
 
         // clear the progress bars
@@ -371,8 +367,11 @@ $(document).ready(function(){
           $traveler.find('.spending .total_amt').data('base_val', data.accounts[i].total_spent);
 
           $traveler.find('.lity_currency');
+
+          var delay_ctr = 0;
           for (var key in account.spent){
-            add_progress(i, account.pk, key, account.spent[key].amt, account.spent[key].portion, 'spending');
+            add_progress(i, account.pk, key, account.spent[key].amt, account.spent[key].portion, 'spending', delay_ctr);
+            delay_ctr ++;
           }
           // followed by payments
           // spending first:
@@ -401,7 +400,8 @@ $(document).ready(function(){
 
 
           for (var key in account.paid){
-            add_progress(i, account.pk, key, account.paid[key].amt, account.paid[key].portion, 'payment');
+            add_progress(i, account.pk, key, account.paid[key].amt, account.paid[key].portion, 'payment', delay_ctr);
+            delay_ctr ++;
           }
         }
 
@@ -444,7 +444,6 @@ function mod_action($li, $prog, delete_action =true){
     success: function(data){
       $li.remove();
       $prog.remove();
-      console.log(data);
       if (delete_action){
         message_log("Charge deleted.", "success");
       } else {

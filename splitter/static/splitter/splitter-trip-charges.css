@@ -78,6 +78,8 @@ li .glyphicon:hover {
   -moz-box-sizing: border-box;    /* Firefox, other Gecko */
   box-sizing: border-box;         /* Opera/IE 8+ */
   border-right: 1px solid #ddd;
+  -webkit-transition: none;
+  transition: none;
 }
 #summary .progress-bar:last-child {
   border-right: 0;

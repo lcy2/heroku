@@ -234,6 +234,12 @@ def traveler(request, trav):
 
 @check_trip_access(False)
 def charges(request, trip, editable):
+    # if the charges are to be kept private (among travelers)
+    # redirect
+    if trip.accounting['is_private']:
+        messages.info(request, "Finances of this trip is private.")
+        return redirect('splitter:trip_overview', pk = trip.pk)
+
     # if there are no records in charges
     # redirect to the page for creating the initial sets of parameters
     if not trip.accounting['currencies']:

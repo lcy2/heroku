@@ -28,6 +28,7 @@ def charge_json_default():
     return {
         'charges': dict(),
         'currencies': list(),
+        'is_private': True,
     }
 
 class Trip(models.Model):
