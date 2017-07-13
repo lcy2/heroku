@@ -247,7 +247,7 @@ def charges(request, trip, editable):
         url = 'https://openexchangerates.org/api/latest.json?app_id=' + config('OXR_API_KEY')
         rates = requests.get(url).json()['rates']
         url = 'https://openexchangerates.org/api/currencies.json'
-        currencies = [(abbrev, 1 / rates[abbrev], full_name) for abbrev, full_name in requests.get(url).json().iteritems()]
+        currencies = [(abbrev, 1 / float(rates[abbrev]), full_name) for abbrev, full_name in requests.get(url).json().iteritems()]
         context = {
             'trip': trip,
             'currencies': currencies,
