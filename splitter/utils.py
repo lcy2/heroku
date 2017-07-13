@@ -223,3 +223,26 @@ def watershed_all():
         trip.profile_misc['svg']['paths'], trip.profile_misc['svg']['bounds'] = watershed_image(trip.profile_pic)
         trip.save()
         print "Watershedded %s" % trip.trip_name
+
+def process_charge(trip, travelers, charges):
+    traveler_obj = {
+        str(traveler.pk): {
+            'index': index,
+            'name': traveler.traveler_name,
+            'pk': traveler.pk,
+        } for index, traveler in enumerate(travelers)
+    }
+    return sorted([process_charge_helper(trip, traveler_obj, hash_val, charge) for hash_val, charge in charges.iteritems()], key=lambda x: x['time'])
+
+
+def process_charge_helper(trip, travelers, hash_val, charge):
+    payer = travelers[str(charge['payer'])]
+    debtors = [travelers[str(x)] for x in charge['debtors']]
+    currency = trip.accounting['currencies'][charge['currency']]['abbr']
+    title = payer['name'] + " paid " + str(charge['amount']) + " " + currency + " for " + charge['description'] + '.'
+    footnote = "Paid " + ', '.join([str(charge['breakdown'][str(x['pk'])]) + " " + currency + " for " + x['name'] for x in debtors]) + '.'
+    if 'tip_rate' in charge:
+        footnote += ' A ' + str(charge['tip_rate']) + "% tax and tip is included."
+    newbreakdown = [(travelers[key]['index'], int(round(val / charge['amount'] * 100)), (str(val) + " " + currency), travelers[key]['name']) for key, val in charge['breakdown'].iteritems()]
+    print newbreakdown
+    return {'title': title, 'footnote': footnote, "breakdown": newbreakdown, 'hash_val': hash_val, 'time': charge['time']}

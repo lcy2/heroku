@@ -4,11 +4,10 @@
       <a href="{% url 'splitter:trip_edit' pk=trip.id %}" role="button" class="btn btn-primary btn-block">Manage Trip Details</a>
     </div>
     <div class="col-sm-4">
-      <a href="{% url 'splitter:phototrek_edit' pk=trip.id %}" role="button" class="btn btn-primary btn-block">Manage Your PhotoTrek</a>
+      <a href="{% url 'splitter:phototrek_edit' pk=trip.id %}" role="button" class="btn btn-primary btn-block">Manage Your PhotoTrail</a>
     </div>
     <div class="col-sm-4">
-      <a role="button" class="btn btn-primary btn-block">View/Edit Expenses</a>
-      <p><span class="label label-warning">Currently Unavailable</span></p>
+      <a href="{% url 'splitter:trip_charges' pk=trip.id %}" role="button" class="btn btn-primary btn-block">View/Edit Expenses</a>
     </div>
 
   </div>

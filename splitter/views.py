@@ -14,10 +14,11 @@ from social_django.models import UserSocialAuth
 from .models import Trip, Segment, Traveler
 from . import gateway
 from .decorators import check_trip_access
-from .utils import watershed_image
+from .utils import process_charge
 
 from lxml import objectify
 from urllib import urlencode
+from decouple import config
 
 import requests, time, json, re
 
@@ -49,6 +50,10 @@ def gateway_switch(request, action):
         'rpfd': gateway.read_pics_from_db,
         'etd': gateway.edit_trip_info,
         'gpio': gateway.get_preview_info_only,
+        'newcharge': gateway.new_charge,
+        'delcharge': gateway.del_charge,
+        'sumcharge': gateway.charge_summary,
+        'ec': gateway.edit_currencies,
     }
     action_dir_seg = {
         'picedits': gateway.pic_edits,
@@ -63,6 +68,8 @@ def gateway_switch(request, action):
             p = re.compile(r'(?<=\/)[0-9]+(?=[\/#]|$)')
             pk = int(p.search(request.META['HTTP_REFERER']).group())
             return action_dir_trip[action](request, pk)
+        else:
+            return JsonResponse({'message': 'Went down the wrong rabbit hole.'}, status = 400)
     elif action in action_dir_seg:
         seg_pk = None
         if 'pk[]' in request.POST:
@@ -224,3 +231,54 @@ def traveler(request, trav):
     }
 
     return render(request, 'splitter/traveler.html', context)
+
+@check_trip_access(False)
+def charges(request, trip, editable):
+    # if there are no records in charges
+    # redirect to the page for creating the initial sets of parameters
+    if not trip.accounting['currencies']:
+        # get list of currencies from openexchangerate
+        url = 'https://openexchangerates.org/api/latest.json?app_id=' + config('OXR_API_KEY')
+        rates = requests.get(url).json()['rates']
+        url = 'https://openexchangerates.org/api/currencies.json'
+        currencies = [(abbrev, 1 / rates[abbrev], full_name) for abbrev, full_name in requests.get(url).json().iteritems()]
+        context = {
+            'trip': trip,
+            'currencies': currencies,
+        }
+        return render(request, 'splitter/new_charges.html', context)
+
+    # process charges into strings
+    travelers = trip.travelers.all().order_by('pk')
+    charges = process_charge(trip, travelers, trip.accounting['charges'])
+    context = {
+        'trip': trip,
+        'charges': charges,
+        'travelers': travelers,
+        'currencies': trip.accounting['currencies'],
+        'editable': editable,
+    }
+    return render(request, 'splitter/trip_charges.html', context)
+
+
+@check_trip_access(True)
+def edit_currencies(request, trip, editable):
+    # this allows the user to edit currency exchange rates
+    if not trip.accounting['currencies']:
+        messages.error("This trip's finances have yet to be initialized.")
+        return redirect('splitter:charges', pk=trip.pk)
+
+    context = {
+        'trip': trip,
+        'currencies': trip.accounting['currencies'],
+    }
+    return render(request, 'splitter/edit_currencies.html', context)
+
+def debug(request):
+    posts = [key + ":" + repr(request.POST.getlist(key)) for key in request.POST]
+    gets = [key + ":" + repr(request.GET.getlist(key)) for key in request.GET]
+    context = {
+        'posts': posts,
+        'gets': gets,
+    }
+    return render(request, "splitter/test.html", context)

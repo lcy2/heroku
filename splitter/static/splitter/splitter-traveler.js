@@ -396,7 +396,4 @@ window.onload = function(){
     responsive_resize();
   }
   responsive_resize();
-
-
-
 }

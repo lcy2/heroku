@@ -18,12 +18,12 @@
   display: block;
   margin: 5px 3px;
 }
-
+/* palette here http://colorpalettes.net/color-palette-3165-2/ */
 .oneway:last-child {
-  background-color: rgba(144, 137, 58, 1);
+  background-color: #c55a71;
 }
 .waypoint:first-child {
-  background-color: rgba(60, 165, 92, 0.8);
+  background-color: #7a9850;
 }
 .waypoint:first-child > span:first-child::after {
   content: " (Origin)";

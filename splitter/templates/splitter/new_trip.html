@@ -8,14 +8,14 @@
       <div class="container-fluid">
         <div class="row">
           <div class="form-group col-xs-12">
-            <label class="control-label"><h2>Trip Name</h4></label>
+            <label class="control-label"><h2>Trip Name</h2></label>
             <input type="text" name="title" class="form-control input-lg" placeholder="Name of the trip"></input>
           </div>
         </div>
         <div class="row">
           <div class="form-group col-sm-9">
             <label class="control-label">Travellers: </label>
-            <select name="travelers" title="Ghost Trip" class="selectpicker" multiple data-selected-text-format="count>2" data-count-selected-text="{0} Travelers">
+            <select name="travelers" title="Ghost Trip" class="selectpicker" multiple data-selected-text-format="count>2" data-count-selected-text="{0} Travelers" data-max-options="10">
               {% for trav in travelers %}
                 <option value="{{ trav.pk }}" {% if trav.user == user %}selected{% endif %}>[{{trav.pk}}] {{trav.traveler_name}}</option>
               {% endfor %}

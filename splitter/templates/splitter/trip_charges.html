@@ -1,0 +1,159 @@
+{% extends 'splitter/trip_base.html' %}
+{% load static %}
+{% block trip_base %}
+
+  <div class="page-header">
+    <h1>Accounting</h1>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">Details</div>
+    <ul class="list-group">
+      {% for charge in charges %}
+        <li class="list-group-item clearfix" title="{{ charge.footnote }}" data-hash="{{charge.hash_val}}">
+          <div><span class="label label-default">{{charge.time}}</span><span>&nbsp;{{charge.title}}</span><small>{{ charge.footnote }}</small></div>
+          <div class="pull-right">
+            <span class="glyphicon glyphicon-edit"></span>
+            <span class="glyphicon glyphicon-trash "></span>
+          </div>
+        </li>
+        <div class="progress">
+          {% for trav_index, portion, amt, trav_name in charge.breakdown %}
+            <div class="progress-bar progress-bar-flat-{{trav_index}}" role="progressbar" style="width:{{portion}}%">
+              <span class="progress_annotation">{{trav_name}}: {{amt}}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </ul>
+
+    <div class="panel-footer text-right">
+      {% if editable %}
+        <a role="button" class="btn btn-primary" href="{% url 'splitter:edit_currencies' pk=trip.pk %}">Edit Exchange Rates</a>
+      {% endif %}
+      <a id="summary_btn" role="button" class="btn btn-primary" href="#summary" data-lity>Summary</a>
+    </div>
+  </div>
+
+  {% if editable %}
+    {% csrf_token %}
+    <div class="container-fluid" id="new_charge_form">
+      <div class="row">
+        <div class="col-xs-6 col-sm-4 col-md-3">
+          <div class="input-group">
+            <select id="pay_select" name="payer" title="Who" class="selectpicker form-control" data-size="4">
+              {% for traveler in travelers %}
+                <option value="{{traveler.pk}}">{{traveler.traveler_name}}</option>
+              {% endfor %}
+            </select>
+            <span class="input-group-addon">paid</span>
+          </div>
+        </div>
+        <div class="col-xs-6 col-sm-4 col-md-3">
+          <div class="input-group">
+            <span class="input-group-addon">for</span>
+            <select id="debt_select" name="debtors" title="whom" class="selectpicker form-control" multiple data-size="4" data-actions-box="true">
+              {% for traveler in travelers %}
+                <option value="{{traveler.pk}}">{{traveler.traveler_name}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="col-xs-12 col-sm-4 col-md-3">
+          <div class="input-group">
+            <input name="amount" id="amt" placeholder="how much" class="form-control" type="text" value="0.00"></input>
+            <div class="input-group-btn">
+              <select id="currency" name="currencies" class="selectpicker form-control" data-size="4" data-width="70px">
+                {% for currency in currencies %}
+                  <option name="currency" value="{{forloop.counter0}}"{% if forloop.first %} selected{% endif %}>{{currency.abbr}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-4 col-md-3">
+          <div class="input-group date">
+            <input type="text" id="time_input" name="time" readonly class="form-control" placeholder="when"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+          </div>
+        </div>
+        <div class="col-sm-4 col-md-3">
+          <div id="radio_grp">
+            <div class="input-group" id="even_grp">
+              <div class="input-group-addon">
+                <input type="radio" name="distribution" value="even" checked aria-label="even" />
+              </div>
+              <div class="input-group-btn">
+                <button type="button" class="btn btn-default" id="even_btn">Even</button>
+              </div>
+            </div>
+            <div class="input-group" id="itemize_grp">
+              <div class="input-group-addon">
+                <input type="radio" name="distribution" value="itemized" aria-label="itemized" />
+              </div>
+              <div class="dropdown input-group-btn">
+                <button class="btn btn-default dropdown-toggle" type="button" id="itemizing" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Itemize <span class="caret"></span></button>
+                <ul class="dropdown-menu" aria-labelledby="itemize-dropdown" id="itemize_dropdown">
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-4 pull-right">
+          <div class="input-group pull-right" id="tt_grp">
+            <div class="input-group-addon">
+              <input type="checkbox" name="taxandtip" id="tt_check" />
+            </div>
+            <span class="input-group-addon">Tax &amp; Tip</span>
+            <input class="form-control" type="text" id="tt_amt" size="4" maxlength="4" value="25" />
+            <span class="input-group-addon">%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <span class="input-group-addon">What for?</span>
+        <input name="description" type="text" class="form-control" id="descriptor"></input>
+        <div class="input-group-btn">
+          <button id="submit" class="btn btn-primary" type="button">Submit</button>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  </div>
+
+  <div id="summary" class="container lity-hide">
+    {% for traveler in travelers %}
+      <div class="panel panel-default" id="traveler-{{traveler.pk}}">
+        <div class="panel-heading">{{traveler.traveler_name}}<div class="pull-right"><span class="total_amt"></span>&nbsp;<span class="lity_currency"></span></div></div>
+        <div class="panel-body">
+          <div class="spending">
+            <span class="label label-default">Spending: </span><small class="pull-right"><span class="total_amt"></span>&nbsp;<span class="lity_currency"></span></small>
+            <div class="progress"></div>
+          </div>
+          <div class="payment">
+            <span class="label label-default">Payment: </span><small class="pull-right"><span class="total_amt"></span>&nbsp;<span class="lity_currency"></span></small>
+            <div class="progress"></div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    <select id="lity_currency_select" class="selectpicker form-control pull-right" data-size="4" data-width="70px">
+      {% for currency in currencies %}
+        <option name="currency" value="{{currency.custom_xrate}}"{% if forloop.first %} selected{% endif %}>{{currency.abbr}}</option>
+      {% endfor %}
+    </select>
+  </div>
+{% endblock %}
+
+{% block trip_override %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css" integrity="sha256-nFp4rgCvFsMQweFQwabbKfjrBwlaebbLkE29VFR0K40=" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js" integrity="sha256-urCxMaTtyuE8UK5XeVYuQbm/MhnXflqZ/B9AOkyTguo=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
+  <script src="{% static 'exlibs/anime.min.js' %}"></script>
+  <script src="{% static 'exlibs/lity.min.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'exlibs/lity.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'splitter/splitter-trip-charges.css' %}" />
+  <script src="{% static 'splitter/splitter-trip-charges.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'splitter/splitter-custom-progress-bars.css' %}" />
+{% endblock %}

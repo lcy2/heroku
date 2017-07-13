@@ -1,0 +1,9 @@
+label {
+  display: block;
+}
+.label {
+  white-space:normal;
+  display: inline-block;
+  margin-bottom: 3px;
+  text-align: left;
+}

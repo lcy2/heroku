@@ -1,0 +1,41 @@
+{% extends 'splitter/trip_base.html' %}
+{% load static %}
+{% block trip_base %}
+  <form action="{% url 'splitter:gateway' action='ec' %}" method="post">
+    <div class="container-fluid">
+      <div class="page-header">
+        <h1>Edit Exchange Rates</h1>
+      </div>
+      <div class="row">
+      {% csrf_token %}
+      {% for currency in currencies %}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="form-group">
+            <label class="control-label">{{currency.abbr}} <small>{{currency.name}}</small></label>
+            <div class="input-group">
+              <input class="c_input form-control" type="text" name="currencies" value="{{currency.custom_xrate}}"></input>
+              <span class="input-group-addon">vs. {{currency.xrate}}</span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+      <div class="row">
+        <div class="col-xs-8">
+          <span class="label label-default">Conversions are in USD</span>
+          <span class="label label-default">Formal rates are shown as reference.</span>
+        </div>
+        <div class="col-xs-4 text-right">
+            <button type="submit" class="btn btn-primary">Submit</button>
+
+        </div>
+      </div>
+    </div>
+  </form>
+{% endblock %}
+
+{% block trip_override %}
+  <script src="{% static 'exlibs/anime.min.js' %}"></script>
+  <script src="{% static 'splitter/splitter-edit-currencies.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'splitter/splitter-edit-currencies.css' %}" />
+{% endblock %}

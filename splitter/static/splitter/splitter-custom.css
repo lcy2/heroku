@@ -1,10 +1,12 @@
+/* use this palette http://colorpalettes.net/color-palette-164/ */
+
 .navbar-inverse {
-  background-color: #003300;
+  background-color: #072a16;
 }
 
 .navbar-brand,
 .navbar-nav > li > a {
-  color: #bbb !important;
+  color: #eee !important;
   line-height: 50px;
   height: 50px;
   padding-top: 0;
@@ -20,7 +22,7 @@
 }
 
 .navbar {
-  border-bottom: 10px #009900 solid;
+  border-bottom: 10px #2d6b22 solid;
 }
 
 .navbar-inverse .navbar-toggle {
@@ -39,21 +41,25 @@
 }
 
 .btn-primary {
-  background-color: #004d00;
-  border-color: #009900;
+  background-color: #072a16;
+  border-color: #8ab446;
 }
 .btn-primary:hover {
-  background-color: #006600;
+  background-color: #2d6b22;
+  border-color: #acc864;
 }
 .btn-primary:focus {
-  background-color: #003300;
+  background-color: #2d6b22;
+  border-color: #8ab446;
 }
 .btn-primary:active,
 .btn-primary.active {
-  background-color: #003300 !important;
+  background-color: #8ab446 !important;
+  border-color: #acc864;
 }
  .btn-primary:active:focus {
-   background-color: #003300;
+   background-color: #8ab446;
+   border-color: #d3e29d;
 }
 
 .glyphicon-menu-hamburger {

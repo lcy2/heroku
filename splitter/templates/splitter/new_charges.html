@@ -1,0 +1,35 @@
+{% extends 'splitter/base.html' %}
+{% load static %}
+{% block main %}
+  <div class="container bordered_container">
+    <form action="{% url 'splitter:init_charges' pk=trip.pk %}" method="post">
+      {% csrf_token %}
+      <div class="container-fluid">
+        <div class="page-header">
+          <h1>Select Currencies</h1>
+        </div>
+        <div class="row">
+          <div class="form-group col-sm-9">
+            <label class="control-label">Currencies: </label>
+            <select name="currencies" title="Select Currencies" class="selectpicker" data-size="7" multiple data-selected-text-format="count>2" data-count-selected-text="{0} Currencies" data-live-search="true">
+              {% for abbrev, rate, full_name in currencies %}
+                <option value="{{full_name}}:{{ abbrev }}:{{rate}}" data-tokens="{{full_name}} {{abbrev}}" data-subtext="{{full_name}}">{{abbrev}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-sm-3">
+            <div class="pull-right">
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+{% endblock %}
+
+{% block override %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
+  <script src="{% static 'splitter/splitter-new-charges.js' %}"></script>
+{% endblock %}

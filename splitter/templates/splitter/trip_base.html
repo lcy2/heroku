@@ -14,15 +14,15 @@
 {% block override %}
   <style>
     .jumbotron {
-      background-image: url({{ trip.profile_pic }});
-      background-position: right;
-      background-repeat: no-repeat;
+      background:
+        linear-gradient(to right, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%),
+        #ffffff url({{ trip.profile_pic }}) no-repeat;
       width: 100%;
       background-size: cover;
+      color:#FFF;
     }
 
     .jumbotron span {
-      background-color: rgba(200, 200, 200, 0.8);
       padding: 10px auto;
     }
   </style>
