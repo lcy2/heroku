@@ -236,7 +236,7 @@ def traveler(request, trav):
 def charges(request, trip, editable):
     # if the charges are to be kept private (among travelers)
     # redirect
-    if trip.accounting['is_private']:
+    if trip.accounting['is_private'] and not editable:
         messages.info(request, "Finances of this trip is private.")
         return redirect('splitter:trip_overview', pk = trip.pk)
 
