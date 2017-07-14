@@ -23,7 +23,6 @@ from urlparse import urlparse
 # from https://github.com/morganwahl/photos-db/blob/master/photosdb/photosdb/views.py
 def _picasa_feed(google, add_url = '', **query):
     """'google' is a GoogleOAuth2 UserSocialAuth instance."""
-
     # check whether the token needs refreshing
     if (google.extra_data['auth_time'] + google.extra_data['expires'] - 10) <= int(time.time()):
         from social_django.utils import load_strategy
@@ -52,6 +51,10 @@ def get_preview_info_only(request, trip):
     except social_auth.DoesNotExist:
         return JsonResponse({'message':  'You do not have linked social accounts.', 'warning_level': 'warning'}, status = 401)
     xml = _picasa_feed(social, kind='album', prettyprint='false')
+    if xml == "Token revoked":
+        messages.error(request, "Your credential has been revoked.")
+        return JsonResponse({'message': 'Your credential has been revoked.', 'warning_level': 'danger', 'action': reverse('logout') + "?next=" + reverse('splitter:index')}, status = 403)
+
     feed = objectify.fromstring(xml)
 
     if feed.tag == "error":
@@ -61,7 +64,7 @@ def get_preview_info_only(request, trip):
                 'warning_level': 'info',
                 'action': reverse('login'),
             }, status = 400);
-    if not feed.find('entry'):
+    if not len(feed.find('entry')):
         return JsonResponse({
             'message': 'No albums found in your Google Photos.',
             'warning_level': 'info',
@@ -104,8 +107,12 @@ def refresh_trek_from_google(request, trip):
 
     for album_id in request.POST.getlist('album_ids[]'):
         album_xml = _picasa_feed(social, add_url="/albumid/" + album_id, imgmax=1600)
+        if album_xml == "Token revoked":
+            messages.error(request, "Your credential has been revoked.")
+            return JsonResponse({'message': 'Your credential has been revoked.', 'warning_level': 'danger', 'action': reverse('logout') + "?next=" + reverse('splitter:index')}, status = 403)
         album_feed = objectify.fromstring(album_xml)
-    #for album in album_infos[start:start + 10]:
+
+
         seg = Segment(
             trip=trip,
             segment_name = album_feed.title.text,

@@ -967,6 +967,9 @@ function rtfgClick(e){
         var response = $.parseJSON(xhr.responseText);
         message_log(response.message, response.warning_level);
         $('[data-lity-close]').trigger('click');
+        if (response.action){
+          window.location.replace(response.action);
+        }
       },
     });
   }

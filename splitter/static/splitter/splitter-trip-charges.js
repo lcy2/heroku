@@ -11,9 +11,11 @@ function submit_form(dataObj){
     success: function(data){
       message_log(data.message, "success");
       var new_charge = '<li class="list-group-item clearfix" data-hash="' + data.hash_val + '" title="' + data.footnote + '">';
-      new_charge += '<div><span class="label label-default">' + data.time + '</span> ' + data.title + '<small>' + data.footnote + '</small></div>';
-      new_charge += '<div class="pull-right"><span class="glyphicon glyphicon-trash pull-right"></span>';
-      new_charge += '<span class="glyphicon glyphicon-edit pull-right"></span></div>';
+      new_charge += '<div><span class="label label-default">' + data.time + '</span>&nbsp;';
+      new_charge += '<span class="label progress-bar-flat-' + data.payer.index + ' payer_name">' + data.payer.name + '</span>';
+      new_charge += '<span> paid <u><strong>' + data.amount + '</strong></u> for ' + data.description + '.</span><small>' + data.footnote + '</small></div>';
+      new_charge += '<div class="pull-right"><span class="glyphicon glyphicon-trash"></span>';
+      new_charge += '<span class="glyphicon glyphicon-edit"></span></div>';
       new_charge += '</li>';
       var new_prog = '<div class="progress">';
       for (var i = 0; i < data.breakdown.length; i ++){

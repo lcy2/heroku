@@ -13,7 +13,13 @@
   </div>
   <div id="btn_col">
     {% if refresh_buttons.google %}
-      <span><a href="#lity-panel" data-lity id="rtfg" class="btn btn-primary" role="button">Refresh with Google</a></span>
+      <span>
+        {% if google_photo_scope %}
+          <a href="#lity-panel" data-lity id="rtfg" class="btn btn-primary" role="button">Refresh with Google</a>
+        {% else %}
+          <a href="{% url "social:begin" "google-oauth2" %}?next={{path}}&extrascope=photos" class="btn btn-primary" role="button">Refresh with Google</a>
+        {% endif %}
+      </span>
     {% endif %}
   </div>
 

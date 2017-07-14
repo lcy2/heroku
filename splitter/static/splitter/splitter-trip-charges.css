@@ -92,6 +92,10 @@ li .glyphicon:hover {
   padding-bottom: 2px;
   padding-top: 2px;
 }
+
+.payer_name {
+  font-size: 1.2rem;
+}
 .total_amt {
   margin-left: 5px;
 }

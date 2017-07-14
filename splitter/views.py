@@ -117,9 +117,12 @@ def phototrek_edit(request, trip, editable):
     """ return all albums """
     refresh_buttons = dict()
     try:
-        social = request.user.social_auth.get(provider='google-oauth2')
+        google_social = request.user.social_auth.get(provider='google-oauth2')
         refresh_buttons['google'] = True
     except UserSocialAuth.DoesNotExist:
+        refresh_button['google'] = False
+
+    if not any(refresh_buttons.values()):
         messages.error(request, "You do not have linked social accounts.")
         return redirect("splitter:index")
 
@@ -127,7 +130,17 @@ def phototrek_edit(request, trip, editable):
         'trip': trip,
         'refresh_buttons': refresh_buttons,
         'edit_permission': editable,
+        'path': request.path,
     }
+
+    # determine whether additional Google access is needed
+    if refresh_buttons['google']:
+        # True indicates that access token has the right scope
+        google_photo_scope = 'scope' in google_social.extra_data and \
+            "https://picasaweb.google.com/data/" in google_social.extra_data['scope'] and \
+            "https://photos.googleapis.com/data/" in google_social.extra_data['scope']
+        context.update({'google_photo_scope': google_photo_scope})
+
     return render(request, 'splitter/phototrek_edit.html', context)
 
 @check_trip_access(False)

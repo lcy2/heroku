@@ -239,10 +239,18 @@ def process_charge_helper(trip, travelers, hash_val, charge):
     payer = travelers[str(charge['payer'])]
     debtors = [travelers[str(x)] for x in charge['debtors']]
     currency = trip.accounting['currencies'][charge['currency']]['abbr']
-    title = payer['name'] + " paid " + str(charge['amount']) + " " + currency + " for " + charge['description'] + '.'
+    title = " paid <u><strong>" + '{0:.2f}'.format(charge['amount']) + "</strong></u> " + currency + " for " + charge['description'] + '.'
     footnote = "Paid " + ', '.join([str(charge['breakdown'][str(x['pk'])]) + " " + currency + " for " + x['name'] for x in debtors]) + '.'
     if 'tip_rate' in charge:
-        footnote += ' A ' + str(charge['tip_rate']) + "% tax and tip is included."
-    newbreakdown = [(travelers[key]['index'], int(round(val / charge['amount'] * 100)), (str(val) + " " + currency), travelers[key]['name']) for key, val in charge['breakdown'].iteritems()]
+        footnote += ' A ' + '{0:.2f}'.format(charge['tip_rate']) + "% tax and tip is included."
+    newbreakdown = [(travelers[key]['index'], int(round(val / charge['amount'] * 100)), ('{0:.2f}'.format(val) + " " + currency), travelers[key]['name']) for key, val in charge['breakdown'].iteritems()]
     print newbreakdown
-    return {'title': title, 'footnote': footnote, "breakdown": newbreakdown, 'hash_val': hash_val, 'time': charge['time']}
+    return {
+        'amount': '{0:.2f}'.format(charge['amount']) + " " + currency,
+        'description': charge['description'],
+        'footnote': footnote,
+        "breakdown": newbreakdown,
+        'hash_val': hash_val,
+        'time': charge['time'],
+        'payer': payer,
+    }

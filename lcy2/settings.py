@@ -32,10 +32,7 @@ SOCIAL_AUTH_GOOGLE_PLUS_AUTH_EXTRA_ARGUMENTS = {
 SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {'access_type': 'offline'}
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('GOOGLE_OAUTH_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('GOOGLE_OAUTH_SECRET')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
-    'https://picasaweb.google.com/data/',
-    'https://photos.googleapis.com/data/',
-]
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = []
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -94,7 +91,8 @@ TEMPLATES = [
 ]
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
+    #'social_core.backends.google.GoogleOAuth2',
+    'lcy2.backend.IncrementalGoogle',
     'django.contrib.auth.backends.ModelBackend'
 )
 
@@ -107,7 +105,8 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.associate_by_email',
     'social_core.pipeline.user.create_user',
     'social_core.pipeline.social_auth.associate_user',
-    'social_core.pipeline.social_auth.load_extra_data',
+    #'social_core.pipeline.social_auth.load_extra_data',
+    'lcy2.backend.custom_load_extra_data',
     'social_core.pipeline.user.user_details',
 )
 
