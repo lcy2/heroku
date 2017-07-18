@@ -312,7 +312,9 @@ function del_med(){
       success: function(data){
         message_log(data.message);
         pic_data.splice(target.data('item_index'), 1);
-        target.data('marker').setMap(null);
+        if (target.data('marker')){
+          target.data('marker').setMap(null);
+        }
         target.remove();
         refresh_after_deletion();
       },
@@ -332,7 +334,9 @@ function del_pic_med(){
       'item_id': target.data('pk'),
     });
     pic_data.splice(target.data('item_index'), 1);
-    target.data('marker').setMap(null);
+    if (target.data('marker')){
+      target.data('marker').setMap(null);
+    }
     target.remove();
     refresh_after_deletion();
   }
