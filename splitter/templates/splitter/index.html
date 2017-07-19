@@ -6,12 +6,11 @@
   {% if user and not user.is_anonymous %}
     {% include "splitter/index_trips.html" with target_trips=private_trips title="Your Trips" index="0" only %}
     <div class="container bordered_container">
-      <div class="row">
-        <div class="col-xs-12">
-          <div class="pull-right">
-            <a href="{% url 'splitter:new_trip' %}" role="button" class="btn btn-primary">New Trip</a>
-          </div>
-        </div>
+      <div class="pull-right">
+        {% if private_trips %}
+          <a href="{{ user.traveler.get_absolute_url }}" role="button" class="btn btn-primary">Trip Gallery</a>
+        {% endif %}
+        <a href="{% url 'splitter:new_trip' %}" role="button" class="btn btn-primary">New Trip</a>
       </div>
     </div>
   {% endif %}
