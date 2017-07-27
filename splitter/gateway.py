@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta
 
 from .models import Segment, Trip, Traveler
 from .decorators import check_trip_access_json, check_trip_access
-from .utils import watershed_image, process_charge
+from .utils import watershed_image, process_charge, charge_hash
 
 import requests, time, re, pytz, sys, json, httplib, random
 
@@ -633,5 +633,15 @@ def charge_summary(request, trip):
     response = {
         'accounts': [account.output() for account in trav_accounts.itervalues()],
         'message': "Summarized.",
+    }
+    return JsonResponse(response)
+
+@check_trip_access_json(True)
+def charge_privacy_toggle(request, trip):
+    trip.accounting['is_private'] = (request.POST.get('toggle') == 'false')
+    trip.save()
+    response = {
+        'share_url': request.build_absolute_uri(reverse("splitter:public_charge_url", kwargs={'pk':trip.pk, 'hash_val':charge_hash(trip)})),
+        'message': "Finance privacy set.",
     }
     return JsonResponse(response)

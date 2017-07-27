@@ -2,6 +2,10 @@
   margin-bottom: 5px;
 }
 
+#is_private {
+  margin-top: 5px;
+}
+
 #tt_amt,
 #itemizing,
 button[type=submit],

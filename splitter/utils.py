@@ -254,3 +254,7 @@ def process_charge_helper(trip, travelers, hash_val, charge):
         'time': charge['time'],
         'payer': payer,
     }
+
+
+def charge_hash(trip):
+    return str(hash((hash(trip.time_created) / 100.0) + (hash(trip.trip_name) / 800.0)))

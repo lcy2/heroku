@@ -440,7 +440,71 @@ $(document).ready(function(){
       $(el).html(currency_name);
     });
   });
+
+
+  // deal with the is_private button
+  // initialize the styles according to whether the trip finances are sharable
+
+  // these are animations from private to public
+  // aka from unchecked to checked
+  $('#is_private_btn').data('animation', [
+    anime({
+      targets: $('#share_url')[0],
+      paddingLeft: ["0", "10px"],
+      opacity: [0, 1],
+      easing: "easeOutQuad",
+      autoplay: false,
+      duration: 250,
+    }),
+
+    anime({
+      targets: $('#is_private .toggle.btn')[0],
+      borderTopRightRadius: ["3px", "0px"],
+      borderBottomRightRadius: ["3px", "0px"],
+      duration: 250,
+      easing: "easeOutQuad",
+      autoplay: false,
+    }),
+  ]);
+
+  if (!$('#is_private_btn').prop('checked')){
+    $('#share_url').css('opacity', 0);
+    $('#share_url').css('paddingLeft', '0');
+  }
+
+  $('#is_private_btn').on('change', function(){
+    // ajax to get the shareable url
+    $.ajax({
+      url: '/splitter/gateway/privcharge',
+      type: 'POST',
+      data: {
+        'toggle': $(this).prop('checked'),
+      },
+      dataType: 'json',
+      success: function(data){
+        $('#share_url').val(data.share_url);
+        message_log(data.message, "success");
+      },
+      error: function(xhr, err){
+        var response = $.parseJSON(xhr.responseText);
+        message_log(response.message, response.warning_level);
+        $('#is_private_btn').bootstrapToggle('toggle');
+      }
+    });
+
+    for (var i = 0; i < $(this).data('animation').length; i++){
+      if ($(this).prop('checked') === $(this).data('animation')[i].reversed){
+        $(this).data('animation')[i].reverse();
+      }
+    }
+
+    for (var i = 0; i < $(this).data('animation').length; i++){
+      $(this).data('animation')[i].play();
+    }
+  });
+
 });
+
 
 function mod_action($li, $prog, delete_action =true){
   $.ajax({

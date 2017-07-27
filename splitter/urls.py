@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^(?P<pk>[0-9]+)/display$', views.phototrek, name = 'phototrek'),
     url(r'^(?P<pk>[0-9]+)/phototrek_edit$', views.phototrek_edit, name = 'phototrek_edit'),
     url(r'^(?P<pk>[0-9]+)/charges$', views.charges, name = 'trip_charges'),
+    url(r'^(?P<pk>[0-9]+)/charges/(?P<hash_val>[-0-9]+)$', views.published_charges, name='public_charge_url'),
     url(r'^(?P<pk>[0-9]+)/edit_currencies$', views.edit_currencies, name = 'edit_currencies'),
     url(r'^(?P<pk>[0-9]+)/init_charges$', gateway.init_charges, name = 'init_charges'),
     url(r'^(?P<trav>[a-zA-z]+)/display$', views.traveler, name = 'traveler'),

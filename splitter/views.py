@@ -14,7 +14,7 @@ from social_django.models import UserSocialAuth
 from .models import Trip, Segment, Traveler
 from . import gateway
 from .decorators import check_trip_access
-from .utils import process_charge
+from .utils import process_charge, charge_hash
 
 from lxml import objectify
 from urllib import urlencode
@@ -53,6 +53,7 @@ def gateway_switch(request, action):
         'newcharge': gateway.new_charge,
         'delcharge': gateway.del_charge,
         'sumcharge': gateway.charge_summary,
+        'privcharge': gateway.charge_privacy_toggle,
         'ec': gateway.edit_currencies,
     }
     action_dir_seg = {
@@ -245,27 +246,25 @@ def traveler(request, trav):
 
     return render(request, 'splitter/traveler.html', context)
 
-@check_trip_access(False)
+@check_trip_access(True)
 def charges(request, trip, editable):
-    # if the charges are to be kept private (among travelers)
-    # redirect
-    if trip.accounting['is_private'] and not editable:
-        messages.info(request, "Finances of this trip is private.")
-        return redirect('splitter:trip_overview', pk = trip.pk)
-
     # if there are no records in charges
     # redirect to the page for creating the initial sets of parameters
     if not trip.accounting['currencies']:
-        # get list of currencies from openexchangerate
-        url = 'https://openexchangerates.org/api/latest.json?app_id=' + config('OXR_API_KEY')
-        rates = requests.get(url).json()['rates']
-        url = 'https://openexchangerates.org/api/currencies.json'
-        currencies = [(abbrev, 1 / float(rates[abbrev]), full_name) for abbrev, full_name in requests.get(url).json().iteritems()]
-        context = {
-            'trip': trip,
-            'currencies': currencies,
-        }
-        return render(request, 'splitter/new_charges.html', context)
+        if editable:
+            # get list of currencies from openexchangerate
+            url = 'https://openexchangerates.org/api/latest.json?app_id=' + config('OXR_API_KEY')
+            rates = requests.get(url).json()['rates']
+            url = 'https://openexchangerates.org/api/currencies.json'
+            currencies = [(abbrev, 1 / float(rates[abbrev]), full_name) for abbrev, full_name in requests.get(url).json().iteritems()]
+            context = {
+                'trip': trip,
+                'currencies': currencies,
+            }
+            return render(request, 'splitter/new_charges.html', context)
+
+        messages.info(request, "No finances are logged.")
+        return redirect('splitter:trip_overview', pk = trip.pk)
 
     # process charges into strings
     travelers = trip.travelers.all().order_by('pk')
@@ -276,8 +275,39 @@ def charges(request, trip, editable):
         'travelers': travelers,
         'currencies': trip.accounting['currencies'],
         'editable': editable,
+        'share_url': '' if trip.accounting['is_private'] else request.build_absolute_uri(reverse("splitter:public_charge_url", kwargs={'pk':trip.pk, 'hash_val':charge_hash(trip)})),
     }
     return render(request, 'splitter/trip_charges.html', context)
+
+
+def published_charges(request, pk, hash_val):
+    trip = Trip.objects.get(pk = pk)
+
+    editors = set([trav.user for trav in trip.travelers.all() if trav.user])
+    if request.user and request.user in editors:
+        return redirect('splitter:trip_charges', pk=pk)
+
+    if trip.accounting['is_private']:
+        messages.info(request, "This trip's finances are kept private.")
+        return redirect('splitter:trip_overview', pk=trip.pk)
+
+    if hash_val == charge_hash(trip):
+        # process charges into strings
+        travelers = trip.travelers.all().order_by('pk')
+        charges = process_charge(trip, travelers, trip.accounting['charges'])
+        context = {
+            'trip': trip,
+            'charges': charges,
+            'travelers': travelers,
+            'currencies': trip.accounting['currencies'],
+            'editable': False,
+            'share_url': reverse("splitter:public_charge_url", kwargs={'pk':pk, 'hash_val':hash_val}),
+        }
+        return render(request, 'splitter/trip_charges.html', context)
+
+    messages.error(request, "Incorrect hash used.")
+    return redirect('splitter:trip_overview', pk = pk)
+
 
 
 @check_trip_access(True)
