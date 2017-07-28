@@ -41,25 +41,25 @@
 }
 
 .btn-primary {
-  background-color: #072a16;
-  border-color: #8ab446;
+  background-color: #2d6b22;
+  border-color: #072a16;
 }
 .btn-primary:hover {
-  background-color: #2d6b22;
-  border-color: #acc864;
+  background-color: #8ab446;
+  border-color: #072a16;
 }
 .btn-primary:focus {
-  background-color: #2d6b22;
-  border-color: #8ab446;
+  background-color: #8ab446;
+  border-color: #072a16;
 }
 .btn-primary:active,
 .btn-primary.active {
-  background-color: #8ab446 !important;
+  background-color: #072a16 !important;
   border-color: #acc864;
 }
  .btn-primary:active:focus {
-   background-color: #8ab446;
-   border-color: #d3e29d;
+   background-color: #072a16;
+   border-color: #acc864;
 }
 
 .glyphicon-menu-hamburger {

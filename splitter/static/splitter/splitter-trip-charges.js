@@ -14,8 +14,8 @@ function submit_form(dataObj){
       new_charge += '<div><span class="label label-default">' + data.time + '</span>&nbsp;';
       new_charge += '<span class="label progress-bar-flat-' + data.payer.index + ' payer_name">' + data.payer.name + '</span>';
       new_charge += '<span> paid <u><strong>' + data.amount + '</strong></u> for ' + data.description + '.</span><small>' + data.footnote + '</small></div>';
-      new_charge += '<div class="pull-right"><span class="glyphicon glyphicon-trash"></span>';
-      new_charge += '<span class="glyphicon glyphicon-edit"></span></div>';
+      new_charge += '<div class="pull-right"><span class="glyphicon glyphicon-edit"></span>';
+      new_charge += '<span class="glyphicon glyphicon-trash"></span></div>';
       new_charge += '</li>';
       var new_prog = '<div class="progress">';
       for (var i = 0; i < data.breakdown.length; i ++){
@@ -72,6 +72,11 @@ function submit_form(dataObj){
         var $li = $(this).closest("li");
         mod_action($li, $li.next(), false);
       });
+
+      // clear certain fields
+      $('#amt').val('');
+      $('.itemize_input').val('');
+      $('#descriptor').val('');
 
     },
     error: function(xhr, err){
@@ -177,7 +182,7 @@ $(document).ready(function(){
       $('input[value=even]').prop('checked', true);
     };
     $selected_options.each(function(){
-      itemize_content += '<li><div class="input-group"><span class="input-group-addon">' + $(this).html() + '</span><input type="text" class="form-control" id="itemize_input_' + $(this).val() + '" value="' + (parseFloat($('#amt').val()) / $selected_options.length).toFixed(2) + '"></input></div></li>';
+      itemize_content += '<li><div class="input-group"><span class="input-group-addon">' + $(this).html() + '</span><input type="text" class="form-control itemize_input" id="itemize_input_' + $(this).val() + '" value="' + (parseFloat($('#amt').val()) / $selected_options.length).toFixed(2) + '"></input></div></li>';
     });
     itemize_content += '</div>';
     $('#itemize_dropdown').html(itemize_content);
