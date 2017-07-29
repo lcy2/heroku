@@ -573,8 +573,9 @@ def del_charge(request, trip):
     trip.save();
     return JsonResponse(entry)
 
-@check_trip_access_json(False)
-def charge_summary(request, trip):
+#@check_trip_access_json(False)
+def charge_summary(request, pk):
+    trip = Trip.objects.get(pk = pk)
     class Account(object):
         def __init__(self, pk, name):
             self.pk = pk

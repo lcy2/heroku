@@ -13,9 +13,11 @@
         <li class="list-group-item clearfix" title="{{ charge.footnote }}" data-hash="{{charge.hash_val}}">
           <div><span class="label label-default">{{charge.time}}</span>&nbsp;<span class="label progress-bar-flat-{{charge.payer.index}} payer_name">{{charge.payer.name}}</span>
             <span> paid <u><strong>{{charge.amount}}</strong></u> for {{charge.description}}.</span><small>{{ charge.footnote }}</small></div>
-          <div class="pull-right">
-            <span class="glyphicon glyphicon-edit"></span><span class="glyphicon glyphicon-trash"></span>
-          </div>
+          {% if editable %}
+            <div class="pull-right">
+              <span class="glyphicon glyphicon-edit"></span><span class="glyphicon glyphicon-trash"></span>
+            </div>
+          {% endif %}
         </li>
         <div class="progress">
           {% for trav_index, portion, amt, trav_name in charge.breakdown %}
@@ -154,10 +156,12 @@
 {% endblock %}
 
 {% block trip_override %}
-  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-  <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css" integrity="sha256-nFp4rgCvFsMQweFQwabbKfjrBwlaebbLkE29VFR0K40=" crossorigin="anonymous" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js" integrity="sha256-urCxMaTtyuE8UK5XeVYuQbm/MhnXflqZ/B9AOkyTguo=" crossorigin="anonymous"></script>
+  {% if editable %}
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css" integrity="sha256-nFp4rgCvFsMQweFQwabbKfjrBwlaebbLkE29VFR0K40=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js" integrity="sha256-urCxMaTtyuE8UK5XeVYuQbm/MhnXflqZ/B9AOkyTguo=" crossorigin="anonymous"></script>
+  {% endif %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
   <script src="{% static 'exlibs/anime.js' %}"></script>
@@ -165,5 +169,8 @@
   <link rel="stylesheet" href="{% static 'exlibs/lity.min.css' %}" />
   <link rel="stylesheet" href="{% static 'splitter/splitter-trip-charges.css' %}" />
   <script src="{% static 'splitter/splitter-trip-charges.js' %}"></script>
+  {% if editable %}
+    <script src="{% static 'splitter/splitter-trip-charges-edit.js' %}"></script>
+  {% endif %}
   <link rel="stylesheet" href="{% static 'splitter/splitter-custom-progress-bars.css' %}" />
 {% endblock %}
