@@ -31,9 +31,11 @@ function get_color_steps(start, end, steps){
 function populate_map(collections){
   var bounds = new google.maps.LatLngBounds();
   var colors = get_color_steps('#3CA55C', '#90893a', collections.length);
+  var has_geo = false;
 
   $.each(collections, function(index, el){
     if (el.geo){
+      has_geo = true;
       var waypoint_icon = {
         path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z",
         fillColor: colors[index],
@@ -84,7 +86,13 @@ function populate_map(collections){
     }
 
   });
-  map.fitBounds(bounds, 0);
+
+  if (has_geo){
+    map.fitBounds(bounds, 0);
+  } else {
+    map.setCenter({lng: 2.3522, lat: 48.8566});
+  }
+
 }
 
 function newDataProcess(data){

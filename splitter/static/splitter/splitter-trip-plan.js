@@ -1,5 +1,6 @@
 var waypoint_title = '';
 var waypoints = [];
+var wpts = [];
 var dir_serv, dir_disp;
 
 function get_color_steps(start, end, steps){
@@ -17,7 +18,6 @@ function get_color_steps(start, end, steps){
   }
   for (var i = 0; i < steps; i ++){
     output.push('#' + $.map(start_nums, function(el, index){
-
       return ('000' + (Math.round(el + step_height[index] * i)).toString(16)).slice(-2);
     }).join(''));
   }
@@ -120,6 +120,7 @@ function add_waypoint(latlng){
   });
   waypoints.push(waypoint_marker);
   $waypoint.data('wp_marker', waypoint_marker);
+  wpts.push(waypoint_title);
 
 
   $waypoint.hover(function(){
@@ -228,10 +229,18 @@ function secInitMap(){
   });
   dir_disp.setMap(map);
 
+
+
+
   google.maps.event.addListener(map, 'idle', function(){
     slide_up();
   });
 }
+
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 
 $(document).ready(function(){
   secInitMap();
@@ -259,5 +268,68 @@ $(document).ready(function(){
       find_path(wps, $('#trans_mode').val(), rt = $('#roundtrip').val() == '1');
     }
   });
+
+  // for displaying the permalink for sharing
+  $('#permabtn').parent().on('show.bs.dropdown', function(){
+    var base_url = window.location.href.replace(window.location.search, '');
+    var markers_url = $.map(waypoints, function(el, index){
+      var pos =  el.getPosition();
+      return pos.lat().toFixed(5).toString() + "," + pos.lng().toFixed(5).toString() + ":" + encodeURIComponent(wpts[index]);
+    });
+    var qstr_arr = [
+      'markers=' + markers_url.join(';'),
+      'mode=' + $('#trans_mode').val(),
+      'rt=' + $('#roundtrip').val(),
+    ];
+    $('#permalink').val(base_url + "?" + qstr_arr.join('&') );
+  });
+
+  $('#permalink').on('click', function(){
+    $(this).select();
+  });
+
+  // to receive the query string...
+  if (window.location.search){
+    process_query_string();
+  }
+
+  function process_query_string(){
+    var query_vars = window.location.search.substring(1).split("&");
+    var query_obj = {};
+    query_vars.forEach(function(el){
+      var pair = el.split("=");
+      query_obj[pair[0]] = pair[1]
+    });
+
+    if (!query_obj.markers){
+      message_log("Invalid query string.", "warning", true);
+      return;
+    }
+
+    var markers = query_obj.markers.split(';');
+    for (var i = 0; i< markers.length; i++){
+      var arr = markers[i].split(':');
+      waypoint_title = decodeURIComponent(arr[1]);
+      arr = arr[0].split(',');
+      if (isNumeric(arr[0]) && isNumeric(arr[1])){
+        var latlng = new google.maps.LatLng(arr[0], arr[1]);
+        add_waypoint(latlng);
+      } else {
+        return;
+      }
+    }
+
+    if (query_obj.mode){
+      $('#trans_mode').selectpicker('val', query_obj.mode);
+    }
+
+    if (query_obj.rt){
+      $('#roundtrip').selectpicker('val', query_obj.rt);
+    }
+
+    console.log(query_obj);
+  }
+
+
 
 });

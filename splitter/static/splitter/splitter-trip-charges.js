@@ -78,7 +78,6 @@ $(document).ready(function(){
             easing: 'easeOutQuad',
             autoplay: false,
           }));
-          console.log(trav_pk, portion, sp_switch, amount);
         }
 
         // clear the progress bars

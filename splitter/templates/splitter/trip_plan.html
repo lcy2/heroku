@@ -18,7 +18,15 @@
       </div>
     </div>
     <div class="row spacey_row" id="btn_row">
-      <div class="col-md-10 text-right">
+      <div class="col-xs-2 col-sm-1">
+        <div class="dropdown">
+          <button id="permabtn" class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">Share&nbsp;<span class="caret"></span></button>
+          <ul class="dropdown-menu">
+            <li class="form-inline"><input id="permalink" class="form-control input-sm" readonly type="text" placeholder="Generating permalink..."></input></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-xs-10 col-sm-8 col-md-9 text-right">
           <select id="roundtrip" class="selectpicker" data-width="fit">
             <option value="1">Roundtrip</option>
             <option value="0">One Way</option>
@@ -29,9 +37,8 @@
             <option value="BICYCLING">Cycling</option>
             <option value="WALKING">Walking</option>
           </select>
-
       </div>
-      <div class="col-md-2 text-right">
+      <div class="col-xs-12 col-sm-3 col-md-2 text-right">
         <button id="calc_btn" class="btn btn-primary" type="button">Calculate Route</button>
       </div>
     </div>
