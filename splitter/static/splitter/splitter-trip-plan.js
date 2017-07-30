@@ -2,6 +2,7 @@ var waypoint_title = '';
 var waypoints = [];
 var wpts = [];
 var dir_serv, dir_disp;
+var marker;
 
 function get_color_steps(start, end, steps){
   var start_nums = $.map([start.slice(1,3), start.slice(3,5), start.slice(5,7)], function(el, index){
@@ -130,6 +131,7 @@ function add_waypoint(latlng){
   });
   $waypoint.find('.delete_media').on('click', function(){
     $waypoint.data('wp_marker').setMap(null);
+    wpts.splice(waypoints.indexOf($waypoint.data('wp_marker')), 1);
     waypoints.splice(waypoints.indexOf($waypoint.data('wp_marker')), 1);
     $waypoint.remove();
     refresh_ids();
@@ -155,7 +157,7 @@ function secInitMap(){
   }
 
   // set up the crosshair marker
-  var marker = new google.maps.Marker({
+  marker = new google.maps.Marker({
     position:map.getCenter(),
     map: map,
     draggable: true,
@@ -180,8 +182,8 @@ function secInitMap(){
       if (status === 'OK'){
         if (results[1]){
           //message_log(results[0].formatted_address);
-          $('#searchTextField').val(results[0].formatted_address);
-          waypoint_title = results[0].formatted_address;
+          $('#searchTextField').val(results[0].name);
+          waypoint_title = results[0].name;
         } else {
           message_log("No results found.");
         }
@@ -201,7 +203,8 @@ function secInitMap(){
     }
     marker.setPosition(places[0].geometry.location);
     map.setCenter(places[0].geometry.location);
-    waypoint_title = places[0].formatted_address;
+    //waypoint_title = places[0].formatted_address;
+    waypoint_title = places[0].name;
   });
 
   //prepare for Directions
@@ -307,6 +310,7 @@ $(document).ready(function(){
     }
 
     var markers = query_obj.markers.split(';');
+    var bound = new google.maps.LatLngBounds();
     for (var i = 0; i< markers.length; i++){
       var arr = markers[i].split(':');
       waypoint_title = decodeURIComponent(arr[1]);
@@ -314,10 +318,15 @@ $(document).ready(function(){
       if (isNumeric(arr[0]) && isNumeric(arr[1])){
         var latlng = new google.maps.LatLng(arr[0], arr[1]);
         add_waypoint(latlng);
+        bound.extend(latlng);
       } else {
+        message_log("Invalid marker sequence.", "warning", true);
         return;
       }
     }
+    map.fitBounds(bound);
+    marker.setPosition(bound.getCenter());
+
 
     if (query_obj.mode){
       $('#trans_mode').selectpicker('val', query_obj.mode);
@@ -327,7 +336,6 @@ $(document).ready(function(){
       $('#roundtrip').selectpicker('val', query_obj.rt);
     }
 
-    console.log(query_obj);
   }
 
 
