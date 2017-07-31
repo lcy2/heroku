@@ -284,7 +284,7 @@ $(document).ready(function(){
       'mode=' + $('#trans_mode').val(),
       'rt=' + $('#roundtrip').val(),
     ];
-    $('#permalink').val(base_url + "?" + qstr_arr.join('&') );
+    $('#permalink').val(base_url + "?" + btoa(qstr_arr.join('&')) );
   });
 
   $('#permalink').on('click', function(){
@@ -297,7 +297,7 @@ $(document).ready(function(){
   }
 
   function process_query_string(){
-    var query_vars = window.location.search.substring(1).split("&");
+    var query_vars = atob(window.location.search.substring(1)).split("&");
     var query_obj = {};
     query_vars.forEach(function(el){
       var pair = el.split("=");
