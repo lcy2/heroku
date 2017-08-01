@@ -4,7 +4,12 @@ var wpts = [];
 var dir_serv, dir_disp;
 var marker;
 
-function get_color_steps(start, end, steps){
+function get_color_steps(start, end, stops){
+  var output = [start];
+  if (stops == 1){
+    return output;
+  }
+
   var start_nums = $.map([start.slice(1,3), start.slice(3,5), start.slice(5,7)], function(el, index){
     return parseInt(el, 16);
   });
@@ -12,12 +17,11 @@ function get_color_steps(start, end, steps){
     return parseInt(el, 16);
   });
   var step_height = [];
-  var output = []
 
   for (var i = 0; i < 3; i ++){
-    step_height.push((end_nums[i] - start_nums[i]) / (steps));
+    step_height.push((end_nums[i] - start_nums[i]) / (stops - 1));
   }
-  for (var i = 0; i < steps; i ++){
+  for (var i = 1; i < stops; i ++){
     output.push('#' + $.map(start_nums, function(el, index){
       return ('000' + (Math.round(el + step_height[index] * i)).toString(16)).slice(-2);
     }).join(''));
@@ -50,23 +54,23 @@ function find_path(wps, mode, rt=true){
   }, function(response, status){
     if (status === 'OK'){
       dir_disp.setDirections(response);
-      // style the markers
-      var orders = response.routes[0].waypoint_order;
-      var colors = get_color_steps('#3CA55C', '#90893a', orders.length + 1);
-      $.each([0].concat($.map(orders, function(el, index){
+      // reorder the waypoints
+      var orders = [0].concat($.map(response.routes[0].waypoint_order, function(el, index){
         return el+ 1;
-      })), function(index, el){
-        var wp_icon = waypoints[index].getIcon();
-        wp_icon.fillColor = colors[el];
+      }));
+      if (!rt){
+        orders.push(orders.length);
+      }
+      reorder_wp(orders);
+
+      // style the markers
+      var colors = get_color_steps('#3CA55C', '#90893a', orders.length);
+      $.each(orders, function(index, el){
+        var wp_icon = waypoints[el].getIcon();
+        wp_icon.fillColor = colors[index];
         wp_icon.fillOpacity = 1;
         waypoints[index].setIcon(wp_icon);
       });
-      if (!rt){
-        var wp_icon = waypoints[waypoints.length-1].getIcon();
-        wp_icon.fillColor = '#90893a';
-        wp_icon.fillOpacity = 1;
-        waypoints[waypoints.length-1].setIcon(wp_icon);
-      }
 
     } else {
       message_log('Directions request failed due to ' + status, 'warning');
@@ -74,6 +78,45 @@ function find_path(wps, mode, rt=true){
   });
 
 }
+
+function reorder_wp(orders){
+  var $waypoints = $('.waypoint');
+  var ordered_wpts = [];
+  var ordered_waypoints = [];
+  var panel = $('#output_panel');
+
+  $('#output_panel').empty();
+
+  for (var i = 0 ; i< orders.length; i++){
+    ordered_wpts.push(wpts[orders[i]]);
+    ordered_waypoints.push(waypoints[orders[i]]);
+
+    var $waypoint = $waypoints.eq(orders[i]);
+    panel.append($waypoint);
+    $waypoint.data('wp_marker', waypoints[orders[i]]);
+    // reinstall listeners
+    $waypoint.hover(function(){
+      $(this).find('.delete_media').show();
+    }, function(){
+      $(this).find('.delete_media').hide();
+    });
+    $waypoint.find('.delete_media').on('click', function(){
+      var $target = $(this).parent();
+      $target.data('wp_marker').setMap(null);
+      wpts.splice(waypoints.indexOf($target.data('wp_marker')), 1);
+      waypoints.splice(waypoints.indexOf($target.data('wp_marker')), 1);
+      $target.remove();
+      refresh_ids();
+    });
+  }
+  wpts = ordered_wpts;
+  waypoints = ordered_waypoints;
+
+
+
+  refresh_ids();
+}
+
 
 function refresh_ids(){
   $('.waypoint').each(function(index, el){
@@ -113,7 +156,7 @@ function add_waypoint(latlng){
     position:latlng,
     map: map,
     icon: waypoint_icon,
-    zIndex: 1,
+    zIndex: 1 + $('.waypoint').length,
     label: {
       text: (waypoints.length + 1).toString(),
       fontWeight: 'bold',
@@ -137,7 +180,6 @@ function add_waypoint(latlng){
     refresh_ids();
   });
 
-  //$('.mapboxgl-ctrl-geocoder > input').val('');
   waypoint_title = '';
   $('#searchTextField').val('');
 }
@@ -182,8 +224,8 @@ function secInitMap(){
       if (status === 'OK'){
         if (results[1]){
           //message_log(results[0].formatted_address);
-          $('#searchTextField').val(results[0].name);
-          waypoint_title = results[0].name;
+          $('#searchTextField').val(results[0].formatted_address);
+          waypoint_title = results[0].formatted_address;
         } else {
           message_log("No results found.");
         }
@@ -203,7 +245,6 @@ function secInitMap(){
     }
     marker.setPosition(places[0].geometry.location);
     map.setCenter(places[0].geometry.location);
-    //waypoint_title = places[0].formatted_address;
     waypoint_title = places[0].name;
   });
 
@@ -233,11 +274,12 @@ function secInitMap(){
   dir_disp.setMap(map);
 
 
-
-
   google.maps.event.addListener(map, 'idle', function(){
     slide_up();
   });
+
+  waypoint_title = '';
+  $('#searchTextField').val('');
 }
 
 function isNumeric(n) {
