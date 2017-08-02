@@ -30,6 +30,20 @@ $(document).ready(function(){
         easing: "easeOutQuad",
         duration: 400,
       }),
+      anime({
+        targets: $(this).find(".glyphicon-resize-vertical").get(),
+        opacity: 1,
+        autoplay: false,
+        easing: "easeOutQuad",
+        duration: 400,
+      }),
+      anime({
+        targets: $(this).find(".pull-right").children().get(),
+        opacity: 1,
+        autoplay: false,
+        easing: "easeOutQuad",
+        duration: 400,
+      })
     ];
     $(el).data('animations', animations);
   });

@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta
 
 from .models import Segment, Trip, Traveler
 from .decorators import check_trip_access_json, check_trip_access
-from .utils import watershed_image, process_charge, charge_hash
+from .utils import watershed_image, process_charge, trip_hash
 
 import requests, time, re, pytz, sys, json, httplib, random
 
@@ -512,8 +512,6 @@ def edit_currencies(request, trip, editable):
 
 @check_trip_access_json(True)
 def new_charge(request, trip):
-    #for key in request.POST:
-    #    print str(key) + " " + str(request.POST.getlist(key))
 
     travelers = trip.travelers.all()
 
@@ -542,6 +540,7 @@ def new_charge(request, trip):
         for x in request.POST.getlist('debtors[]'):
             distro_obj[x] = float("{0:.2f}".format(float(request.POST['amount']) / debtor_len))
 
+    hash_val = str(random.getrandbits(128))
     new_charge = {
         'payer': int(request.POST['payer']),
         'debtors': map(int, request.POST.getlist('debtors[]')),
@@ -552,10 +551,11 @@ def new_charge(request, trip):
         'breakdown': distro_obj,
         'description': request.POST['description'],
     }
+    trip.accounting['n_charges'] += 1
+    trip.accounting['order'].append(hash_val)
     if 'tip_rate' in request.POST:
         new_charge['tip_rate'] = float(request.POST['tip_rate'])
 
-    hash_val = str(random.getrandbits(128))
     trip.accounting['charges'][hash_val] = new_charge
     trip.save()
 
@@ -570,8 +570,33 @@ def del_charge(request, trip):
         return JsonResponse({'message':  'Invalid request.', 'warning_level': 'danger'}, status = 400)
 
     entry = trip.accounting['charges'].pop(request.POST['hash_val'])
+
+    # rearanging the positions
+    trip.accounting['n_charges'] -= 1
+    trip.accounting['order'].remove(request.POST['hash_val'])
+
     trip.save();
     return JsonResponse(entry)
+
+@check_trip_access_json(True)
+def swap_charge(request, trip):
+    if "new_index" not in request.POST or "old_index" not in request.POST:
+        return JsonResponse({'message': 'Invalid request.', 'warning_level': 'danger'}, status = 400)
+
+    if request.POST['new_index'] == request.POST['old_index']:
+        return JsonResponse({'message': 'Position unchanged.', 'warning_level': 'success'})
+
+    new_index = int(request.POST['new_index'])
+    old_index = int(request.POST['old_index'])
+
+    increment = -1 if new_index > old_index else 1
+    def swap(ni, oi):
+        trip.accounting['order'][ni], trip.accounting['order'][oi] = trip.accounting['order'][oi], trip.accounting['order'][ni]
+    for index in xrange(new_index, old_index, increment):
+        swap(index, old_index)
+    trip.save()
+    return JsonResponse({'message': "Position changed.", 'warning_level': 'success'})
+
 
 #@check_trip_access_json(False)
 def charge_summary(request, pk):
@@ -642,7 +667,7 @@ def charge_privacy_toggle(request, trip):
     trip.accounting['is_private'] = (request.POST.get('toggle') == 'false')
     trip.save()
     response = {
-        'share_url': request.build_absolute_uri(reverse("splitter:public_charge_url", kwargs={'pk':trip.pk, 'hash_val':charge_hash(trip)})),
+        'share_url': request.build_absolute_uri(reverse("splitter:public_charge_url", kwargs={'pk':trip.pk, 'hash_val':trip_hash(trip, "charge")})),
         'message': "Finance privacy set.",
     }
     return JsonResponse(response)

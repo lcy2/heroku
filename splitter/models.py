@@ -29,6 +29,14 @@ def charge_json_default():
         'charges': dict(),
         'currencies': list(),
         'is_private': True,
+        'n_charges': 0,
+        'order': list(),
+    }
+
+def itinerary_json_default():
+    return {
+        'itinerary': dict(), # each entry contains {date: date, lodging: URL | "" | "inherit", transport: URL | "", segment: str, description: str }
+        'is_private': True,
     }
 
 class Trip(models.Model):
@@ -46,6 +54,7 @@ class Trip(models.Model):
     authorized_viewers = models.ManyToManyField(User, blank = True)
     is_private = models.BooleanField(default = True)
     accounting = JSONField(default = charge_json_default)
+    itinerary = JSONField(default = itinerary_json_default)
 
     def __repr__(self):
         return unicode(self.trip_name)

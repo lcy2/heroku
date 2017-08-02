@@ -42,7 +42,7 @@ li > .input-group {
   margin: 2px 3px;
 }
 
-ul .progress {
+div .progress {
   border-radius: 0;
   margin-bottom: 0;
   height: 5px;
@@ -58,16 +58,31 @@ ul .progress {
 .list-group-item small {
   display: none;
 }
-li .glyphicon {
+.pull-right .glyphicon {
   margin-left: 10px;
   padding: 4px;
   border: 1px solid rgba(0, 0, 0, 0);
+  opacity: 0;
 }
-li .glyphicon:hover {
+.pull-right .glyphicon:hover {
   background-color: #ddd;
   background-clip: padding-box;
   border: 1px solid #666;
 }
+.glyphicon-resize-vertical {
+  font-size: 1.1rem;
+  opacity: 0;
+  cursor: move;
+  cursor: -webkit-grabbing;
+}
+.sortable-chosen li {
+  background-color: rgba(244,235, 66, 0.6);
+}
+.sortable-ghost {
+  cursor: move;
+  cursor: -webkit-grabbing;
+}
+
 #summary {
   background-color: #ddd;
   padding: 10px 50px;

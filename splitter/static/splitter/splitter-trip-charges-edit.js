@@ -1,3 +1,5 @@
+var sortable_order = []
+
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
@@ -268,12 +270,12 @@ $(document).ready(function(){
   });
 
   $(".glyphicon-trash").on('click', function(){
-    var $li = $(this).closest("li");
-    mod_action($li, $li.next());
+    var $div = $(this).closest("li").parent();
+    mod_action($div);
   });
   $(".glyphicon-edit").on('click', function(){
-    var $li = $(this).closest("li");
-    mod_action($li, $li.next(), false);
+    var $div = $(this).closest("li").parent();
+    mod_action($div, false);
   });
 
   // deal with the is_private button
@@ -339,17 +341,16 @@ $(document).ready(function(){
 });
 
 
-function mod_action($li, $prog, delete_action =true){
+function mod_action($div, delete_action =true){
   $.ajax({
     url: '/splitter/gateway/delcharge',
     type: 'POST',
     data: {
-      'hash_val': $li.data('hash'),
+      'hash_val': $div.find('li').data('hash'),
     },
     dataType: 'json',
     success: function(data){
-      $li.remove();
-      $prog.remove();
+      $div.remove();
       if (delete_action){
         message_log("Charge deleted.", "success");
       } else {
@@ -379,3 +380,33 @@ function mod_action($li, $prog, delete_action =true){
     }
   });
 }
+
+
+// Sortable
+Sortable.create(sortable_list, {
+  handle: '.glyphicon-resize-vertical',
+  animation: 150,
+  onStart: function(evt){
+    sortable_order = this.toArray();
+  },
+  onEnd: function(evt){
+    var target = this;
+    $.ajax({
+      url: '/splitter/gateway/swapcharge',
+      type: 'POST',
+      data: {
+        old_index: evt.oldIndex,
+        new_index: evt.newIndex
+      },
+      dataType: 'json',
+      success: function(data){
+        message_log(data.message, data.warning_level);
+      },
+      error: function(xhr, err){
+        var response = $.parseJSON(xhr.responseText);
+        message_log(response.message, response.warning_level);
+        target.sort(sortable_order);
+      }
+    });
+  },
+});

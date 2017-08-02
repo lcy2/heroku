@@ -8,11 +8,13 @@
   </div>
   <div class="panel panel-default">
     <div class="panel-heading">Details</div>
-    <ul class="list-group">
+    <div class="list-group" id="sortable_list">
       {% for charge in charges %}
+      <div>
         <li class="list-group-item clearfix" title="{{ charge.footnote }}" data-hash="{{charge.hash_val}}">
-          <div><span class="label label-default">{{charge.time}}</span>&nbsp;<span class="label progress-bar-flat-{{charge.payer.index}} payer_name">{{charge.payer.name}}</span>
-            <span> paid <u><strong>{{charge.amount}}</strong></u> for {{charge.description}}.</span><small>{{ charge.footnote }}</small></div>
+          <span class="glyphicon glyphicon-resize-vertical"></span>
+          <span class="label label-default">{{charge.time}}</span>&nbsp;<span class="label progress-bar-flat-{{charge.payer.index}} payer_name">{{charge.payer.name}}</span>
+            <span> paid <u><strong>{{charge.amount}}</strong></u> for {{charge.description}}.</span><small>{{ charge.footnote }}</small>
           {% if editable %}
             <div class="pull-right">
               <span class="glyphicon glyphicon-edit"></span><span class="glyphicon glyphicon-trash"></span>
@@ -26,8 +28,9 @@
             </div>
           {% endfor %}
         </div>
+      </div>
       {% endfor %}
-    </ul>
+    </div>
 
     <div class="panel-footer text-right">
       {% if editable %}
@@ -161,6 +164,7 @@
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css" integrity="sha256-nFp4rgCvFsMQweFQwabbKfjrBwlaebbLkE29VFR0K40=" crossorigin="anonymous" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js" integrity="sha256-urCxMaTtyuE8UK5XeVYuQbm/MhnXflqZ/B9AOkyTguo=" crossorigin="anonymous"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js"></script>
   {% endif %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />

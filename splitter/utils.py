@@ -224,7 +224,7 @@ def watershed_all():
         trip.save()
         print "Watershedded %s" % trip.trip_name
 
-def process_charge(trip, travelers, charges):
+def process_charge(trip, travelers, charges, order = None):
     traveler_obj = {
         str(traveler.pk): {
             'index': index,
@@ -232,7 +232,9 @@ def process_charge(trip, travelers, charges):
             'pk': traveler.pk,
         } for index, traveler in enumerate(travelers)
     }
-    return sorted([process_charge_helper(trip, traveler_obj, hash_val, charge) for hash_val, charge in charges.iteritems()], key=lambda x: x['time'])
+    if order:
+        return [process_charge_helper(trip, traveler_obj, hash_val, charges[hash_val]) for hash_val in order]
+    return [process_charge_helper(trip, traveler_obj, hash_val, charge) for hash_val, charge in charges.iteritems()]
 
 
 def process_charge_helper(trip, travelers, hash_val, charge):
@@ -244,7 +246,7 @@ def process_charge_helper(trip, travelers, hash_val, charge):
     if 'tip_rate' in charge:
         footnote += ' A ' + '{0:.2f}'.format(charge['tip_rate']) + "% tax and tip is included."
     newbreakdown = [(travelers[key]['index'], int(round(val / charge['amount'] * 100)), ('{0:.2f}'.format(val) + " " + currency), travelers[key]['name']) for key, val in charge['breakdown'].iteritems()]
-    print newbreakdown
+    #print newbreakdown
     return {
         'amount': '{0:.2f}'.format(charge['amount']) + " " + currency,
         'description': charge['description'],
@@ -256,5 +258,22 @@ def process_charge_helper(trip, travelers, hash_val, charge):
     }
 
 
-def charge_hash(trip):
-    return str(hash((hash(trip.time_created) / 100.0) + (hash(trip.trip_name) / 800.0)))
+def trip_hash(trip, action):
+    action_dir = {
+        'charge': [100.0, 800.0],
+        'itinerary': [246.2, 631.3],
+    }
+    return str(hash((hash(trip.time_created) / action_dir[action][0]) + (hash(trip.trip_name) / action_dir[action][1])))
+
+def assign_pos(trip):
+    charges = trip.accounting['charges']
+    charge_ct = 0
+    pos_array = []
+    for index, (hash_val, charge) in enumerate(charges.iteritems()):
+        if 'pos' in charge:
+            del charge['pos']
+        pos_array.append(hash_val)
+        charge_ct += 1
+    trip.accounting['order'] = pos_array
+    trip.accounting['n_charges'] = charge_ct
+    trip.save()
