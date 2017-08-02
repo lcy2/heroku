@@ -245,7 +245,8 @@ def process_charge_helper(trip, travelers, hash_val, charge):
     footnote = "Paid " + ', '.join([str(charge['breakdown'][str(x['pk'])]) + " " + currency + " for " + x['name'] for x in debtors]) + '.'
     if 'tip_rate' in charge:
         footnote += ' A ' + '{0:.2f}'.format(charge['tip_rate']) + "% tax and tip is included."
-    newbreakdown = [(travelers[key]['index'], int(round(val / charge['amount'] * 100)), ('{0:.2f}'.format(val) + " " + currency), travelers[key]['name']) for key, val in charge['breakdown'].iteritems()]
+
+    newbreakdown = [(travelers[key]['index'], 0 if charge['amount'] == 0 else int(round(val / charge['amount'] * 100)), ('{0:.2f}'.format(val) + " " + currency), travelers[key]['name']) for key, val in charge['breakdown'].iteritems()]
     #print newbreakdown
     return {
         'amount': '{0:.2f}'.format(charge['amount']) + " " + currency,

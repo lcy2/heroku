@@ -163,7 +163,7 @@ $(document).ready(function(){
   // validate total amt charged numerical inputs
   $('#amt').data('prev_val', $('#amt').val());
   $('#amt').on('input', function(){
-    if (!isNumeric($(this).val()) || parseFloat($(this).val()) < 0 || parseFloat($(this).val()) != parseFloat($(this).val()).toFixed(2) ){
+    if ($(this).val() != "" && (!isNumeric($(this).val()) || parseFloat($(this).val()) < 0 || parseFloat($(this).val()) != parseFloat($(this).val()).toFixed(2) )){
       anime({
         targets: this,
         backgroundColor: ['#F99', '#FFF'],
@@ -254,6 +254,11 @@ $(document).ready(function(){
       message_log("Please choose for whom the expense is paid.", "warning");
       return false;
     }
+    if ($('#amt').val() == "" || parseFloat($('#amt').val()) == 0){
+      message_log("Input the amount for this entry.", "warning");
+      return false;
+    }
+
     if ($('input[name=distribution]:checked').val() == "itemized"){
       var sum = 0;
       $('#itemize_dropdown input').each(function(index, el){

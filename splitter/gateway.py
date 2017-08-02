@@ -521,14 +521,23 @@ def new_charge(request, trip):
     if request.POST['distribution'] == "itemized" and any('itemized[' + x + ']' not in request.POST for x in request.POST.getlist('debtors[]')):
         return JsonResponse({'message':  'Invalid request.', 'warning_level': 'danger'}, status = 400)
 
+    # verify "amount" is indeed a number
+    try:
+        float(request.POST['amount'])
+
     #verify the itemized accounts do add up
-    if request.POST['distribution'] == 'itemized' and abs(sum(map(float, [request.POST['itemized[' + x + ']'] for x in request.POST.getlist('debtors[]')])) / float(request.POST['amount']) - 1) > 0.01:
-        return JsonResponse({'message': "There's a mismatch between the sum of the itemized inputs and the total sum.", 'warning_level': "warning"}, status = 400)
+    try:
+        if request.POST['distribution'] == 'itemized' and abs(sum(map(float, [request.POST['itemized[' + x + ']'] for x in request.POST.getlist('debtors[]')])) / float(request.POST['amount']) - 1) > 0.01:
+            return JsonResponse({'message': "There's a mismatch between the sum of the itemized inputs and the total sum.", 'warning_level': "warning"}, status = 400)
+    except ValueError:
+        return JsonResponse({'message': 'String found in numerical fields.', 'warning_level': 'danger'}, status = 400})
 
     #verify the payer and debtors are indeed among the travelers
     post_travs = set([int(request.POST['payer'])] + map(int, request.POST.getlist('debtors[]')))
     if not post_travs.issubset(set([traveler.pk for traveler in travelers])):
         return JsonResponse({'message':  'Invalid travelers detected.', 'warning_level': 'danger'}, status = 400)
+
+
 
     # execute the database op
     distro_obj = {}
