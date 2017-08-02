@@ -12,13 +12,14 @@ function submit_form(dataObj){
     dataType: 'json',
     success: function(data){
       message_log(data.message, "success");
-      var new_charge = '<li class="list-group-item clearfix" data-hash="' + data.hash_val + '" title="' + data.footnote + '">';
-      new_charge += '<div><span class="label label-default">' + data.time + '</span>&nbsp;';
+      var new_charge = '<div class="list-group-item clearfix" data-hash="' + data.hash_val + '" title="' + data.footnote + '">';
+      new_charge += '<span class="glyphicon glyphicon-resize-vertical"></span>&nbsp;';
+      new_charge += '<span class="label label-default">' + data.time + '</span>&nbsp;';
       new_charge += '<span class="label progress-bar-flat-' + data.payer.index + ' payer_name">' + data.payer.name + '</span>';
-      new_charge += '<span> paid <u><strong>' + data.amount + '</strong></u> for ' + data.description + '.</span><small>' + data.footnote + '</small></div>';
+      new_charge += '<span> paid <u><strong>' + data.amount + '</strong></u> for ' + data.description + '.</span><small>' + data.footnote + '</small>';
       new_charge += '<div class="pull-right"><span class="glyphicon glyphicon-edit"></span>';
       new_charge += '<span class="glyphicon glyphicon-trash"></span></div>';
-      new_charge += '</li>';
+      new_charge += '</div>';
       var new_prog = '<div class="progress">';
       for (var i = 0; i < data.breakdown.length; i ++){
         new_prog += '<div class="progress-bar progress-bar-flat-' + data.breakdown[i][0] + '" role="progressbar" style="width:' + data.breakdown[i][1] + '%">';
@@ -26,9 +27,11 @@ function submit_form(dataObj){
       }
       new_prog += '</div>';
       var $new_charge = $(new_charge);
-      var $new_prog = $(new_prog)
-      $('.list-group').append($new_charge);
-      $('.list-group').append($new_prog);
+      var $new_prog = $(new_prog);
+      var $new_div = $("<div></div>");
+      $new_div.append($new_charge);
+      $new_div.append($new_prog);
+      $('#sortable_list').append($new_div);
       // store animations to their respective objects
       var animations = [
         anime({
@@ -45,6 +48,20 @@ function submit_form(dataObj){
           easing: "easeOutQuad",
           duration: 400,
         }),
+        anime({
+          targets: $new_charge.find(".glyphicon-resize-vertical").get(),
+          opacity: 1,
+          autoplay: false,
+          easing: "easeOutQuad",
+          duration: 400,
+        }),
+        anime({
+          targets: $new_charge.find(".pull-right").children().get(),
+          opacity: 1,
+          autoplay: false,
+          easing: "easeOutQuad",
+          duration: 400,
+        })
       ];
       $new_charge.data('animations', animations);
 
@@ -65,15 +82,17 @@ function submit_form(dataObj){
 
       // bind click listener to the deletion glyphicon
       $new_charge.find(".glyphicon-trash").on('click', function(){
-        var $li = $(this).closest("li");
-        mod_action($li, $li.next());
+        var $div = $(this).closest("div.list-group-item").parent();
+        mod_action($div);
       });
 
       // bind click listener to the deletion glyphicon
       $new_charge.find(".glyphicon-edit").on('click', function(){
-        var $li = $(this).closest("li");
-        mod_action($li, $li.next(), false);
+        var $div = $(this).closest("div.list-group-item").parent();
+        mod_action($div, false);
       });
+
+
 
       // clear certain fields
       $('#amt').val('');
@@ -270,11 +289,11 @@ $(document).ready(function(){
   });
 
   $(".glyphicon-trash").on('click', function(){
-    var $div = $(this).closest("li").parent();
+    var $div = $(this).closest("div.list-group-item").parent();
     mod_action($div);
   });
   $(".glyphicon-edit").on('click', function(){
-    var $div = $(this).closest("li").parent();
+    var $div = $(this).closest("div.list-group-item").parent();
     mod_action($div, false);
   });
 
@@ -346,7 +365,7 @@ function mod_action($div, delete_action =true){
     url: '/splitter/gateway/delcharge',
     type: 'POST',
     data: {
-      'hash_val': $div.find('li').data('hash'),
+      'hash_val': $div.find('div.list-group-item').data('hash'),
     },
     dataType: 'json',
     success: function(data){

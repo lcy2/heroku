@@ -11,8 +11,8 @@
     <div class="list-group" id="sortable_list">
       {% for charge in charges %}
       <div>
-        <li class="list-group-item clearfix" title="{{ charge.footnote }}" data-hash="{{charge.hash_val}}">
-          <span class="glyphicon glyphicon-resize-vertical"></span>
+        <div class="list-group-item clearfix" title="{{ charge.footnote }}" data-hash="{{charge.hash_val}}">
+          {% if editable %}<span class="glyphicon glyphicon-resize-vertical"></span>{% endif %}
           <span class="label label-default">{{charge.time}}</span>&nbsp;<span class="label progress-bar-flat-{{charge.payer.index}} payer_name">{{charge.payer.name}}</span>
             <span> paid <u><strong>{{charge.amount}}</strong></u> for {{charge.description}}.</span><small>{{ charge.footnote }}</small>
           {% if editable %}
@@ -20,7 +20,7 @@
               <span class="glyphicon glyphicon-edit"></span><span class="glyphicon glyphicon-trash"></span>
             </div>
           {% endif %}
-        </li>
+        </div>
         <div class="progress">
           {% for trav_index, portion, amt, trav_name in charge.breakdown %}
             <div class="progress-bar progress-bar-flat-{{trav_index}}" role="progressbar" style="width:{{portion}}%">

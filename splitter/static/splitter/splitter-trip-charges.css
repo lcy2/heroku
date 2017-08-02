@@ -38,10 +38,6 @@ button[type=submit],
   border-bottom-right-radius: 0;
 }
 
-li > .input-group {
-  margin: 2px 3px;
-}
-
 div .progress {
   border-radius: 0;
   margin-bottom: 0;
@@ -75,7 +71,7 @@ div .progress {
   cursor: move;
   cursor: -webkit-grabbing;
 }
-.sortable-chosen li {
+.sortable-chosen div.list-group-item {
   background-color: rgba(244,235, 66, 0.6);
 }
 .sortable-ghost {

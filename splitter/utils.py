@@ -270,8 +270,6 @@ def assign_pos(trip):
     charge_ct = 0
     pos_array = []
     for index, (hash_val, charge) in enumerate(charges.iteritems()):
-        if 'pos' in charge:
-            del charge['pos']
         pos_array.append(hash_val)
         charge_ct += 1
     trip.accounting['order'] = pos_array
